@@ -26,7 +26,13 @@
         "method": "GET",
         "url": "https://api.github.com/repos/frontendbr/vagas/issues?state=open&per_page=100&sort=created&direction=desc",
         "options": {
-          "timeout": 30000
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
         }
       },
       "id": "vagas-frontend-br",
@@ -57,7 +63,13 @@
         "method": "GET",
         "url": "https://api.github.com/repos/backend-br/vagas/issues?state=open&per_page=100&sort=created&direction=desc",
         "options": {
-          "timeout": 30000
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
         }
       },
       "id": "vagas-backend-br",
@@ -88,7 +100,13 @@
         "method": "GET",
         "url": "https://himalayas.app/jobs/api/search?q=developer&country=BR&seniority=Entry-level&sort=recent",
         "options": {
-          "timeout": 30000
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
         }
       },
       "id": "vagas-remotas-himalayas",
@@ -117,7 +135,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/data/vagas.json",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
         "options": {
           "timeout": 30000
         },
@@ -136,7 +154,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const front = $('Vagas Frontend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst back = $('Vagas Backend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst remoteResponse = $('Vagas Remotas Himalayas').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst remoteJobs = remoteResponse.length ? remoteResponse[0].jobs || [] : [];\nconst nowIso = new Date().toISOString();\nconst nowMs = Date.now();\nconst MAX_HISTORICO = 400;\nconst sourceNames = ['Frontend BR', 'Backend BR', 'Himalayas'];\nfunction safeArray(value) {\n  return Array.isArray(value) ? value : (value && typeof value === 'object' && Array.isArray(value.jobs) ? value.jobs : []);\n}\nconst sourceValues = {\n  'Frontend BR': front,\n  'Backend BR': back,\n  'Himalayas': remoteJobs\n};\nconst sourceState = {};\nfor (const name of sourceNames) {\n  sourceState[name] = Array.isArray(sourceValues[name]) ? sourceValues[name] : safeArray(sourceValues[name]);\n}\nconst githubFile = $input.first().json;\nif (!githubFile || !githubFile.sha || !githubFile.content) {\n  throw new Error('Arquivo data/vagas.json não encontrado no repositório. Publique o site primeiro.');\n}\nconst previous = JSON.parse(Buffer.from(githubFile.content.replace(/\\s/g, ''), 'base64').toString('utf8'));\nconst current = Array.isArray(previous.vagas) ? previous.vagas : [];\nconst ultimaConsultaBemSucedida = {};\nlet successCount = 0;\nfor (const name of sourceNames) {\n  const items = Array.isArray(sourceState[name]) ? sourceState[name] : [];\n  if (items !== undefined && Array.isArray(sourceState[name])) {\n    ultimaConsultaBemSucedida[name] = nowIso;\n    successCount += 1;\n  }\n}\nconst allSourcesFailed = successCount === 0;\nif (allSourcesFailed) {\n  const payload = {\n    atualizadoEm: previous.atualizadoEm || nowIso,\n    total: current.length,\n    vagas: current,\n    ultimaSincronizacao: nowIso,\n    ultimaSincronizacaoCompleta: previous.ultimaSincronizacaoCompleta || null,\n    ultimaSincronizacaoParcial: previous.ultimaSincronizacaoParcial || null,\n    ultimaConsultaBemSucedida: { ...(previous.ultimaConsultaBemSucedida || {}), ...ultimaConsultaBemSucedida },\n    limiteHistorico: MAX_HISTORICO,\n    novasNaExecucao: 0,\n    historicoPreservado: true,\n    statusExecucao: 'historico_preservado_sem_fonte_ativa'\n  };\n  return [{ json: { changed: false, total: current.length, novos: 0, status: 'historico_preservado', sha: githubFile.sha, content: Buffer.from(JSON.stringify(payload, null, 2) + '\\n', 'utf8').toString('base64') } }];\n}\nfunction textValue(v) {\n  return String(v ?? '').replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim();\n}\nfunction isoDate(value) {\n  if (!value) return '';\n  const numeric = Number(value);\n  const parsed = new Date(Number.isFinite(numeric) && numeric > 100000000 ? numeric * 1000 : value);\n  return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString();\n}\nfunction ensureDate(value, fallback) {\n  if (!value) return fallback;\n  return value;\n}\nconst reDev = /desenvolv|developer|programador|programming|engenheir[oa] de software|software engineer|front.?end|back.?end|full.?stack|python|javascript|typescript|react|node\\.?js|qa|testes|quality assurance|est[aá]gio.*(ti|tecnologia|sistemas)/i;\nconst reEntry = /\\b(junior|júnior|jr\\.?|est[aá]gio|estagi[aá]ri[oa]|intern(ship)?|trainee|entry[ -]?level|sem experi[eê]ncia|primeiro emprego|aprendiz)\\b/i;\nconst reSenior = /\\b(senior|s[eê]nior|sr\\.?|lead|principal|staff|manager|gerente|arquiteto|architect|pleno|mid[ -]?level)\\b/i;\nfunction fromIssues(items, sourceName) {\n  return (Array.isArray(items) ? items : []).flatMap(v => {\n    if (!v || !v.id || v.pull_request || v.state !== 'open') return [];\n    const labels = Array.isArray(v.labels) ? v.labels.map(l => l.name || '').join(' ') : '';\n    const title = String(v.title || '');\n    const description = textValue(v.body || '');\n    if (!reDev.test(title + ' ' + labels + ' ' + description.slice(0, 700))) return [];\n    if (!reEntry.test(title + ' ' + labels + ' ' + description.slice(0, 2000)) || reSenior.test(title + ' ' + labels)) return [];\n    const publishedEm = isoDate(v.created_at);\n    return [{\n      id: (sourceName || 'fonte').toLowerCase().replace(/\\W/g, '-') + '-' + v.id,\n      cargo: title,\n      empresa: 'Ver anúncio',\n      nivel: /est[aá]gio|intern|aprendiz|trainee/i.test(title + ' ' + labels) ? 'Estágio' : 'Júnior',\n      modalidade: /remot|home\.office/i.test(title + ' ' + labels) ? 'Remoto' : (/h[ií]brid/i.test(title + ' ' + labels) ? 'Híbrido' : 'Não informada'),\n      local: 'Brasil / ver anúncio',\n      descricao: description.slice(0, 450),\n      publicadoEm: publishedEm,\n      fonte: sourceName,\n      link: v.html_url,\n      capturadoEm: nowIso\n    }];\n  });\n}\nfunction fromHimalayas(items) {\n  return (Array.isArray(items) ? items : []).flatMap(v => {\n    const title = String(v.title || '');\n    const seniority = String(v.seniority || '');\n    const empType = String(v.employmentType || '');\n    if (!reDev.test(title) || reSenior.test(title)) return [];\n    if (!(reEntry.test(title + ' ' + seniority + ' ' + empType) || /entry[ -]?level/i.test(seniority))) return [];\n    if (!v.guid || !v.applicationLink) return [];\n    const location = Array.isArray(v.locationRestrictions) ? v.locationRestrictions : [];\n    if (location.length && !location.some(c => /brazil|brasil|^br$/i.test(typeof c === 'string' ? c : (c.name || c.code || '')))) return [];\n    return [{\n      id: 'himalayas-' + v.guid,\n      cargo: title,\n      empresa: v.companyName || 'Não informada',\n      nivel: /est[aá]gio|intern|aprendiz|trainee/i.test(title + ' ' + seniority + ' ' + empType) ? 'Estágio' : 'Júnior',\n      modalidade: 'Remoto',\n      local: location.length ? 'Brasil' : 'Mundial (ver restrições)',\n      descricao: textValue(v.excerpt || v.description).slice(0, 450),\n      publicadoEm: isoDate(v.pubDate),\n      expiraEm: isoDate(v.expiryDate),\n      fonte: 'Himalayas',\n      link: v.applicationLink,\n      capturadoEm: nowIso\n    }];\n  });\n}\nconst incoming = [\n  ...fromIssues(sourceState['Frontend BR'], 'Frontend BR'),\n  ...fromIssues(sourceState['Backend BR'], 'Backend BR'),\n  ...fromHimalayas(sourceState['Himalayas'])\n];\nconst byId = new Map((Array.isArray(current) ? current : []).map(v => [v.id, v]));\nconst seenIds = new Set();\nconst merged = new Map();\nfor (const item of current) {\n  if (item && item.id) {\n    item.primeiraIdentificacao = item.primeiraIdentificacao || item.ultimaIdentificacao || item.capturadoEm || nowIso;\n    item.ultimaIdentificacao = item.ultimaIdentificacao || item.primeiraIdentificacao || item.capturadoEm || nowIso;\n    item.statusIdentificacao = item.statusIdentificacao || 'existente';\n    merged.set(item.id, item);\n  }\n}\nlet novasNaExecucao = 0;\nfor (const item of incoming) {\n  const currentItem = merged.get(item.id);\n  const incomingCopy = { ...item };\n  if (!incomingCopy.publicadoEm && item.publicadoEm) incomingCopy.publicadoEm = item.publicadoEm;\n  if (currentItem) {\n    incomingCopy.primeiraIdentificacao = currentItem.primeiraIdentificacao || incomingCopy.primeiraIdentificacao || incomingCopy.capturadoEm || nowIso;\n    incomingCopy.ultimaIdentificacao = nowIso;\n    incomingCopy.publicadoEm = ensureDate(currentItem.publicadoEm || incomingCopy.publicadoEm, incomingCopy.publicadoEm);\n    incomingCopy.statusIdentificacao = (currentItem.primeiraIdentificacao && currentItem.primeiraIdentificacao !== currentItem.ultimaIdentificacao) ? 'anteriormente-identificada' : 'existente';\n    incomingCopy.ultimaConsultaBemSucedida = currentItem.ultimaConsultaBemSucedida || { ...currentItem.ultimaConsultaBemSucedida };\n    const finalItem = { ...currentItem, ...incomingCopy };\n    finalItem.publicadoEm = finalItem.publicadoEm || incomingCopy.publicadoEm;\n    finalItem.primeiraIdentificacao = finalItem.primeiraIdentificacao || nowIso;\n    finalItem.ultimaIdentificacao = nowIso;\n    if (!finalItem.capturadoEm) finalItem.capturadoEm = nowIso;\n    merged.set(item.id, finalItem);\n  } else {\n    incomingCopy.primeiraIdentificacao = incomingCopy.primeiraIdentificacao || nowIso;\n    incomingCopy.ultimaIdentificacao = nowIso;\n    incomingCopy.statusIdentificacao = 'nova';\n    incomingCopy.ultimaConsultaBemSucedida = { ...ultimaConsultaBemSucedida };\n    merged.set(item.id, incomingCopy);\n    novasNaExecucao += 1;\n  }\n  seenIds.add(item.id);\n}\nlet vagas = Array.from(merged.values()).sort((a, b) => {\n  const aDate = a.ultimaIdentificacao || a.publicadoEm || a.capturadoEm || '';\n  const bDate = b.ultimaIdentificacao || b.publicadoEm || b.capturadoEm || '';\n  return new Date(bDate || 0).getTime() - new Date(aDate || 0).getTime();\n}).slice(0, MAX_HISTORICO);\nfor (const vaga of vagas) {\n  vaga.primeiraIdentificacao = vaga.primeiraIdentificacao || vaga.ultimaIdentificacao || vaga.capturadoEm || nowIso;\n  vaga.ultimaIdentificacao = vaga.ultimaIdentificacao || vaga.primeiraIdentificacao || nowIso;\n  vaga.statusIdentificacao = vaga.statusIdentificacao || 'existente';\n  vaga.publicadoEm = vaga.publicadoEm || vaga.capturadoEm || null;\n  vaga.ultimaConsultaBemSucedida = vaga.ultimaConsultaBemSucedida || { ...ultimaConsultaBemSucedida };\n}\nconst output = {\n  atualizadoEm: nowIso,\n  total: vagas.length,\n  vagas,\n  ultimaSincronizacao: nowIso,\n  ultimaSincronizacaoCompleta: successCount === sourceNames.length ? nowIso : (previous.ultimaSincronizacaoCompleta || null),\n  ultimaSincronizacaoParcial: successCount > 0 && successCount < sourceNames.length ? nowIso : (previous.ultimaSincronizacaoParcial || null),\n  ultimaConsultaBemSucedida: { ...(previous.ultimaConsultaBemSucedida || {}), ...ultimaConsultaBemSucedida },\n  limiteHistorico: MAX_HISTORICO,\n  novasNaExecucao,\n  historicoPreservado: true,\n  statusExecucao: successCount === sourceNames.length ? 'sincronizacao_completa' : 'sincronizacao_parcial'\n};\nconst changed = JSON.stringify(vagas) !== JSON.stringify(current);\nreturn [{ json: { changed, total: vagas.length, novos: novasNaExecucao, sha: githubFile.sha, content: Buffer.from(JSON.stringify(output, null, 2) + '\\n', 'utf8').toString('base64') } }];",
+        "jsCode": "const front = $('Vagas Frontend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst back = $('Vagas Backend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst remoteRaw = $('Vagas Remotas Himalayas').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst remoteJobs = Array.isArray(remoteRaw) && remoteRaw[0] && Array.isArray(remoteRaw[0].jobs) ? remoteRaw[0].jobs : [];\nconst nowIso = new Date().toISOString();\nconst maxHistoric = 400;\nconst sourceNames = ['Frontend BR', 'Backend BR', 'Himalayas'];\nconst stripVolatile = (value) => {\n  if (!value || typeof value !== 'object') return value;\n  const next = { ...value };\n  delete next.ultimaSincronizacao;\n  delete next.ultimaConsultaBemSucedida;\n  delete next.statusExecucao;\n  delete next.novasNaExecucao;\n  delete next.historicoPreservado;\n  delete next.limiteHistorico;\n  delete next.ultimaSincronizacaoCompleta;\n  delete next.ultimaSincronizacaoParcial;\n  return next;\n};\nconst normalizeIssue = (item, source) => {\n  if (!item || !item.id) return null;\n  const title = String(item.title || '').trim();\n  const body = String(item.body || '');\n  const now = nowIso;\n  return {\n    id: `${source.toLowerCase().replace(/\\W+/g, '-')}-${item.id}`,\n    cargo: title,\n    empresa: 'Ver anúncio',\n    nivel: /est[aá]gio|intern|aprendiz|trainee/i.test(title + ' ' + body) ? 'Estágio' : 'Júnior',\n    modalidade: /remot|home\\.?office/i.test(title + ' ' + body) ? 'Remoto' : (/h[ií]brid/i.test(title + ' ' + body) ? 'Híbrido' : 'Não informada'),\n    local: 'Brasil / ver anúncio',\n    descricao: body.slice(0, 500),\n    publicadoEm: item.created_at || '',\n    fonte: source,\n    link: item.html_url || '',\n    capturadoEm: now,\n    primeiraIdentificacao: now,\n    ultimaIdentificacao: now,\n    statusIdentificacao: 'nova'\n  };\n};\nconst normalizeHimalayas = (item) => {\n  if (!item || !item.id && !item.guid) return null;\n  const title = String(item.title || item.cargo || '');\n  const company = String(item.companyName || item.empresa || 'Não informada');\n  const now = nowIso;\n  return {\n    id: item.id || `himalayas-${String(item.guid || item.applicationLink || title).replace(/\\W+/g, '-') }`,\n    cargo: title,\n    empresa: company,\n    nivel: /est[aá]gio|intern|aprendiz|trainee/i.test(title) ? 'Estágio' : 'Júnior',\n    modalidade: 'Remoto',\n    local: Array.isArray(item.locationRestrictions) && item.locationRestrictions.length ? 'Brasil' : 'Mundial (ver restrições)',\n    descricao: String(item.excerpt || item.description || '').slice(0, 500),\n    publicadoEm: item.pubDate || item.publicadoEm || '',\n    expiraEm: item.expiryDate || item.expiraEm || '',\n    fonte: 'Himalayas',\n    link: item.applicationLink || item.link || '',\n    capturadoEm: now,\n    primeiraIdentificacao: now,\n    ultimaIdentificacao: now,\n    statusIdentificacao: 'nova'\n  };\n};\nfunction normalizeUrl(raw) {\n  if (!raw) return '';\n  const value = String(raw).trim();\n  if (!/^https?:\\/\\//i.test(value)) return value;\n  try {\n    const url = new URL(value);\n    url.hash = '';\n    const params = new URLSearchParams(url.search);\n    const tracking = new Set(['utm_source','utm_medium','utm_campaign','utm_term','utm_content','utm_id','gclid','fbclid','mc_cid','mc_eid']);\n    for (const key of [...params.keys()]) {\n      if (tracking.has(String(key).toLowerCase())) params.delete(key);\n    }\n    url.search = params.toString();\n    return String(url).replace(/[?#]+$/, '');\n  } catch (e) {\n    return value.replace(/[?&](?:utm_[^&]+|gclid|fbclid|mc_cid|mc_eid)=[^&]+/gi, '').replace(/&&+/g, '&').replace(/[?&]$/, '');\n  }\n}\nfunction normalizeCompany(value) {\n  return String(value || '')\n    .normalize('NFKD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/\\b(?:ltda|ltda\\.|sa|s\\.a\\.|s\\/a|inc|corp|company|consultoria|brasil|do brasil)\\b/gi, '')\n    .replace(/[^A-Za-z0-9\\s]/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .toLowerCase();\n}\nfunction normalizeRole(value) {\n  return String(value || '')\n    .normalize('NFKD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/\\b(full[\\s-]?stack)\\b/gi, 'fullstack')\n    .replace(/\\b(front[\\s-]?end)\\b/gi, 'frontend')\n    .replace(/\\b(back[\\s-]?end)\\b/gi, 'backend')\n    .replace(/\\b(junior|júnior|jr|estagi[oá]rio|est[aá]gio|intern(ship)?|trainee|entry[\\s-]?level)\\b/gi, '')\n    .replace(/[^A-Za-z0-9\\s]/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .toLowerCase();\n}\nconst incoming = [\n  ...front.filter(Boolean).map(item => normalizeIssue(item, 'Frontend BR')),\n  ...back.filter(Boolean).map(item => normalizeIssue(item, 'Backend BR')),\n  ...remoteJobs.filter(Boolean).map(normalizeHimalayas)\n].filter(Boolean);\nconst githubFile = $input.first().json;\nif (!githubFile || !githubFile.sha || !githubFile.content) {\n  throw new Error('Arquivo data/vagas.json não encontrado no repositório.');\n}\nconst existingJson = JSON.parse(Buffer.from(githubFile.content, 'base64').toString('utf8'));\nconst current = Array.isArray(existingJson.vagas) ? existingJson.vagas : [];\nconst existingById = new Map(current.map(v => [v.id, v]));\nconst urlIndex = new Map();\nfor (const item of current) {\n  const url = normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '');\n  if (url) urlIndex.set(url, item);\n}\nconst merged = new Map();\nconst sourceStats = {};\nfor (const name of sourceNames) { sourceStats[name] = false; }\nfor (const item of incoming) {\n  const url = normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '');\n  let match = existingById.get(item.id);\n  if (!match && url) match = urlIndex.get(url);\n  if (match) {\n    const mergedItem = { ...match, ...item };\n    mergedItem.ultimaIdentificacao = nowIso;\n    if (!mergedItem.primeiraIdentificacao) mergedItem.primeiraIdentificacao = match.capturadoEm || nowIso;\n    mergedItem.urlNormalizada = url || match.urlNormalizada || normalizeUrl(match.link || match.url || match.html_url || match.applicationLink || '');\n    mergedItem.empresaNormalizada = normalizeCompany(mergedItem.empresa || match.empresa || '');\n    mergedItem.cargoNormalizado = normalizeRole(mergedItem.cargo || match.cargo || '');\n    mergedItem.fontesAlternativas = Array.from(new Set([...(Array.isArray(match.fontesAlternativas) ? match.fontesAlternativas : []), ...(Array.isArray(item.fontesAlternativas) ? item.fontesAlternativas : []), match.fonte, item.fonte].filter(Boolean)));\n    merged.set(mergedItem.id, mergedItem);\n  } else {\n    const candidate = { ...item };\n    candidate.urlNormalizada = url;\n    candidate.empresaNormalizada = normalizeCompany(candidate.empresa);\n    candidate.cargoNormalizado = normalizeRole(candidate.cargo);\n    candidate.fontesAlternativas = [candidate.fonte].filter(Boolean);\n    candidate.primeiraIdentificacao = candidate.primeiraIdentificacao || nowIso;\n    candidate.ultimaIdentificacao = nowIso;\n    candidate.statusIdentificacao = 'nova';\n    merged.set(candidate.id, candidate);\n  }\n}\nfor (const existing of current) {\n  if (!existing || !existing.id) continue;\n  if (!merged.has(existing.id)) {\n    const clone = { ...existing };\n    clone.primeiraIdentificacao = clone.primeiraIdentificacao || clone.capturadoEm || nowIso;\n    clone.ultimaIdentificacao = clone.ultimaIdentificacao || clone.primeiraIdentificacao || nowIso;\n    clone.statusIdentificacao = clone.statusIdentificacao || 'existente';\n    clone.urlNormalizada = normalizeUrl(clone.link || clone.url || clone.html_url || clone.applicationLink || '');\n    clone.empresaNormalizada = normalizeCompany(clone.empresa || '');\n    clone.cargoNormalizado = normalizeRole(clone.cargo || '');\n    clone.fontesAlternativas = Array.isArray(clone.fontesAlternativas) ? clone.fontesAlternativas : [clone.fonte].filter(Boolean);\n    merged.set(existing.id, clone);\n  }\n}\nconst proposal = Array.from(merged.values())\n  .filter(Boolean)\n  .map(v => ({ ...v, publicadoEm: v.publicadoEm || '', urlNormalizada: normalizeUrl(v.link || v.url || v.html_url || v.applicationLink || ''), empresaNormalizada: normalizeCompany(v.empresa || ''), cargoNormalizado: normalizeRole(v.cargo || '') }))\n  .sort((a, b) => new Date(b.ultimaIdentificacao || b.publicadoEm || b.capturadoEm || 0).getTime() - new Date(a.ultimaIdentificacao || a.publicadoEm || a.capturadoEm || 0).getTime())\n  .slice(0, maxHistoric);\nconst comparableCurrent = current.map(stripVolatile).map(item => ({ ...item, link: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || ''), urlNormalizada: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '') }));\nconst comparableProposal = proposal.map(stripVolatile).map(item => ({ ...item, link: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || ''), urlNormalizada: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '') }));\nconst changedRelevant = JSON.stringify(comparableCurrent) !== JSON.stringify(comparableProposal);\nconst payload = {\n  atualizadoEm: nowIso,\n  total: proposal.length,\n  vagas: proposal,\n  ultimaSincronizacao: nowIso,\n  ultimaSincronizacaoCompleta: Array.isArray(incoming) && incoming.length ? nowIso : null,\n  ultimaSincronizacaoParcial: null,\n  limiteHistorico: maxHistoric,\n  historicoPreservado: true,\n  novasNaExecucao: proposal.filter(v => v.statusIdentificacao === 'nova').length\n};\nconst shouldPublish = changedRelevant && proposal.length > 0;\nreturn [{\n  json: {\n    changed: shouldPublish,\n    relevantChange: changedRelevant,\n    total: proposal.length,\n    novos: payload.novasNaExecucao,\n    sha: githubFile.sha,\n    content: shouldPublish ? Buffer.from(JSON.stringify(payload, null, 2) + '\\n', 'utf8').toString('base64') : null,\n    preserveHistory: true\n  }\n}];",
         "id": "consolidar-historico",
         "name": "Consolidar historico",
         "type": "n8n-nodes-base.code",
@@ -183,7 +201,7 @@
     {
       "parameters": {
         "method": "PUT",
-        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/data/vagas.json",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "githubApi",
         "sendBody": true,
@@ -199,6 +217,20 @@
       "typeVersion": 4.2,
       "position": [
         2330,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const status = $input.first().json.statusCode;\nconst body = $input.first().json.body || {};\nconst message = body && body.message ? String(body.message) : '';\nconst conflict = status === 409 || status === 422;\nreturn [{ json: { statusCode: status, conflict, message, shouldRetry: conflict, publicationAttempted: true } }];"
+      },
+      "id": "tratar-resultado-publicacao",
+      "name": "Tratar resultado de publicação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2550,
         180
       ]
     }
@@ -219,14 +251,14 @@
       "main": [
         [
           {
-            "node": "Continuar Frontend",
+            "node": "continuar-frontend",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Continuar Frontend": {
+    "continuar-frontend": {
       "main": [
         [
           {
@@ -241,14 +273,14 @@
       "main": [
         [
           {
-            "node": "Continuar Backend",
+            "node": "continuar-backend",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Continuar Backend": {
+    "continuar-backend": {
       "main": [
         [
           {
@@ -263,56 +295,67 @@
       "main": [
         [
           {
-            "node": "Ler arquivo atual GitHub",
+            "node": "continuar-remotas",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Continuar Remotas": {
+    "continuar-remotas": {
       "main": [
         [
           {
-            "node": "Ler arquivo atual GitHub",
+            "node": "ler-arquivo-atual-github",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Ler arquivo atual GitHub": {
+    "ler-arquivo-atual-github": {
       "main": [
         [
           {
-            "node": "Consolidar historico",
+            "node": "consolidar-historico",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Consolidar historico": {
+    "consolidar-historico": {
       "main": [
         [
           {
-            "node": "Mudou alguma vaga?",
+            "node": "mudou-alguma-vaga?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Mudou alguma vaga?": {
+    "mudou-alguma-vaga?": {
       "main": [
         [
           {
-            "node": "Publicar vagas.json",
+            "node": "publicar-vagas.json",
             "type": "main",
             "index": 0
           }
         ],
         []
+      ]
+    },
+    "publicar-vagas.json": {
+      "main": [
+        [
+          {
+            "node": "tratar-resultado-publicacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
