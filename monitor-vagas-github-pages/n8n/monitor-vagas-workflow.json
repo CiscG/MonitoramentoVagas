@@ -1,0 +1,326 @@
+{
+  "name": "Monitor DevVagas - Brasil e Remoto - GitHub Pages (60 min)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 60
+            }
+          ]
+        }
+      },
+      "id": "a-cada-60-minutos",
+      "name": "A cada 60 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -100,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/frontendbr/vagas/issues?state=open&per_page=100&sort=created&direction=desc",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "vagas-frontend-br",
+      "name": "Vagas Frontend BR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        150,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { proximo: true } }];"
+      },
+      "id": "continuar-frontend",
+      "name": "Continuar Frontend",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        390,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/backend-br/vagas/issues?state=open&per_page=100&sort=created&direction=desc",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "vagas-backend-br",
+      "name": "Vagas Backend BR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        630,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { proximo: true } }];"
+      },
+      "id": "continuar-backend",
+      "name": "Continuar Backend",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        870,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://himalayas.app/jobs/api/search?q=developer&country=BR&seniority=Entry-level&sort=recent",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "vagas-remotas-himalayas",
+      "name": "Vagas Remotas Himalayas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1110,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { proximo: true } }];"
+      },
+      "id": "continuar-remotas",
+      "name": "Continuar Remotas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1350,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/CiscG/DevVagas/contents/data/vagas.json",
+        "options": {
+          "timeout": 30000
+        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi"
+      },
+      "id": "ler-arquivo-atual-github",
+      "name": "Ler arquivo atual GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1590,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const front = $('Vagas Frontend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst back = $('Vagas Backend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst remoteResponse = $('Vagas Remotas Himalayas').first().json;\nconst githubFile = $input.first().json;\nif (!githubFile.sha || !githubFile.content) throw new Error('Arquivo data/vagas.json não encontrado no repositório. Publique o site primeiro.');\nconst previous = JSON.parse(Buffer.from(githubFile.content.replace(/\\s/g, ''), 'base64').toString('utf8'));\nconst current = Array.isArray(previous.vagas) ? previous.vagas : [];\nconst now = Date.now();\nconst maxAgeMs = 90 * 86400000;\nconst recentLimit = 60 * 86400000;\nconst reDev = /desenvolv|developer|programador|programming|engenheir[oa] de software|software engineer|front.?end|back.?end|full.?stack|python|javascript|typescript|react|node\\.?js|qa|testes|quality assurance|est[aá]gio.*(ti|tecnologia|sistemas)/i;\nconst reEntry = /\\b(junior|júnior|jr\\.?|est[aá]gio|estagi[aá]ri[oa]|intern(ship)?|trainee|entry[ -]?level|sem experi[eê]ncia|primeiro emprego|aprendiz)\\b/i;\nconst reSenior = /\\b(senior|s[eê]nior|sr\\.?|lead|principal|staff|manager|gerente|arquiteto|architect|pleno|mid[ -]?level)\\b/i;\nfunction text(html) { return String(html ?? '').replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim(); }\nfunction dateISO(t) { if(!t) return ''; const n = Number(t); const d = new Date(Number.isFinite(n) && n > 100000000 ? n*1000 : t); return isNaN(d.getTime()) ? '' : d.toISOString(); }\nfunction level(s) { if (/est[aá]gio|estagi|intern/i.test(s)) return 'Estágio'; if (/trainee|aprendiz/i.test(s)) return 'Trainee'; return 'Júnior'; }\nfunction fromIssues(arr, source) {\n  return arr.flatMap(v => {\n    if (!v || !v.id || v.pull_request || v.state !== 'open') return [];\n    const labels = Array.isArray(v.labels) ? v.labels.map(l => l.name || '').join(' ') : '';\n    const title = String(v.title || ''); const description = text(v.body || '');\n    if (!reDev.test(title + ' ' + labels + ' ' + description.slice(0,700))) return [];\n    if (!reEntry.test(title + ' ' + labels + ' ' + description.slice(0,2000)) || reSenior.test(title + ' ' + labels)) return [];\n    const published = dateISO(v.created_at);\n    if (published && now - new Date(published).getTime() > recentLimit) return [];\n    return [{id: source.toLowerCase().replace(/\\W/g,'-')+'-'+v.id, cargo:title, empresa:'Ver anúncio', nivel:level(title+' '+labels+' '+description.slice(0,500)), modalidade:/remot|home.office/i.test(title+' '+labels+' '+description)?'Remoto':(/h[ií]brid/i.test(title+' '+labels+' '+description)?'Híbrido':'Não informada'), local:'Brasil / ver anúncio', descricao:description.slice(0,450), publicadoEm:published, fonte:source, link:v.html_url, capturadoEm:new Date(now).toISOString()}];\n  });\n}\nfunction fromHimalayas(jobs) {\n  return jobs.flatMap(v => {\n    const title=String(v.title||''); const seniority=String(v.seniority||''); const type=String(v.employmentType||'');\n    if (!reDev.test(title) || reSenior.test(title)) return [];\n    if (!(reEntry.test(title+' '+seniority+' '+type) || /entry[ -]?level/i.test(seniority))) return [];\n    if (!v.guid || !v.applicationLink) return [];\n    const location=Array.isArray(v.locationRestrictions)?v.locationRestrictions:[];\n    if (location.length && !location.some(c=>/brazil|brasil|^br$/i.test(typeof c==='string'?c:(c.name||c.code||'')))) return [];\n    return [{id:'himalayas-'+v.guid, cargo:title, empresa:v.companyName||'Não informada', nivel:level(title+' '+seniority+' '+type), modalidade:'Remoto', local:location.length?'Brasil':'Mundial (ver restrições)', descricao:text(v.excerpt||v.description).slice(0,450), publicadoEm:dateISO(v.pubDate), expiraEm:dateISO(v.expiryDate), fonte:'Himalayas', link:v.applicationLink, capturadoEm:new Date(now).toISOString()}];\n  });\n}\nconst remoteJobs=Array.isArray(remoteResponse.jobs)?remoteResponse.jobs:[];\nconst incoming=[...fromIssues(front,'Frontend BR'),...fromIssues(back,'Backend BR'),...fromHimalayas(remoteJobs)];\nconst map = new Map(current.filter(v => v && v.id && (!v.expiraEm || new Date(v.expiraEm).getTime()>now) && (!v.publicadoEm || now-new Date(v.publicadoEm).getTime()<maxAgeMs)).map(v => [v.id,v]));\nfor (const v of incoming) {\n  const old=map.get(v.id);\n  // Preserva a data original de captura e evita mudanças cosméticas a cada hora\n  map.set(v.id, old ? {...old,...v,capturadoEm:old.capturadoEm||v.capturadoEm} : v);\n}\nlet vagas=[...map.values()].sort((a,b)=>String(b.publicadoEm||'').localeCompare(String(a.publicadoEm||''))).slice(0,400);\nconst normal = list=>JSON.stringify(list.map(({capturadoEm,...rest})=>rest));\nconst changed=normal(vagas)!==normal(current);\nif(!changed) return [{json:{changed:false, total:vagas.length, novos:0}}];\nconst oldIds=new Set(current.map(v=>v.id));\nconst updated={atualizadoEm:new Date(now).toISOString(),total:vagas.length,vagas};\nreturn [{json:{changed:true,total:vagas.length,novos:vagas.filter(v=>!oldIds.has(v.id)).length,sha:githubFile.sha,content:Buffer.from(JSON.stringify(updated,null,2)+'\\n','utf8').toString('base64')}}];"
+      },
+      "id": "consolidar-historico",
+      "name": "Consolidar historico",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1830,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "changed",
+              "leftValue": "={{ $json.changed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        }
+      },
+      "id": "mudou-alguma-vaga?",
+      "name": "Mudou alguma vaga?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2070,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/CiscG/DevVagas/contents/data/vagas.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { message: \"Atualiza vagas automaticamente\", content: $json.content, sha: $json.sha, branch: \"main\" } }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "publicar-vagas.json",
+      "name": "Publicar vagas.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2330,
+        180
+      ]
+    }
+  ],
+  "connections": {
+    "A cada 60 minutos": {
+      "main": [
+        [
+          {
+            "node": "Vagas Frontend BR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vagas Frontend BR": {
+      "main": [
+        [
+          {
+            "node": "Continuar Frontend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar Frontend": {
+      "main": [
+        [
+          {
+            "node": "Vagas Backend BR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vagas Backend BR": {
+      "main": [
+        [
+          {
+            "node": "Continuar Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar Backend": {
+      "main": [
+        [
+          {
+            "node": "Vagas Remotas Himalayas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vagas Remotas Himalayas": {
+      "main": [
+        [
+          {
+            "node": "Continuar Remotas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar Remotas": {
+      "main": [
+        [
+          {
+            "node": "Ler arquivo atual GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler arquivo atual GitHub": {
+      "main": [
+        [
+          {
+            "node": "Consolidar historico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar historico": {
+      "main": [
+        [
+          {
+            "node": "Mudou alguma vaga?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mudou alguma vaga?": {
+      "main": [
+        [
+          {
+            "node": "Publicar vagas.json",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
