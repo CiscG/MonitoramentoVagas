@@ -1,5 +1,5 @@
 {
-  "name": "Monitor DevVagas - Brasil e Remoto - GitHub Pages (60 min)",
+  "name": "Monitor MonitoramentoVagas - Brasil e Remoto - GitHub Pages (60 min)",
   "nodes": [
     {
       "parameters": {
@@ -117,7 +117,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "https://api.github.com/repos/CiscG/DevVagas/contents/data/vagas.json",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/data/vagas.json",
         "options": {
           "timeout": 30000
         },
@@ -183,7 +183,7 @@
     {
       "parameters": {
         "method": "PUT",
-        "url": "https://api.github.com/repos/CiscG/DevVagas/contents/data/vagas.json",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/data/vagas.json",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "githubApi",
         "sendBody": true,
