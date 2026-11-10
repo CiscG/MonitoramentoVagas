@@ -1,5 +1,5 @@
 {
-  "name": "Monitor MonitoramentoVagas - Brasil e Remoto - GitHub Pages (60 min)",
+  "name": "Monitor DevVagas - APIs resilientes (60 min) - TESTE",
   "nodes": [
     {
       "parameters": {
@@ -26,7 +26,13 @@
         "method": "GET",
         "url": "https://api.github.com/repos/frontendbr/vagas/issues?state=open&per_page=100&sort=created&direction=desc",
         "options": {
-          "timeout": 30000
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
         }
       },
       "id": "vagas-frontend-br",
@@ -36,7 +42,12 @@
       "position": [
         150,
         250
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -57,7 +68,13 @@
         "method": "GET",
         "url": "https://api.github.com/repos/backend-br/vagas/issues?state=open&per_page=100&sort=created&direction=desc",
         "options": {
-          "timeout": 30000
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
         }
       },
       "id": "vagas-backend-br",
@@ -67,7 +84,12 @@
       "position": [
         630,
         250
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -88,7 +110,13 @@
         "method": "GET",
         "url": "https://himalayas.app/jobs/api/search?q=developer&country=BR&seniority=Entry-level&sort=recent",
         "options": {
-          "timeout": 30000
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
         }
       },
       "id": "vagas-remotas-himalayas",
@@ -98,7 +126,12 @@
       "position": [
         1110,
         250
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -117,7 +150,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/data/vagas.json",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
         "options": {
           "timeout": 30000
         },
@@ -136,7 +169,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const front = $('Vagas Frontend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst back = $('Vagas Backend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst remoteResponse = $('Vagas Remotas Himalayas').first().json;\nconst githubFile = $input.first().json;\nif (!githubFile.sha || !githubFile.content) throw new Error('Arquivo data/vagas.json não encontrado no repositório. Publique o site primeiro.');\nconst previous = JSON.parse(Buffer.from(githubFile.content.replace(/\\s/g, ''), 'base64').toString('utf8'));\nconst current = Array.isArray(previous.vagas) ? previous.vagas : [];\nconst now = Date.now();\nconst maxAgeMs = 90 * 86400000;\nconst recentLimit = 60 * 86400000;\nconst reDev = /desenvolv|developer|programador|programming|engenheir[oa] de software|software engineer|front.?end|back.?end|full.?stack|python|javascript|typescript|react|node\\.?js|qa|testes|quality assurance|est[aá]gio.*(ti|tecnologia|sistemas)/i;\nconst reEntry = /\\b(junior|júnior|jr\\.?|est[aá]gio|estagi[aá]ri[oa]|intern(ship)?|trainee|entry[ -]?level|sem experi[eê]ncia|primeiro emprego|aprendiz)\\b/i;\nconst reSenior = /\\b(senior|s[eê]nior|sr\\.?|lead|principal|staff|manager|gerente|arquiteto|architect|pleno|mid[ -]?level)\\b/i;\nfunction text(html) { return String(html ?? '').replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim(); }\nfunction dateISO(t) { if(!t) return ''; const n = Number(t); const d = new Date(Number.isFinite(n) && n > 100000000 ? n*1000 : t); return isNaN(d.getTime()) ? '' : d.toISOString(); }\nfunction level(s) { if (/est[aá]gio|estagi|intern/i.test(s)) return 'Estágio'; if (/trainee|aprendiz/i.test(s)) return 'Trainee'; return 'Júnior'; }\nfunction fromIssues(arr, source) {\n  return arr.flatMap(v => {\n    if (!v || !v.id || v.pull_request || v.state !== 'open') return [];\n    const labels = Array.isArray(v.labels) ? v.labels.map(l => l.name || '').join(' ') : '';\n    const title = String(v.title || ''); const description = text(v.body || '');\n    if (!reDev.test(title + ' ' + labels + ' ' + description.slice(0,700))) return [];\n    if (!reEntry.test(title + ' ' + labels + ' ' + description.slice(0,2000)) || reSenior.test(title + ' ' + labels)) return [];\n    const published = dateISO(v.created_at);\n    if (published && now - new Date(published).getTime() > recentLimit) return [];\n    return [{id: source.toLowerCase().replace(/\\W/g,'-')+'-'+v.id, cargo:title, empresa:'Ver anúncio', nivel:level(title+' '+labels+' '+description.slice(0,500)), modalidade:/remot|home.office/i.test(title+' '+labels+' '+description)?'Remoto':(/h[ií]brid/i.test(title+' '+labels+' '+description)?'Híbrido':'Não informada'), local:'Brasil / ver anúncio', descricao:description.slice(0,450), publicadoEm:published, fonte:source, link:v.html_url, capturadoEm:new Date(now).toISOString()}];\n  });\n}\nfunction fromHimalayas(jobs) {\n  return jobs.flatMap(v => {\n    const title=String(v.title||''); const seniority=String(v.seniority||''); const type=String(v.employmentType||'');\n    if (!reDev.test(title) || reSenior.test(title)) return [];\n    if (!(reEntry.test(title+' '+seniority+' '+type) || /entry[ -]?level/i.test(seniority))) return [];\n    if (!v.guid || !v.applicationLink) return [];\n    const location=Array.isArray(v.locationRestrictions)?v.locationRestrictions:[];\n    if (location.length && !location.some(c=>/brazil|brasil|^br$/i.test(typeof c==='string'?c:(c.name||c.code||'')))) return [];\n    return [{id:'himalayas-'+v.guid, cargo:title, empresa:v.companyName||'Não informada', nivel:level(title+' '+seniority+' '+type), modalidade:'Remoto', local:location.length?'Brasil':'Mundial (ver restrições)', descricao:text(v.excerpt||v.description).slice(0,450), publicadoEm:dateISO(v.pubDate), expiraEm:dateISO(v.expiryDate), fonte:'Himalayas', link:v.applicationLink, capturadoEm:new Date(now).toISOString()}];\n  });\n}\nconst remoteJobs=Array.isArray(remoteResponse.jobs)?remoteResponse.jobs:[];\nconst incoming=[...fromIssues(front,'Frontend BR'),...fromIssues(back,'Backend BR'),...fromHimalayas(remoteJobs)];\nconst map = new Map(current.filter(v => v && v.id && (!v.expiraEm || new Date(v.expiraEm).getTime()>now) && (!v.publicadoEm || now-new Date(v.publicadoEm).getTime()<maxAgeMs)).map(v => [v.id,v]));\nfor (const v of incoming) {\n  const old=map.get(v.id);\n  // Preserva a data original de captura e evita mudanças cosméticas a cada hora\n  map.set(v.id, old ? {...old,...v,capturadoEm:old.capturadoEm||v.capturadoEm} : v);\n}\nlet vagas=[...map.values()].sort((a,b)=>String(b.publicadoEm||'').localeCompare(String(a.publicadoEm||''))).slice(0,400);\nconst normal = list=>JSON.stringify(list.map(({capturadoEm,...rest})=>rest));\nconst changed=normal(vagas)!==normal(current);\nif(!changed) return [{json:{changed:false, total:vagas.length, novos:0}}];\nconst oldIds=new Set(current.map(v=>v.id));\nconst updated={atualizadoEm:new Date(now).toISOString(),total:vagas.length,vagas};\nreturn [{json:{changed:true,total:vagas.length,novos:vagas.filter(v=>!oldIds.has(v.id)).length,sha:githubFile.sha,content:Buffer.from(JSON.stringify(updated,null,2)+'\\n','utf8').toString('base64')}}];"
+        "jsCode": "const frontendStatus = $('Validar Frontend BR').first().json;\nconst backendStatus = $('Validar Backend BR').first().json;\nconst himalayasStatus = $('Validar Himalayas').first().json;\nconst front = frontendStatus.sucesso ? frontendStatus.vagas : [];\nconst back = backendStatus.sucesso ? backendStatus.vagas : [];\nconst remoteResponse = himalayasStatus.sucesso ? {jobs:himalayasStatus.vagas} : {jobs:[]};\nconst fontes = [frontendStatus,backendStatus,himalayasStatus];\nconst falhas = fontes.filter(s=>!s.sucesso);\nif (falhas.length) console.log('[MonitoramentoVagas] Falha(s): '+JSON.stringify(falhas.map(s=>({fonte:s.fonte, statusHTTP:s.statusHTTP, mensagem:s.mensagem, retryAfterSegundos:s.retryAfterSegundos}))));\nconst githubFile = $input.first().json;\nif (!githubFile.sha || !githubFile.content) throw new Error('Arquivo data/vagas.json não encontrado no repositório. Publique o site primeiro.');\nconst previous = JSON.parse(Buffer.from(githubFile.content.replace(/\\s/g, ''), 'base64').toString('utf8'));\nconst current = Array.isArray(previous.vagas) ? previous.vagas : [];\nif (falhas.length === fontes.length) { console.log('[MonitoramentoVagas] Todas as fontes falharam: histórico preservado, nenhuma publicação.'); return [{json:{changed:false,total:current.length,novos:0,erroFontes:true}}]; }\nconst now = Date.now();\nconst maxAgeMs = 90 * 86400000;\nconst recentLimit = 60 * 86400000;\nconst reDev = /desenvolv|developer|programador|programming|engenheir[oa] de software|software engineer|front.?end|back.?end|full.?stack|python|javascript|typescript|react|node\\.?js|qa|testes|quality assurance|est[aá]gio.*(ti|tecnologia|sistemas)/i;\nconst reEntry = /\\b(junior|júnior|jr\\.?|est[aá]gio|estagi[aá]ri[oa]|intern(ship)?|trainee|entry[ -]?level|sem experi[eê]ncia|primeiro emprego|aprendiz)\\b/i;\nconst reSenior = /\\b(senior|s[eê]nior|sr\\.?|lead|principal|staff|manager|gerente|arquiteto|architect|pleno|mid[ -]?level)\\b/i;\nfunction text(html) { return String(html ?? '').replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim(); }\nfunction dateISO(t) { if(!t) return ''; const n = Number(t); const d = new Date(Number.isFinite(n) && n > 100000000 ? n*1000 : t); return isNaN(d.getTime()) ? '' : d.toISOString(); }\nfunction level(s) { if (/est[aá]gio|estagi|intern/i.test(s)) return 'Estágio'; if (/trainee|aprendiz/i.test(s)) return 'Trainee'; return 'Júnior'; }\nfunction fromIssues(arr, source) {\n  return arr.flatMap(v => {\n    if (!v || !v.id || v.pull_request || v.state !== 'open') return [];\n    const labels = Array.isArray(v.labels) ? v.labels.map(l => l.name || '').join(' ') : '';\n    const title = String(v.title || ''); const description = text(v.body || '');\n    if (!reDev.test(title + ' ' + labels + ' ' + description.slice(0,700))) return [];\n    if (!reEntry.test(title + ' ' + labels + ' ' + description.slice(0,2000)) || reSenior.test(title + ' ' + labels)) return [];\n    const published = dateISO(v.created_at);\n    if (published && now - new Date(published).getTime() > recentLimit) return [];\n    return [{id: source.toLowerCase().replace(/\\W/g,'-')+'-'+v.id, cargo:title, empresa:'Ver anúncio', nivel:level(title+' '+labels+' '+description.slice(0,500)), modalidade:/remot|home.office/i.test(title+' '+labels+' '+description)?'Remoto':(/h[ií]brid/i.test(title+' '+labels+' '+description)?'Híbrido':'Não informada'), local:'Brasil / ver anúncio', descricao:description.slice(0,450), publicadoEm:published, fonte:source, link:v.html_url, capturadoEm:new Date(now).toISOString()}];\n  });\n}\nfunction fromHimalayas(jobs) {\n  return jobs.flatMap(v => {\n    const title=String(v.title||''); const seniority=String(v.seniority||''); const type=String(v.employmentType||'');\n    if (!reDev.test(title) || reSenior.test(title)) return [];\n    if (!(reEntry.test(title+' '+seniority+' '+type) || /entry[ -]?level/i.test(seniority))) return [];\n    if (!v.guid || !v.applicationLink) return [];\n    const location=Array.isArray(v.locationRestrictions)?v.locationRestrictions:[];\n    if (location.length && !location.some(c=>/brazil|brasil|^br$/i.test(typeof c==='string'?c:(c.name||c.code||'')))) return [];\n    return [{id:'himalayas-'+v.guid, cargo:title, empresa:v.companyName||'Não informada', nivel:level(title+' '+seniority+' '+type), modalidade:'Remoto', local:location.length?'Brasil':'Mundial (ver restrições)', descricao:text(v.excerpt||v.description).slice(0,450), publicadoEm:dateISO(v.pubDate), expiraEm:dateISO(v.expiryDate), fonte:'Himalayas', link:v.applicationLink, capturadoEm:new Date(now).toISOString()}];\n  });\n}\nconst remoteJobs=Array.isArray(remoteResponse.jobs)?remoteResponse.jobs:[];\nconst incoming=[...fromIssues(front,'Frontend BR'),...fromIssues(back,'Backend BR'),...fromHimalayas(remoteJobs)];\nconst map = new Map(current.filter(v => v && v.id && (falhas.length > 0 || ((!v.expiraEm || new Date(v.expiraEm).getTime()>now) && (!v.publicadoEm || now-new Date(v.publicadoEm).getTime()<maxAgeMs)))).map(v => [v.id,v]));\nfor (const v of incoming) {\n  const old=map.get(v.id);\n  // Preserva a data original de captura e evita mudanças cosméticas a cada hora\n  map.set(v.id, old ? {...old,...v,capturadoEm:old.capturadoEm||v.capturadoEm} : v);\n}\nlet vagas=[...map.values()].sort((a,b)=>String(b.publicadoEm||'').localeCompare(String(a.publicadoEm||''))).slice(0,400);\nconst normal = list=>JSON.stringify(list.map(({capturadoEm,...rest})=>rest));\nconst changed=normal(vagas)!==normal(current);\nif(!changed) return [{json:{changed:false, total:vagas.length, novos:0}}];\nconst oldIds=new Set(current.map(v=>v.id));\nconst updated={atualizadoEm:new Date(now).toISOString(),total:vagas.length,vagas};\nreturn [{json:{changed:true,total:vagas.length,novos:vagas.filter(v=>!oldIds.has(v.id)).length,sha:githubFile.sha,content:Buffer.from(JSON.stringify(updated,null,2)+'\\n','utf8').toString('base64')}}];"
       },
       "id": "consolidar-historico",
       "name": "Consolidar historico",
@@ -183,7 +216,7 @@
     {
       "parameters": {
         "method": "PUT",
-        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/data/vagas.json",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "githubApi",
         "sendBody": true,
@@ -200,6 +233,48 @@
       "position": [
         2330,
         180
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fonte = \"Frontend BR\";\nconst tipo = \"github\";\nconst entradas = $input.all().map(i => i.json);\nconst consultadoEm = new Date().toISOString();\nlet status = null, headers = {}, body, mensagem = '', sucesso = false;\nfunction textoErro(v) {\n  if (typeof v === 'string') return v.slice(0, 500);\n  if (v && typeof v === 'object') return String(v.message || v.error || v.errors?.[0]?.message || JSON.stringify(v)).slice(0, 500);\n  return String(v ?? '').slice(0, 500);\n}\nif (entradas.length && entradas.every(e => e && typeof e.statusCode === 'number')) {\n  status = entradas[0].statusCode; headers = entradas[0].headers || {};\n  body = entradas.length === 1 ? entradas[0].body : entradas.flatMap(e => Array.isArray(e.body) ? e.body : [e.body]);\n  if (!entradas.every(e=>e.statusCode===status)) { status = null; mensagem='Resposta inconsistente: códigos HTTP diferentes na mesma consulta.'; }\n} else if (entradas.some(e => e?.error || e?.message)) {\n  mensagem = textoErro(entradas.find(e => e?.error || e?.message)?.error || entradas.find(e => e?.message)?.message);\n} else {\n  // Fallback for n8n versions returning the body directly.\n  body = entradas.length > 1 ? entradas : entradas[0];\n  status = 200;\n}\nlet vagas = [];\nif (status >= 200 && status < 300) {\n  if (tipo === 'github') {\n    if (Array.isArray(body)) { vagas = body; sucesso = true; }\n    else if (body && typeof body === 'object' && body.id && body.title) { vagas = [body]; sucesso = true; }\n    else mensagem = 'Resposta com estrutura inesperada: esperado array de issues.';\n  } else {\n    if (body && typeof body === 'object' && Array.isArray(body.jobs)) { vagas = body.jobs; sucesso = true; }\n    else mensagem = 'Resposta com estrutura inesperada: esperado objeto com jobs[].';\n  }\n} else if (!mensagem) {\n  const descricao = ({401:'Não autorizado',403:'Acesso proibido ou limite da API',404:'Endpoint não encontrado',429:'Limite de requisições'}[status]) || (status >= 500 ? 'Erro temporário do servidor' : 'Falha HTTP');\n  mensagem = descricao + ' (HTTP ' + String(status ?? 'desconhecido') + '): ' + textoErro(body);\n}\nconst h = Object.fromEntries(Object.entries(headers || {}).map(([k,v])=>[k.toLowerCase(),v]));\nconst retryAfter = h['retry-after'] ?? null;\nlet retryAfterSegundos = null;\nif (retryAfter !== null) {\n  const n = Number(retryAfter);\n  if (Number.isFinite(n) && n >= 0) retryAfterSegundos = Math.ceil(n);\n  else { const d = Date.parse(String(retryAfter)); if (!isNaN(d)) retryAfterSegundos = Math.max(0, Math.ceil((d - Date.now()) / 1000)); }\n}\nconst estado = sucesso ? (vagas.length ? 'ok' : 'sem_vagas') : 'falhou';\nconst diagnostico = {fonte, consultadoEm, statusHTTP:status, estado, quantidade:vagas.length, mensagem:sucesso?'':mensagem, retryAfterSegundos};\nconsole.log('[MonitoramentoVagas] '+JSON.stringify(diagnostico));\nreturn [{json:{...diagnostico, sucesso, vagas}}];"
+      },
+      "id": "validar-frontend-br",
+      "name": "Validar Frontend BR",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        330,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fonte = \"Backend BR\";\nconst tipo = \"github\";\nconst entradas = $input.all().map(i => i.json);\nconst consultadoEm = new Date().toISOString();\nlet status = null, headers = {}, body, mensagem = '', sucesso = false;\nfunction textoErro(v) {\n  if (typeof v === 'string') return v.slice(0, 500);\n  if (v && typeof v === 'object') return String(v.message || v.error || v.errors?.[0]?.message || JSON.stringify(v)).slice(0, 500);\n  return String(v ?? '').slice(0, 500);\n}\nif (entradas.length && entradas.every(e => e && typeof e.statusCode === 'number')) {\n  status = entradas[0].statusCode; headers = entradas[0].headers || {};\n  body = entradas.length === 1 ? entradas[0].body : entradas.flatMap(e => Array.isArray(e.body) ? e.body : [e.body]);\n  if (!entradas.every(e=>e.statusCode===status)) { status = null; mensagem='Resposta inconsistente: códigos HTTP diferentes na mesma consulta.'; }\n} else if (entradas.some(e => e?.error || e?.message)) {\n  mensagem = textoErro(entradas.find(e => e?.error || e?.message)?.error || entradas.find(e => e?.message)?.message);\n} else {\n  // Fallback for n8n versions returning the body directly.\n  body = entradas.length > 1 ? entradas : entradas[0];\n  status = 200;\n}\nlet vagas = [];\nif (status >= 200 && status < 300) {\n  if (tipo === 'github') {\n    if (Array.isArray(body)) { vagas = body; sucesso = true; }\n    else if (body && typeof body === 'object' && body.id && body.title) { vagas = [body]; sucesso = true; }\n    else mensagem = 'Resposta com estrutura inesperada: esperado array de issues.';\n  } else {\n    if (body && typeof body === 'object' && Array.isArray(body.jobs)) { vagas = body.jobs; sucesso = true; }\n    else mensagem = 'Resposta com estrutura inesperada: esperado objeto com jobs[].';\n  }\n} else if (!mensagem) {\n  const descricao = ({401:'Não autorizado',403:'Acesso proibido ou limite da API',404:'Endpoint não encontrado',429:'Limite de requisições'}[status]) || (status >= 500 ? 'Erro temporário do servidor' : 'Falha HTTP');\n  mensagem = descricao + ' (HTTP ' + String(status ?? 'desconhecido') + '): ' + textoErro(body);\n}\nconst h = Object.fromEntries(Object.entries(headers || {}).map(([k,v])=>[k.toLowerCase(),v]));\nconst retryAfter = h['retry-after'] ?? null;\nlet retryAfterSegundos = null;\nif (retryAfter !== null) {\n  const n = Number(retryAfter);\n  if (Number.isFinite(n) && n >= 0) retryAfterSegundos = Math.ceil(n);\n  else { const d = Date.parse(String(retryAfter)); if (!isNaN(d)) retryAfterSegundos = Math.max(0, Math.ceil((d - Date.now()) / 1000)); }\n}\nconst estado = sucesso ? (vagas.length ? 'ok' : 'sem_vagas') : 'falhou';\nconst diagnostico = {fonte, consultadoEm, statusHTTP:status, estado, quantidade:vagas.length, mensagem:sucesso?'':mensagem, retryAfterSegundos};\nconsole.log('[MonitoramentoVagas] '+JSON.stringify(diagnostico));\nreturn [{json:{...diagnostico, sucesso, vagas}}];"
+      },
+      "id": "validar-backend-br",
+      "name": "Validar Backend BR",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        810,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fonte = \"Himalayas\";\nconst tipo = \"himalayas\";\nconst entradas = $input.all().map(i => i.json);\nconst consultadoEm = new Date().toISOString();\nlet status = null, headers = {}, body, mensagem = '', sucesso = false;\nfunction textoErro(v) {\n  if (typeof v === 'string') return v.slice(0, 500);\n  if (v && typeof v === 'object') return String(v.message || v.error || v.errors?.[0]?.message || JSON.stringify(v)).slice(0, 500);\n  return String(v ?? '').slice(0, 500);\n}\nif (entradas.length && entradas.every(e => e && typeof e.statusCode === 'number')) {\n  status = entradas[0].statusCode; headers = entradas[0].headers || {};\n  body = entradas.length === 1 ? entradas[0].body : entradas.flatMap(e => Array.isArray(e.body) ? e.body : [e.body]);\n  if (!entradas.every(e=>e.statusCode===status)) { status = null; mensagem='Resposta inconsistente: códigos HTTP diferentes na mesma consulta.'; }\n} else if (entradas.some(e => e?.error || e?.message)) {\n  mensagem = textoErro(entradas.find(e => e?.error || e?.message)?.error || entradas.find(e => e?.message)?.message);\n} else {\n  // Fallback for n8n versions returning the body directly.\n  body = entradas.length > 1 ? entradas : entradas[0];\n  status = 200;\n}\nlet vagas = [];\nif (status >= 200 && status < 300) {\n  if (tipo === 'github') {\n    if (Array.isArray(body)) { vagas = body; sucesso = true; }\n    else if (body && typeof body === 'object' && body.id && body.title) { vagas = [body]; sucesso = true; }\n    else mensagem = 'Resposta com estrutura inesperada: esperado array de issues.';\n  } else {\n    if (body && typeof body === 'object' && Array.isArray(body.jobs)) { vagas = body.jobs; sucesso = true; }\n    else mensagem = 'Resposta com estrutura inesperada: esperado objeto com jobs[].';\n  }\n} else if (!mensagem) {\n  const descricao = ({401:'Não autorizado',403:'Acesso proibido ou limite da API',404:'Endpoint não encontrado',429:'Limite de requisições'}[status]) || (status >= 500 ? 'Erro temporário do servidor' : 'Falha HTTP');\n  mensagem = descricao + ' (HTTP ' + String(status ?? 'desconhecido') + '): ' + textoErro(body);\n}\nconst h = Object.fromEntries(Object.entries(headers || {}).map(([k,v])=>[k.toLowerCase(),v]));\nconst retryAfter = h['retry-after'] ?? null;\nlet retryAfterSegundos = null;\nif (retryAfter !== null) {\n  const n = Number(retryAfter);\n  if (Number.isFinite(n) && n >= 0) retryAfterSegundos = Math.ceil(n);\n  else { const d = Date.parse(String(retryAfter)); if (!isNaN(d)) retryAfterSegundos = Math.max(0, Math.ceil((d - Date.now()) / 1000)); }\n}\nconst estado = sucesso ? (vagas.length ? 'ok' : 'sem_vagas') : 'falhou';\nconst diagnostico = {fonte, consultadoEm, statusHTTP:status, estado, quantidade:vagas.length, mensagem:sucesso?'':mensagem, retryAfterSegundos};\nconsole.log('[MonitoramentoVagas] '+JSON.stringify(diagnostico));\nreturn [{json:{...diagnostico, sucesso, vagas}}];"
+      },
+      "id": "validar-himalayas",
+      "name": "Validar Himalayas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1290,
+        120
       ]
     }
   ],
@@ -219,7 +294,7 @@
       "main": [
         [
           {
-            "node": "Continuar Frontend",
+            "node": "Validar Frontend BR",
             "type": "main",
             "index": 0
           }
@@ -241,7 +316,7 @@
       "main": [
         [
           {
-            "node": "Continuar Backend",
+            "node": "Validar Backend BR",
             "type": "main",
             "index": 0
           }
@@ -263,7 +338,7 @@
       "main": [
         [
           {
-            "node": "Continuar Remotas",
+            "node": "Validar Himalayas",
             "type": "main",
             "index": 0
           }
@@ -313,6 +388,39 @@
           }
         ],
         []
+      ]
+    },
+    "Validar Frontend BR": {
+      "main": [
+        [
+          {
+            "node": "Continuar Frontend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Backend BR": {
+      "main": [
+        [
+          {
+            "node": "Continuar Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Himalayas": {
+      "main": [
+        [
+          {
+            "node": "Continuar Remotas",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
