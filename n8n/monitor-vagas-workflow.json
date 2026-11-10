@@ -135,6 +135,83 @@
     {
       "parameters": {
         "method": "GET",
+        "url": "https://api.adzuna.com/v1/api/jobs/br/search/1?app_id={{$env.ADZUNA_APP_ID}}&app_key={{$env.ADZUNA_APP_KEY}}&what=junior+developer&where=Brazil&results_per_page=20",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "vagas-adzuna",
+      "name": "Vagas Adzuna",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1590,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { proximo: true } }];"
+      },
+      "id": "continuar-adzuna",
+      "name": "Continuar Adzuna",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1830,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jooble.org/api/{{$env.JOOBLE_API_KEY}}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { keywords: \"junior developer, QA, Unity, Unreal Engine, Godot, estágio, trainee\", location: \"Brazil\", page: 1, searchMode: 1 } }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "vagas-jooble",
+      "name": "Vagas Jooble",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2070,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { proximo: true } }];"
+      },
+      "id": "continuar-jooble",
+      "name": "Continuar Jooble",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2310,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
         "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
         "options": {
           "timeout": 30000
@@ -147,20 +224,20 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1590,
+        2550,
         250
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const front = $('Vagas Frontend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst back = $('Vagas Backend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst remoteRaw = $('Vagas Remotas Himalayas').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst remoteJobs = Array.isArray(remoteRaw) && remoteRaw[0] && Array.isArray(remoteRaw[0].jobs) ? remoteRaw[0].jobs : [];\nconst nowIso = new Date().toISOString();\nconst maxHistoric = 400;\nconst sourceNames = ['Frontend BR', 'Backend BR', 'Himalayas'];\nconst stripVolatile = (value) => {\n  if (!value || typeof value !== 'object') return value;\n  const next = { ...value };\n  delete next.ultimaSincronizacao;\n  delete next.ultimaConsultaBemSucedida;\n  delete next.statusExecucao;\n  delete next.novasNaExecucao;\n  delete next.historicoPreservado;\n  delete next.limiteHistorico;\n  delete next.ultimaSincronizacaoCompleta;\n  delete next.ultimaSincronizacaoParcial;\n  return next;\n};\nconst normalizeIssue = (item, source) => {\n  if (!item || !item.id) return null;\n  const title = String(item.title || '').trim();\n  const body = String(item.body || '');\n  const now = nowIso;\n  return {\n    id: `${source.toLowerCase().replace(/\\W+/g, '-')}-${item.id}`,\n    cargo: title,\n    empresa: 'Ver anúncio',\n    nivel: /est[aá]gio|intern|aprendiz|trainee/i.test(title + ' ' + body) ? 'Estágio' : 'Júnior',\n    modalidade: /remot|home\\.?office/i.test(title + ' ' + body) ? 'Remoto' : (/h[ií]brid/i.test(title + ' ' + body) ? 'Híbrido' : 'Não informada'),\n    local: 'Brasil / ver anúncio',\n    descricao: body.slice(0, 500),\n    publicadoEm: item.created_at || '',\n    fonte: source,\n    link: item.html_url || '',\n    capturadoEm: now,\n    primeiraIdentificacao: now,\n    ultimaIdentificacao: now,\n    statusIdentificacao: 'nova'\n  };\n};\nconst normalizeHimalayas = (item) => {\n  if (!item || !item.id && !item.guid) return null;\n  const title = String(item.title || item.cargo || '');\n  const company = String(item.companyName || item.empresa || 'Não informada');\n  const now = nowIso;\n  return {\n    id: item.id || `himalayas-${String(item.guid || item.applicationLink || title).replace(/\\W+/g, '-') }`,\n    cargo: title,\n    empresa: company,\n    nivel: /est[aá]gio|intern|aprendiz|trainee/i.test(title) ? 'Estágio' : 'Júnior',\n    modalidade: 'Remoto',\n    local: Array.isArray(item.locationRestrictions) && item.locationRestrictions.length ? 'Brasil' : 'Mundial (ver restrições)',\n    descricao: String(item.excerpt || item.description || '').slice(0, 500),\n    publicadoEm: item.pubDate || item.publicadoEm || '',\n    expiraEm: item.expiryDate || item.expiraEm || '',\n    fonte: 'Himalayas',\n    link: item.applicationLink || item.link || '',\n    capturadoEm: now,\n    primeiraIdentificacao: now,\n    ultimaIdentificacao: now,\n    statusIdentificacao: 'nova'\n  };\n};\nfunction normalizeUrl(raw) {\n  if (!raw) return '';\n  const value = String(raw).trim();\n  if (!/^https?:\\/\\//i.test(value)) return value;\n  try {\n    const url = new URL(value);\n    url.hash = '';\n    const params = new URLSearchParams(url.search);\n    const tracking = new Set(['utm_source','utm_medium','utm_campaign','utm_term','utm_content','utm_id','gclid','fbclid','mc_cid','mc_eid']);\n    for (const key of [...params.keys()]) {\n      if (tracking.has(String(key).toLowerCase())) params.delete(key);\n    }\n    url.search = params.toString();\n    return String(url).replace(/[?#]+$/, '');\n  } catch (e) {\n    return value.replace(/[?&](?:utm_[^&]+|gclid|fbclid|mc_cid|mc_eid)=[^&]+/gi, '').replace(/&&+/g, '&').replace(/[?&]$/, '');\n  }\n}\nfunction normalizeCompany(value) {\n  return String(value || '')\n    .normalize('NFKD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/\\b(?:ltda|ltda\\.|sa|s\\.a\\.|s\\/a|inc|corp|company|consultoria|brasil|do brasil)\\b/gi, '')\n    .replace(/[^A-Za-z0-9\\s]/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .toLowerCase();\n}\nfunction normalizeRole(value) {\n  return String(value || '')\n    .normalize('NFKD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/\\b(full[\\s-]?stack)\\b/gi, 'fullstack')\n    .replace(/\\b(front[\\s-]?end)\\b/gi, 'frontend')\n    .replace(/\\b(back[\\s-]?end)\\b/gi, 'backend')\n    .replace(/\\b(junior|júnior|jr|estagi[oá]rio|est[aá]gio|intern(ship)?|trainee|entry[\\s-]?level)\\b/gi, '')\n    .replace(/[^A-Za-z0-9\\s]/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .toLowerCase();\n}\nconst incoming = [\n  ...front.filter(Boolean).map(item => normalizeIssue(item, 'Frontend BR')),\n  ...back.filter(Boolean).map(item => normalizeIssue(item, 'Backend BR')),\n  ...remoteJobs.filter(Boolean).map(normalizeHimalayas)\n].filter(Boolean);\nconst githubFile = $input.first().json;\nif (!githubFile || !githubFile.sha || !githubFile.content) {\n  throw new Error('Arquivo data/vagas.json não encontrado no repositório.');\n}\nconst existingJson = JSON.parse(Buffer.from(githubFile.content, 'base64').toString('utf8'));\nconst current = Array.isArray(existingJson.vagas) ? existingJson.vagas : [];\nconst existingById = new Map(current.map(v => [v.id, v]));\nconst urlIndex = new Map();\nfor (const item of current) {\n  const url = normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '');\n  if (url) urlIndex.set(url, item);\n}\nconst merged = new Map();\nconst sourceStats = {};\nfor (const name of sourceNames) { sourceStats[name] = false; }\nfor (const item of incoming) {\n  const url = normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '');\n  let match = existingById.get(item.id);\n  if (!match && url) match = urlIndex.get(url);\n  if (match) {\n    const mergedItem = { ...match, ...item };\n    mergedItem.ultimaIdentificacao = nowIso;\n    if (!mergedItem.primeiraIdentificacao) mergedItem.primeiraIdentificacao = match.capturadoEm || nowIso;\n    mergedItem.urlNormalizada = url || match.urlNormalizada || normalizeUrl(match.link || match.url || match.html_url || match.applicationLink || '');\n    mergedItem.empresaNormalizada = normalizeCompany(mergedItem.empresa || match.empresa || '');\n    mergedItem.cargoNormalizado = normalizeRole(mergedItem.cargo || match.cargo || '');\n    mergedItem.fontesAlternativas = Array.from(new Set([...(Array.isArray(match.fontesAlternativas) ? match.fontesAlternativas : []), ...(Array.isArray(item.fontesAlternativas) ? item.fontesAlternativas : []), match.fonte, item.fonte].filter(Boolean)));\n    merged.set(mergedItem.id, mergedItem);\n  } else {\n    const candidate = { ...item };\n    candidate.urlNormalizada = url;\n    candidate.empresaNormalizada = normalizeCompany(candidate.empresa);\n    candidate.cargoNormalizado = normalizeRole(candidate.cargo);\n    candidate.fontesAlternativas = [candidate.fonte].filter(Boolean);\n    candidate.primeiraIdentificacao = candidate.primeiraIdentificacao || nowIso;\n    candidate.ultimaIdentificacao = nowIso;\n    candidate.statusIdentificacao = 'nova';\n    merged.set(candidate.id, candidate);\n  }\n}\nfor (const existing of current) {\n  if (!existing || !existing.id) continue;\n  if (!merged.has(existing.id)) {\n    const clone = { ...existing };\n    clone.primeiraIdentificacao = clone.primeiraIdentificacao || clone.capturadoEm || nowIso;\n    clone.ultimaIdentificacao = clone.ultimaIdentificacao || clone.primeiraIdentificacao || nowIso;\n    clone.statusIdentificacao = clone.statusIdentificacao || 'existente';\n    clone.urlNormalizada = normalizeUrl(clone.link || clone.url || clone.html_url || clone.applicationLink || '');\n    clone.empresaNormalizada = normalizeCompany(clone.empresa || '');\n    clone.cargoNormalizado = normalizeRole(clone.cargo || '');\n    clone.fontesAlternativas = Array.isArray(clone.fontesAlternativas) ? clone.fontesAlternativas : [clone.fonte].filter(Boolean);\n    merged.set(existing.id, clone);\n  }\n}\nconst proposal = Array.from(merged.values())\n  .filter(Boolean)\n  .map(v => ({ ...v, publicadoEm: v.publicadoEm || '', urlNormalizada: normalizeUrl(v.link || v.url || v.html_url || v.applicationLink || ''), empresaNormalizada: normalizeCompany(v.empresa || ''), cargoNormalizado: normalizeRole(v.cargo || '') }))\n  .sort((a, b) => new Date(b.ultimaIdentificacao || b.publicadoEm || b.capturadoEm || 0).getTime() - new Date(a.ultimaIdentificacao || a.publicadoEm || a.capturadoEm || 0).getTime())\n  .slice(0, maxHistoric);\nconst comparableCurrent = current.map(stripVolatile).map(item => ({ ...item, link: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || ''), urlNormalizada: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '') }));\nconst comparableProposal = proposal.map(stripVolatile).map(item => ({ ...item, link: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || ''), urlNormalizada: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '') }));\nconst changedRelevant = JSON.stringify(comparableCurrent) !== JSON.stringify(comparableProposal);\nconst payload = {\n  atualizadoEm: nowIso,\n  total: proposal.length,\n  vagas: proposal,\n  ultimaSincronizacao: nowIso,\n  ultimaSincronizacaoCompleta: Array.isArray(incoming) && incoming.length ? nowIso : null,\n  ultimaSincronizacaoParcial: null,\n  limiteHistorico: maxHistoric,\n  historicoPreservado: true,\n  novasNaExecucao: proposal.filter(v => v.statusIdentificacao === 'nova').length\n};\nconst shouldPublish = changedRelevant && proposal.length > 0;\nreturn [{\n  json: {\n    changed: shouldPublish,\n    relevantChange: changedRelevant,\n    total: proposal.length,\n    novos: payload.novasNaExecucao,\n    sha: githubFile.sha,\n    content: shouldPublish ? Buffer.from(JSON.stringify(payload, null, 2) + '\\n', 'utf8').toString('base64') : null,\n    preserveHistory: true\n  }\n}];",
+        "jsCode": "const front = $('Vagas Frontend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst back = $('Vagas Backend BR').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst remoteRaw = $('Vagas Remotas Himalayas').all().map(x => x.json).flatMap(x => Array.isArray(x) ? x : [x]);\nconst adzunaRaw = $('Vagas Adzuna').all().map(x => x.json).flatMap(x => Array.isArray(x.results) ? x.results : (Array.isArray(x) ? x : [x]));\nconst joobleRaw = $('Vagas Jooble').all().map(x => x.json).flatMap(x => Array.isArray(x.jobs) ? x.jobs : (Array.isArray(x) ? x : [x]));\nconst remoteJobs = Array.isArray(remoteRaw) && remoteRaw[0] && Array.isArray(remoteRaw[0].jobs) ? remoteRaw[0].jobs : [];\nconst nowIso = new Date().toISOString();\nconst maxHistoric = 400;\nconst sourceNames = ['Frontend BR', 'Backend BR', 'Himalayas', 'Adzuna', 'Jooble'];\nfunction textValue(v) { return String(v ?? '').replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim(); }\nfunction normalizeUrl(raw) {\n  if (!raw) return '';\n  const value = String(raw).trim();\n  if (!/^https?:\\/\\//i.test(value)) return value;\n  try {\n    const url = new URL(value);\n    url.hash = '';\n    const params = new URLSearchParams(url.search);\n    const tracking = new Set(['utm_source','utm_medium','utm_campaign','utm_term','utm_content','utm_id','gclid','fbclid','mc_cid','mc_eid']);\n    for (const key of [...params.keys()]) {\n      if (tracking.has(String(key).toLowerCase())) params.delete(key);\n    }\n    url.search = params.toString();\n    return String(url).replace(/[?#]+$/, '');\n  } catch (e) {\n    return value.replace(/[?&](?:utm_[^&]+|gclid|fbclid|mc_cid|mc_eid)=[^&]+/gi, '').replace(/&&+/g, '&').replace(/[?&]$/, '');\n  }\n}\nfunction normalizeCompany(value) {\n  return String(value || '')\n    .normalize('NFKD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/\\b(?:ltda|ltda\\.|sa|s\\.a\\.|s\\/a|inc|corp|company|consultoria|brasil|do brasil)\\b/gi, '')\n    .replace(/[^A-Za-z0-9\\s]/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .toLowerCase();\n}\nfunction normalizeRole(value) {\n  return String(value || '')\n    .normalize('NFKD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/\\b(full[\\s-]?stack)\\b/gi, 'fullstack')\n    .replace(/\\b(front[\\s-]?end)\\b/gi, 'frontend')\n    .replace(/\\b(back[\\s-]?end)\\b/gi, 'backend')\n    .replace(/\\b(junior|júnior|jr|estagi[oá]rio|est[aá]gio|intern(ship)?|trainee|entry[\\s-]?level)\\b/gi, '')\n    .replace(/[^A-Za-z0-9\\s]/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .toLowerCase();\n}\nfunction normalizeItem(item, source) {\n  if (!item || !item.id) return null;\n  const url = normalizeUrl(item.link || item.url || item.redirect_url || item.applicationLink || item.html_url || '');\n  const company = String(item.company || item.empresa || item.companyName || 'Ver anúncio');\n  const cargo = String(item.title || item.cargo || item.job_title || '');\n  const description = String(item.description || item.descricao || item.snippet || '');\n  return {\n    id: `${source.toLowerCase().replace(/\\W+/g, '-')}-${String(item.id || url || cargo || company)}`.slice(0, 180),\n    cargo: cargo || 'Cargo não informado',\n    empresa: company || 'Ver anúncio',\n    nivel: /est[aá]gio|intern|aprendiz|trainee/i.test(`${cargo} ${description}`) ? 'Estágio' : /junior|júnior|jr/i.test(`${cargo} ${description}`) ? 'Júnior' : 'Não informada',\n    modalidade: /remot|home\\.?office/i.test(`${cargo} ${description}`) ? 'Remoto' : (/h[ií]brid/i.test(`${cargo} ${description}`) ? 'Híbrido' : 'Não informada'),\n    local: item.location || item.local || 'Brasil / ver anúncio',\n    descricao: description.slice(0, 500),\n    publicadoEm: item.created || item.created_at || item.date || item.publishedAt || '',\n    fonte: source,\n    link: url || item.link || item.url || item.redirect_url || item.applicationLink || '',\n    capturadoEm: nowIso,\n    primeiraIdentificacao: nowIso,\n    ultimaIdentificacao: nowIso,\n    statusIdentificacao: 'nova',\n    urlNormalizada: url,\n    empresaNormalizada: normalizeCompany(company),\n    cargoNormalizado: normalizeRole(cargo),\n    fontesAlternativas: [source] \n  };\n}\nconst incoming = [\n  ...front.filter(Boolean).map(item => normalizeItem(item, 'Frontend BR')),\n  ...back.filter(Boolean).map(item => normalizeItem(item, 'Backend BR')),\n  ...remoteJobs.filter(Boolean).map(item => normalizeItem({ ...item, id: item.id || item.guid || item.applicationLink || item.title, link: item.applicationLink || item.link || item.url }, 'Himalayas')),\n  ...adzunaRaw.filter(Boolean).map(item => normalizeItem({ ...item, id: item.id || item.redirect_url || item.title, link: item.redirect_url || item.redirect_url || item.url, company: item.company && item.company.display_name ? item.company.display_name : item.company, title: item.title || item.cargo, description: item.description || item.snippet }, 'Adzuna')),\n  ...joobleRaw.filter(Boolean).map(item => normalizeItem({ ...item, id: item.id || item.link || item.title, link: item.link || item.url, company: item.company, title: item.title || item.job_title, description: item.snippet || item.description, location: item.location || item.location || 'Brasil' }, 'Jooble'))\n].filter(Boolean);\nconst githubFile = $input.first().json;\nif (!githubFile || !githubFile.sha || !githubFile.content) { throw new Error('Arquivo data/vagas.json não encontrado.'); }\nconst existingJson = JSON.parse(Buffer.from(githubFile.content, 'base64').toString('utf8'));\nconst current = Array.isArray(existingJson.vagas) ? existingJson.vagas : [];\nconst existingById = new Map(current.map(v => [v.id, v]));\nconst urlIndex = new Map();\nfor (const item of current) {\n  const url = normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '');\n  if (url) urlIndex.set(url, item);\n}\nconst merged = new Map();\nfor (const item of current) {\n  if (item && item.id) {\n    const clone = { ...item };\n    clone.urlNormalizada = normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '');\n    clone.empresaNormalizada = normalizeCompany(item.empresa || '');\n    clone.cargoNormalizado = normalizeRole(item.cargo || '');\n    clone.fontesAlternativas = Array.isArray(item.fontesAlternativas) ? item.fontesAlternativas : [item.fonte].filter(Boolean);\n    clone.primeiraIdentificacao = clone.primeiraIdentificacao || clone.capturadoEm || nowIso;\n    clone.ultimaIdentificacao = clone.ultimaIdentificacao || clone.primeiraIdentificacao || nowIso;\n    merged.set(item.id, clone);\n  }\n}\nfor (const item of incoming) {\n  const existing = existingById.get(item.id);\n  const url = item.urlNormalizada || normalizeUrl(item.link || '');\n  const byUrl = url ? urlIndex.get(url) : null;\n  const base = existing || byUrl || null;\n  if (base) {\n    const mergedItem = { ...base, ...item };\n    if (!mergedItem.primeiraIdentificacao) mergedItem.primeiraIdentificacao = base.capturadoEm || nowIso;\n    mergedItem.ultimaIdentificacao = nowIso;\n    mergedItem.fontesAlternativas = Array.from(new Set([...(Array.isArray(base.fontesAlternativas) ? base.fontesAlternativas : []), ...(Array.isArray(item.fontesAlternativas) ? item.fontesAlternativas : []), base.fonte, item.fonte].filter(Boolean)));\n    merged.set(base.id, mergedItem);\n  } else {\n    merged.set(item.id, item);\n  }\n}\nconst proposal = Array.from(merged.values())\n  .filter(Boolean)\n  .map(v => ({ ...v, urlNormalizada: normalizeUrl(v.link || v.url || v.html_url || v.applicationLink || ''), empresaNormalizada: normalizeCompany(v.empresa || ''), cargoNormalizado: normalizeRole(v.cargo || '') }))\n  .sort((a, b) => new Date(b.ultimaIdentificacao || b.publicadoEm || b.capturadoEm || 0).getTime() - new Date(a.ultimaIdentificacao || a.publicadoEm || a.capturadoEm || 0).getTime())\n  .slice(0, maxHistoric);\nconst comparableCurrent = current.map(item => ({ ...item, link: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || ''), urlNormalizada: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '') }));\nconst comparableProposal = proposal.map(item => ({ ...item, link: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || ''), urlNormalizada: normalizeUrl(item.link || item.url || item.html_url || item.applicationLink || '') }));\nconst changedRelevant = JSON.stringify(comparableCurrent) !== JSON.stringify(comparableProposal);\nconst payload = {\n  atualizadoEm: nowIso,\n  total: proposal.length,\n  vagas: proposal,\n  ultimaSincronizacao: nowIso,\n  ultimaSincronizacaoCompleta: nowIso,\n  ultimaSincronizacaoParcial: null,\n  limiteHistorico: maxHistoric,\n  historicoPreservado: true,\n  novasNaExecucao: proposal.filter(v => v.statusIdentificacao === 'nova').length,\n  ultimaConsultaBemSucedida: { 'Frontend BR': nowIso, 'Backend BR': nowIso, 'Himalayas': nowIso, 'Adzuna': nowIso, 'Jooble': nowIso }\n};\nconst shouldPublish = changedRelevant && proposal.length > 0;\nreturn [{\n  json: {\n    changed: shouldPublish,\n    relevantChange: changedRelevant,\n    total: proposal.length,\n    novos: payload.novasNaExecucao,\n    sha: githubFile.sha,\n    content: shouldPublish ? Buffer.from(JSON.stringify(payload, null, 2) + '\\n', 'utf8').toString('base64') : null,\n    preserveHistory: true\n  }\n}];",
         "id": "consolidar-historico",
         "name": "Consolidar historico",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1830,
+          2790,
           250
         ]
       }
@@ -194,7 +271,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2070,
+        3030,
         250
       ]
     },
@@ -216,7 +293,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2330,
+        3290,
         180
       ]
     },
@@ -230,7 +307,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2550,
+        3510,
         180
       ]
     }
@@ -251,14 +328,14 @@
       "main": [
         [
           {
-            "node": "continuar-frontend",
+            "node": "Continuar Frontend",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "continuar-frontend": {
+    "Continuar Frontend": {
       "main": [
         [
           {
@@ -273,14 +350,14 @@
       "main": [
         [
           {
-            "node": "continuar-backend",
+            "node": "Continuar Backend",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "continuar-backend": {
+    "Continuar Backend": {
       "main": [
         [
           {
@@ -295,51 +372,95 @@
       "main": [
         [
           {
-            "node": "continuar-remotas",
+            "node": "Continuar Remotas",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "continuar-remotas": {
+    "Continuar Remotas": {
       "main": [
         [
           {
-            "node": "ler-arquivo-atual-github",
+            "node": "Vagas Adzuna",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "ler-arquivo-atual-github": {
+    "Vagas Adzuna": {
       "main": [
         [
           {
-            "node": "consolidar-historico",
+            "node": "Continuar Adzuna",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "consolidar-historico": {
+    "Continuar Adzuna": {
       "main": [
         [
           {
-            "node": "mudou-alguma-vaga?",
+            "node": "Vagas Jooble",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "mudou-alguma-vaga?": {
+    "Vagas Jooble": {
       "main": [
         [
           {
-            "node": "publicar-vagas.json",
+            "node": "Continuar Jooble",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar Jooble": {
+      "main": [
+        [
+          {
+            "node": "Ler arquivo atual GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler arquivo atual GitHub": {
+      "main": [
+        [
+          {
+            "node": "Consolidar historico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar historico": {
+      "main": [
+        [
+          {
+            "node": "Mudou alguma vaga?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mudou alguma vaga?": {
+      "main": [
+        [
+          {
+            "node": "Publicar vagas.json",
             "type": "main",
             "index": 0
           }
@@ -347,11 +468,11 @@
         []
       ]
     },
-    "publicar-vagas.json": {
+    "Publicar vagas.json": {
       "main": [
         [
           {
-            "node": "tratar-resultado-publicacao",
+            "node": "Tratar resultado de publicação",
             "type": "main",
             "index": 0
           }
