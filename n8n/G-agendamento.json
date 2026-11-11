@@ -258,7 +258,7 @@
       ],
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT payload,report_archive,revision FROM tecops_pipeline_state WHERE singleton=TRUE;",
+        "query": "SELECT p.payload,p.report_archive,p.revision FROM (SELECT TRUE AS singleton) seed LEFT JOIN tecops_pipeline_state p ON p.singleton=seed.singleton;",
         "options": {}
       }
     },
@@ -355,7 +355,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const p=$('Confirmar transação PostgreSQL').first().json;\nconst file=$input.first().json||{};\nif(!file.sha||typeof file.content!=='string')throw new Error('Espelho GitHub indisponível: dados PostgreSQL preservados. Verifique a publicação.');\nconst next=JSON.stringify(p.data,null,2)+'\\n';\nconst current=Buffer.from(file.content.replace(/\\s/g,''),'base64').toString('utf8');\nreturn [{json:{...p,needsMirror:current!==next,\n publishPayload:{message:'TecOps: atualizar espelho de vagas após commit PostgreSQL',sha:file.sha,\n branch:'main',content:Buffer.from(next,'utf8').toString('base64')}}}];"
+        "jsCode": "const p=$('Confirmar transação PostgreSQL').first().json;\nconst response=$input.first().json||{};\nconst file=response.body?.sha?response.body:response;\nif(!file.sha||typeof file.content!=='string')throw new Error('Espelho GitHub indisponível: dados PostgreSQL preservados. Verifique a publicação.');\nconst next=JSON.stringify(p.data,null,2)+'\\n';\nconst current=Buffer.from(file.content.replace(/\\s/g,''),'base64').toString('utf8');\nreturn [{json:{...p,needsMirror:current!==next,\n publishPayload:{message:'TecOps: atualizar espelho de vagas após commit PostgreSQL',sha:file.sha,\n branch:'main',content:Buffer.from(next,'utf8').toString('base64')}}}];"
       }
     },
     {
