@@ -160,7 +160,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "https://api.adzuna.com/v1/api/jobs/br/search/1?app_id={{$env.ADZUNA_APP_ID}}&app_key={{$env.ADZUNA_APP_KEY}}&what=junior+developer&where=Brazil&results_per_page=20",
+        "url": "https://api.adzuna.com/v1/api/jobs/br/search/1?what=junior+developer&where=Brazil&results_per_page=20",
         "options": {
           "timeout": 30000,
           "response": {
@@ -169,7 +169,9 @@
               "neverError": true
             }
           }
-        }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth"
       },
       "name": "Vagas Adzuna",
       "type": "n8n-nodes-base.httpRequest",
@@ -211,29 +213,16 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://jooble.org/api/{{$env.JOOBLE_API_KEY}}",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ { keywords: \"junior developer, QA, Unity, Unreal Engine, Godot, estágio, trainee\", location: \"Brazil\", page: 1, searchMode: 1 } }}",
-        "options": {
-          "timeout": 30000,
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "neverError": true
-            }
-          }
-        }
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{json:{statusCode:503,body:{message:'Jooble desativado: configurar gateway autenticado (chave no path não pode ser armazenada em credencial HTTP padrão).'}}}];"
       },
       "name": "Vagas Jooble",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         2070,
         250
       ],
-      "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000
@@ -345,7 +334,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "https://api.adzuna.com/v1/api/jobs/br/search/1?app_id={{$env.ADZUNA_APP_ID}}&app_key={{$env.ADZUNA_APP_KEY}}&what=game%20developer&where=Brazil&results_per_page=20",
+        "url": "https://api.adzuna.com/v1/api/jobs/br/search/1?what=game%20developer&where=Brazil&results_per_page=20",
         "options": {
           "timeout": 30000,
           "response": {
@@ -354,7 +343,9 @@
               "neverError": true
             }
           }
-        }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth"
       },
       "name": "Vagas Adzuna Game Dev",
       "type": "n8n-nodes-base.httpRequest",
@@ -384,7 +375,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "https://api.adzuna.com/v1/api/jobs/br/search/1?app_id={{$env.ADZUNA_APP_ID}}&app_key={{$env.ADZUNA_APP_KEY}}&what=est%C3%A1gio%20desenvolvimento&where=Brazil&results_per_page=20",
+        "url": "https://api.adzuna.com/v1/api/jobs/br/search/1?what=est%C3%A1gio%20desenvolvimento&where=Brazil&results_per_page=20",
         "options": {
           "timeout": 30000,
           "response": {
@@ -393,7 +384,9 @@
               "neverError": true
             }
           }
-        }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth"
       },
       "name": "Vagas Adzuna Estagio",
       "type": "n8n-nodes-base.httpRequest",
@@ -422,29 +415,16 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://br.jooble.org/api/{{$env.JOOBLE_BR_API_KEY}}",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ { keywords: \"game developer\", location: \"Brasil\", page: 1, ResultOnPage: 20 } }}",
-        "options": {
-          "timeout": 30000,
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "neverError": true
-            }
-          }
-        }
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{json:{statusCode:503,body:{message:'Jooble desativado: configurar gateway autenticado (chave no path não pode ser armazenada em credencial HTTP padrão).'}}}];"
       },
       "name": "Vagas Jooble BR Game Dev",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         3840,
         250
       ],
-      "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000
@@ -464,29 +444,16 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://br.jooble.org/api/{{$env.JOOBLE_BR_API_KEY}}",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ { keywords: \"estágio desenvolvimento\", location: \"Brasil\", page: 1, ResultOnPage: 20 } }}",
-        "options": {
-          "timeout": 30000,
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "neverError": true
-            }
-          }
-        }
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{json:{statusCode:503,body:{message:'Jooble desativado: configurar gateway autenticado (chave no path não pode ser armazenada em credencial HTTP padrão).'}}}];"
       },
       "name": "Vagas Jooble BR Estagio",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         4150,
         250
       ],
-      "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000
@@ -527,6 +494,160 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "jsCode": "// A — coleta e normalização. Não lê/grava histórico nem publica no GitHub.\nconst now = new Date().toISOString();\nconst MAX = 400; // limite de exibição; excedentes vão para historicoVagas\nconst sources = [\n  { name:'Frontend BR', provider:'Frontend BR', node:'Validar Frontend BR' },\n  { name:'Backend BR', provider:'Backend BR', node:'Validar Backend BR' },\n  { name:'Himalayas', provider:'Himalayas', node:'Validar Himalayas' },\n  { name:'Adzuna', provider:'Adzuna', node:'Validar Adzuna' },\n  { name:'Jooble', provider:'Jooble', node:'Validar Jooble' },\n  { name:'Himalayas Game Dev', provider:'Himalayas', node:'Validar Himalayas Game Dev' },\n  { name:'Himalayas Estagio', provider:'Himalayas', node:'Validar Himalayas Estagio' },\n  { name:'Adzuna Game Dev', provider:'Adzuna', node:'Validar Adzuna Game Dev' },\n  { name:'Adzuna Estagio', provider:'Adzuna', node:'Validar Adzuna Estagio' },\n  { name:'Jooble BR Game Dev', provider:'Jooble', node:'Validar Jooble BR Game Dev' },\n  { name:'Jooble BR Estagio', provider:'Jooble', node:'Validar Jooble BR Estagio' }\n];\nconst checks = sources.map(s => ({ ...s, ...$(s.node).first().json }));\n\nconst context=$('Entrada A').first().json||{};\nconst ok=checks.filter(s=>s.ok===true);\nfunction descriptionHash(value) {\n const data=norm(value);if(!data)return '';\n let h=0xcbf29ce484222325n;\n for(let i=0;i<data.length;i++)h=BigInt.asUintN(64,(h^BigInt(data.charCodeAt(i)))*0x100000001b3n);\n return 'fnv1a64:'+h.toString(16).padStart(16,'0');\n}\n\nconst clean = value => String(value??'')\n  .replace(/<script\\b[^>]*>[\\s\\S]*?<\\/script\\s*>/gi,' ')\n  .replace(/<style\\b[^>]*>[\\s\\S]*?<\\/style\\s*>/gi,' ')\n  .replace(/<[^>]+>/g,' ')\n  .replace(/&nbsp;|&#160;/gi,' ').replace(/&amp;/gi,'&')\n  .replace(/&lt;/gi,'<').replace(/&gt;/gi,'>')\n  .replace(/&quot;/gi,'\"').replace(/&#39;|&apos;/gi,\"'\")\n  .replace(/\\s+/g,' ').trim();\nconst norm = value => clean(value).normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'')\n  .toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();\nfunction normalizeUrl(value) {\n  const input=String(value??'').trim();\n  if (!/^https?:\\/\\//i.test(input)) return '';\n  try {\n    const url = new URL(input); if (!['http:','https:'].includes(url.protocol)) return '';\n    url.hash='';\n    for(const key of [...url.searchParams.keys()])\n      if (/^(utm_.+|gclid|fbclid|mc_cid|mc_eid|ref_src)$/i.test(key)) url.searchParams.delete(key);\n    url.searchParams.sort();\n    if(url.pathname.length>1)url.pathname=url.pathname.replace(/\\/+$/,'');\n    return url.toString().replace(/\\?$/,'');\n  } catch(e) { return ''; }\n}\nfunction validDate(value) {\n  if (value===null || value===undefined || value==='') return '';\n  const n=Number(value);\n  const date = (typeof value==='number' || /^\\d{10,13}$/.test(String(value)))\n    ? new Date(n < 1e11 ? n*1000 : n) : new Date(value);\n  return Number.isNaN(date.getTime()) ? '' : date.toISOString();\n}\nconst techRules = [\n ['Unreal Engine', /\\bunreal(?:\\s+engine)?\\s*(?:4|5)?\\b/i],\n ['Unreal Blueprints', /\\b(?:unreal\\s+)?blueprints?\\b/i],\n ['Unity', /\\bunity(?:\\s*3d)?\\b/i],\n ['Godot', /\\bgodot\\b/i],\n ['GameMaker', /\\bgame\\s*maker\\b|\\bgamemaker\\b/i],\n ['Construct', /\\bconstruct\\s*(?:2|3)\\b/i],\n ['Defold', /\\bdefold\\b/i],\n ['GDScript', /\\bgdscript\\b/i],\n ['C++', /(?:^|[^a-z0-9])c\\+\\+(?=$|[^a-z0-9])/i],\n ['C#', /(?:^|[^a-z0-9])c#(?=$|[^a-z0-9])/i],\n ['TypeScript', /\\btypescript\\b/i],\n ['JavaScript', /\\bjavascript\\b|\\bjs\\b/i],\n ['Python', /\\bpython\\b/i],\n ['Java', /\\bjava\\b(?!\\s*script)/i],\n ['Kotlin', /\\bkotlin\\b/i], ['Swift', /\\bswift\\b/i],\n ['Rust', /\\brust\\b/i], ['Lua', /\\blua\\b/i],\n ['Dart', /\\bdart\\b/i],\n ['React', /\\breact(?:\\.js|js)?\\b/i], ['Vue', /\\bvue(?:\\.js|js)?\\b/i],\n ['Angular', /\\bangular\\b/i], ['Next.js', /\\bnext(?:\\.js|js)\\b/i],\n ['Node.js', /\\bnode(?:\\.js|js)?\\b/i],\n ['Express', /\\bexpress(?:\\.js|js)?\\b/i],\n ['FastAPI', /\\bfastapi\\b/i], ['Django', /\\bdjango\\b/i],\n ['Spring Boot', /\\bspring\\s*boot\\b/i],\n ['Flutter', /\\bflutter\\b/i], ['React Native', /\\breact\\s*native\\b/i],\n ['HTML', /\\bhtml\\b/i], ['CSS', /\\bcss\\b/i],\n ['SQL', /\\bsql\\b/i], ['PostgreSQL', /\\bpostgres(?:ql)?\\b/i],\n ['MySQL', /\\bmysql\\b/i], ['MongoDB', /\\bmongodb\\b/i], ['Redis', /\\bredis\\b/i],\n ['Docker', /\\bdocker\\b/i], ['Kubernetes', /\\bkubernetes\\b|\\bk8s\\b/i],\n ['AWS', /\\baws\\b|\\bamazon web services\\b/i],\n ['Azure', /\\bazure\\b/i], ['Google Cloud', /\\bgoogle cloud\\b|\\bgcp\\b/i],\n ['Git', /\\bgit\\b/i], ['Linux', /\\blinux\\b/i],\n ['OpenGL', /\\bopengl\\b/i], ['Vulkan', /\\bvulkan\\b/i],\n ['DirectX', /\\bdirectx\\b/i], ['SDL', /\\bsdl\\s*[23]?\\b/i],\n ['Photon', /\\bphoton\\b/i], ['Mirror Networking', /\\bmirror networking\\b|\\bmirror\\s+network/i],\n ['Unity Netcode', /\\bnetcode for gameobjects\\b|\\bunity\\s+netcode\\b/i],\n ['Steamworks SDK', /\\bsteamworks\\b/i], ['Unity DOTS', /\\bunity\\s+dots\\b/i],\n ['Unity ECS', /\\bunity\\s+ecs\\b|\\bentity\\s+component\\s+system\\b/i]\n];\nconst languageNames = new Set(['C++','C#','GDScript','TypeScript','JavaScript','Python','Java','Kotlin','Swift','Rust','Lua','Dart','SQL','HTML','CSS']);\nconst engineNames = new Set(['Unity','Unreal Engine','Godot','GameMaker','Construct','Defold']);\nconst strongGameTitle = /\\b(?:game\\s*(?:dev(?:elop(?:er|ment))?|programmer|engineer|engine|tools?|ai|network|client|server)|gameplay|gamedev|video\\s*games?|jogos?\\s*(?:digitais|eletr[oô]nicos)?|unity|unreal|godot)\\b/i;\nconst devRole = /\\b(?:desenvolv\\w*|program\\w*|developer|engineer|engineering|software|coder|scripter|t[eé]cnic\\w*|technical)\\b/i;\nfunction classify(title, description, seniority='') {\n  const heading=clean(title), body=clean(description), all=`${heading} ${body}`;\n  const tituloNivel=/\\b(est[aá]gio|estagi[aá]ri[oa]|intern(ship)?|aprendiz)\\b/i.test(heading)?'Estágio':\n    /\\btrainee\\b/i.test(heading)?'Trainee':\n    /\\b(junior|júnior|jr\\.?|entry[ -]?level)\\b/i.test(heading)?'Júnior':null;\n  const explicitSeniority=clean(seniority);\n  const nivel=tituloNivel||(/\\b(?:entry[ -]?level|junior)\\b/i.test(explicitSeniority)?'Júnior':\n    /\\bintern\\b/i.test(explicitSeniority)?'Estágio':\n    /\\btrainee\\b/i.test(explicitSeniority)?'Trainee':'Não informada');\n  const tecnologias=techRules.filter(([name,re])=>re.test(all)).map(([name])=>name);\n  const engines=tecnologias.filter(t=>engineNames.has(t));\n  const linguagens=tecnologias.filter(t=>languageNames.has(t));\n  const gameHeadline=strongGameTitle.test(heading) &&\n    (devRole.test(heading) || /\\b(?:gameplay|engine|unity|unreal|godot|gamedev)\\b/i.test(heading));\n  const gameBody= /\\b(?:game\\s+development|game\\s+programming|gameplay\\s+programming|desenvolvimento\\s+de\\s+jogos|programa[cç][aã]o\\s+de\\s+jogos)\\b/i.test(body)\n    && (devRole.test(heading) || /\\b(?:programming|c#|c\\+\\+|engine|unity|unreal|godot)\\b/i.test(body));\n  const isGameDev=gameHeadline || gameBody;\n  const areas=[];\n  if(isGameDev) areas.push('Desenvolvimento de Jogos');\n  if(/\\b(?:full[\\s-]?stack|fullstack)\\b/i.test(heading)) areas.push('Desenvolvimento Full Stack');\n  else {\n    if(/\\b(?:front[\\s-]?end|frontend|web\\s*(?:developer|desenvolvedor))\\b/i.test(heading)) areas.push('Desenvolvimento Frontend');\n    if(/\\b(?:back[\\s-]?end|backend|api\\s*(?:developer|engineer))\\b/i.test(heading)) areas.push('Desenvolvimento Backend');\n  }\n  if(/\\b(?:mobile|android|ios|flutter|react native)\\b/i.test(heading)) areas.push('Desenvolvimento Mobile');\n  if(/\\b(?:qa|quality assurance|quality engineer|software tester|testes?|test engineer|sdet|test automation)\\b/i.test(heading)) areas.push('QA e Testes');\n  if(/\\b(?:data engineer|engenheir[oa] de dados|data analyst|cientista de dados|data scientist)\\b/i.test(heading)) areas.push('Dados e Engenharia de Dados');\n  if(/\\b(?:devops|site reliability|sre|cloud engineer|platform engineer)\\b/i.test(heading)) areas.push('DevOps e Cloud');\n  if(!areas.length && /\\b(?:software engineer|engenheir[oa] de software|software developer|desenvolvedor(?:a)?|programador(?:a)?|developer|game programmer|game dev)\\b/i.test(heading)) areas.push('Desenvolvimento de Software');\n  const area=areas[0]||'Não identificada';\n  const especializacoes=[];\n  if (isGameDev) {\n    if(/\\bgameplay\\b/i.test(all)) especializacoes.push('Gameplay');\n    if(/\\b(?:game\\s*engine|engine programmer|engine development)\\b/i.test(all)) especializacoes.push('Game Engine');\n    if(/\\b(?:multiplayer|network(?:ing)?|netcode|photon|mirror networking)\\b/i.test(all)) especializacoes.push('Multiplayer e Networking');\n    if(/\\b(?:game\\s*ai|ai\\s*for\\s*games|behavior trees|behaviour trees)\\b/i.test(all)) especializacoes.push('IA para Jogos');\n    if(/\\b(?:tools programmer|game tools|pipeline|editor tools)\\b/i.test(all)) especializacoes.push('Ferramentas e Pipelines');\n    for(const engine of engines) especializacoes.push(engine);\n  }\n  const noExperience=/\\b(?:sem\\s+experi[eê]ncia|n[aã]o\\s+(?:exige|exigimos|requer|requeremos|precisa\\s+de)\\s+experi[eê]ncia|no\\s+(?:(?:prior|previous|professional)\\s+)?experience\\s+(?:required|needed|necessary)|zero\\s+experience|0\\s+years?\\s+(?:of\\s+)?experience)\\b/i.test(all);\n  const xpMatches=[];\n  const xpPatterns=[\n    /\\b(\\d{1,2})\\s*(?:\\+|a\\s+\\d{1,2}|[-–]\\s*\\d{1,2})?\\s*(?:anos?|years?)\\s*(?:(?:de|of|working with|with|em)\\s+)?(?:experi[eê]ncia|experience|viv[eê]ncia|professional experience|pr[aá]tica\\s+profissional)\\b/gi,\n    /\\b(?:experi[eê]ncia|experience)\\s*(?:m[ií]nima|minim[ao]|de|of|:|em|com|with)?\\s*(\\d{1,2})\\s*(?:\\+|a\\s+\\d{1,2}|[-–]\\s*\\d{1,2})?\\s*(?:anos?|years?)\\b/gi\n  ];\n  for(const re of xpPatterns) {\n    let m; while((m=re.exec(all))!==null) {\n      const anos=Number(m[1]); if(anos>30) continue;\n      const entorno=all.slice(Math.max(0,m.index-75),Math.min(all.length,m.index+m[0].length+55));\n      const desejavel=/\\b(?:desej[aá]vel|diferencial|nice\\s+to\\s+have|preferred|preferable|bonus|optional|plus|seria\\s+um\\s+plus)\\b/i.test(entorno);\n      const obrigatoria=/\\b(?:obrigat[oó]ri[ao]|exigid[ao]|requerid[ao]|necess[aá]ri[ao]|minimum|m[ií]nimo|must\\s+have|required|at\\s+least|precisa\\s+ter|requisitos?)\\b/i.test(entorno);\n      const tipo=desejavel?'desejavel':(obrigatoria?'obrigatoria':'mencionada');\n      if(!xpMatches.some(x=>x.anos===anos&&x.tipo===tipo)) xpMatches.push({anos,tipo,evidencia:m[0].trim()});\n      if(xpMatches.length>=5) break;\n    }\n  }\n  const obrigatorias=xpMatches.filter(x=>x.tipo==='obrigatoria').map(x=>x.anos);\n  const desejaveis=xpMatches.filter(x=>x.tipo==='desejavel').map(x=>x.anos);\n  // Não afirmar ausência de experiência se o mesmo anúncio exige anos mínimos.\n  const experiencia=obrigatorias.length?'Obrigatória':noExperience?'Não exigida':desejaveis.length?'Desejável':xpMatches.length?'Mencionada sem definição':'Não informada';\n  const confianca={\n    nivel: tituloNivel?'Alta':nivel!=='Não informada'?'Média':'Não determinada',\n    area: gameHeadline?'Alta':isGameDev?'Média':area!=='Não identificada'?'Alta':'Não determinada',\n    experiencia: noExperience||obrigatorias.length||desejaveis.length?'Alta':xpMatches.length?'Média':'Não determinada',\n    tecnologias:tecnologias.length?'Alta':'Não determinada'\n  };\n  const justificativa = `${nivel==='Não informada'?'Nível não indicado explicitamente':`Nível ${nivel} identificado no título ou nível informado`}; ${area==='Não identificada'?'área não identificada':`área ${area} por termos técnicos`}; ${experiencia==='Não informada'?'experiência não informada':`experiência ${experiencia.toLowerCase()} conforme texto`}.`;\n  const tags=[...new Set([...areas,...especializacoes,...tecnologias,\n    nivel!=='Não informada'?nivel:null,\n    experiencia==='Não exigida'?'Sem experiência':null,\n    experiencia==='Desejável'?'Experiência desejável':null,\n    experiencia==='Obrigatória'?'Experiência obrigatória':null].filter(Boolean))];\n  return { nivel,area,areas,especializacoes,tecnologias,linguagens,engines,tags,\n    experiencia,experienciaObrigatoriaAnos:obrigatorias.length?Math.min(...obrigatorias):null,\n    experienciaDesejavelAnos:desejaveis.length?Math.min(...desejaveis):null,\n    evidenciasExperiencia:xpMatches.map(x=>x.evidencia).slice(0,3),\n    confiancaClassificacao:confianca,justificativaClassificacao:justificativa };\n}\nfunction locationOf(raw, provider) {\n  const l=raw.location;\n  if(typeof l==='string' && l.trim()) return clean(l);\n  if(l && typeof l==='object') return clean(l.display_name||l.name||l.city||'');\n  if(provider==='Himalayas') {\n    if(Array.isArray(raw.locationRestrictions)) {\n      if(!raw.locationRestrictions.length) return 'Mundial / remoto';\n      return raw.locationRestrictions.map(v=>typeof v==='string'?v:(v?.name||v?.country||'')).filter(Boolean).join(', ')||'Remoto / ver anúncio';\n    }\n    return 'Remoto / ver anúncio';\n  }\n  return clean(raw.local||raw.candidate_required_location||'')||'Ver anúncio';\n}\nfunction toRow(raw, provider, queryLabel) {\n  if(!raw || typeof raw!=='object' || Array.isArray(raw) || raw.pull_request) return null;\n  const cargo=clean(raw.title||raw.cargo||raw.job_title||'');\n  const empresa=clean(raw.company?.display_name||raw.company?.name||raw.companyName||raw.company||raw.empresa||raw.employer?.name||'Ver anúncio');\n  const link=String(raw.applicationLink||raw.html_url||raw.redirect_url||raw.link||raw.url||'').trim();\n  const urlNormalizada=normalizeUrl(link);\n  const originalId=raw.id??raw.guid??raw.uuid??urlNormalizada;\n  if(!cargo || !originalId || !urlNormalizada) return null;\n  const desc=clean(raw.body||raw.description||raw.descricao||raw.snippet||raw.excerpt||'');\n  // Filtra somente títulos inequivocamente não técnicos.\n  if(/\\b(?:game designer|level designer|technical artist|concept artist|3d artist|2d artist|marketing|social media|customer support|recrutador|sales manager)\\b/i.test(cargo)\n      && !/\\b(?:programmer|developer|software engineer|desenvolvedor|programador)\\b/i.test(cargo)) return null;\n  if(/\\b(?:senior|sênior|staff|principal|lead|tech lead|head of|diretor de tecnologia|sr\\.)\\b/i.test(cargo)\n      && !/\\b(?:junior|júnior|est[aá]gio|intern)\\b/i.test(cargo)) return null;\n  // Mantém foco em engenharia, desenvolvimento, QA, dados e programas técnicos de estágio.\n  // Sem evidência suficiente no título, descarta apenas vagas novas, não o histórico existente.\n  const relevante=/\\b(?:dev(?:eloper|elopment)?|desenvolv\\w*|program\\w*|engenhar\\w*|engineer|software|frontend|front[ -]?end|backend|back[ -]?end|full[ -]?stack|qa|quality assurance|tester|testing|testes?|sdet|gameplay|gamedev|unity|unreal|godot|game\\s+(?:engine|tools|ai)|data\\s+(?:engineer|analyst|scientist)|dados|devops|sre|cloud\\s+engineer|ti|tecnologia da informa[cç][aã]o|est[aá]gio\\s+(?:em\\s+)?(?:sistemas|inform[aá]tica|tecnologia))\\b/i;\n  if(!relevante.test(cargo)) return null;\n  const classificados=classify(cargo,desc,raw.seniority||raw.employmentType||raw.type||'');\n  const publicacao=validDate(raw.created_at||raw.created||raw.publishedAt||raw.pubDate||raw.date||raw.publication_date);\n  const expiraEm=validDate(raw.expiryDate);\n  if(expiraEm && expiraEm <= now) return null;\n  const id=`${provider.toLowerCase().replace(/\\W+/g,'-')}-${String(originalId)}`.slice(0,200);\n  return {\n    id,cargo,empresa,nivel:classificados.nivel,\n    modalidade: provider==='Himalayas'?'Remoto':/\\b(?:remot[oa]|remote|home[ -]?office)\\b/i.test(`${cargo} ${desc}`)?'Remoto':\n      /\\b(?:h[ií]brid[oa]|hybrid)\\b/i.test(`${cargo} ${desc}`)?'Híbrido':'Não informada',\n    local:locationOf(raw,provider),descricao:desc.slice(0,500),\n    requisitos:clean(raw.requirements||raw.qualifications||'').slice(0,1000),\n    content_hash:descriptionHash(desc),publicadoEm:publicacao,\n    atualizadoNaFonte:validDate(raw.updated||raw.updated_at),expiraEm,\n    // Manter applicationLink ORIGINAL (obrigatório para vagas Himalayas);\n    // urlNormalizada é usada somente para deduplicação.\n    fonte:provider,link,capturadoEm:now,primeiraIdentificacao:now,ultimaIdentificacao:now,statusIdentificacao:'nova',\n    urlNormalizada,empresaNormalizada:norm(empresa),cargoNormalizado:norm(cargo),fontesAlternativas:[provider],\n    buscasCorrespondentes:[queryLabel],\n    ...classificados\n  };\n}\nconst incoming=ok.flatMap(s=>(s.jobs||[]).map(v=>toRow(v,s.provider,s.name)).filter(Boolean));\n\nreturn [{json:{\n  ...context,run:context.run||{requestedAt:now,kind:'daily'},profile:context.profile||{},\n  jobs:incoming,rawCount:ok.reduce((n,s)=>n+(s.jobs||[]).length,0),\n  diagnostics:checks.map(s=>({name:s.name,ok:s.ok===true,statusCode:s.statusCode??null,\n    checkedAt:s.checkedAt||now,quantity:s.ok===true?(s.jobs||[]).length:0,error:s.ok===true?null:(s.error||'Fonte indisponível')})),\n  collectedAt:now\n}}];"
+      }
+    },
+    {
+      "name": "Aguardar limite — 1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        380,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 2",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        860,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 3",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1340,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 4",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1820,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 5",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2300,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 6",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2830,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 7",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3140,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 8",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3450,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 9",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3760,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 10",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4070,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Aguardar limite — 11",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4380,
+        560
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
       }
     }
   ],
@@ -645,7 +766,7 @@
       "main": [
         [
           {
-            "node": "Continuar Frontend",
+            "node": "Aguardar limite — 1",
             "type": "main",
             "index": 0
           }
@@ -656,7 +777,7 @@
       "main": [
         [
           {
-            "node": "Continuar Backend",
+            "node": "Aguardar limite — 2",
             "type": "main",
             "index": 0
           }
@@ -667,7 +788,7 @@
       "main": [
         [
           {
-            "node": "Continuar Remotas",
+            "node": "Aguardar limite — 3",
             "type": "main",
             "index": 0
           }
@@ -678,7 +799,7 @@
       "main": [
         [
           {
-            "node": "Continuar Adzuna",
+            "node": "Aguardar limite — 4",
             "type": "main",
             "index": 0
           }
@@ -689,7 +810,7 @@
       "main": [
         [
           {
-            "node": "Continuar Jooble",
+            "node": "Aguardar limite — 5",
             "type": "main",
             "index": 0
           }
@@ -711,7 +832,7 @@
       "main": [
         [
           {
-            "node": "Vagas Himalayas Estagio",
+            "node": "Aguardar limite — 6",
             "type": "main",
             "index": 0
           }
@@ -733,7 +854,7 @@
       "main": [
         [
           {
-            "node": "Vagas Adzuna Game Dev",
+            "node": "Aguardar limite — 7",
             "type": "main",
             "index": 0
           }
@@ -755,7 +876,7 @@
       "main": [
         [
           {
-            "node": "Vagas Adzuna Estagio",
+            "node": "Aguardar limite — 8",
             "type": "main",
             "index": 0
           }
@@ -777,7 +898,7 @@
       "main": [
         [
           {
-            "node": "Vagas Jooble BR Game Dev",
+            "node": "Aguardar limite — 9",
             "type": "main",
             "index": 0
           }
@@ -799,7 +920,7 @@
       "main": [
         [
           {
-            "node": "Vagas Jooble BR Estagio",
+            "node": "Aguardar limite — 10",
             "type": "main",
             "index": 0
           }
@@ -821,7 +942,7 @@
       "main": [
         [
           {
-            "node": "Normalizar coleta",
+            "node": "Aguardar limite — 11",
             "type": "main",
             "index": 0
           }
@@ -833,6 +954,127 @@
         [
           {
             "node": "Vagas Frontend BR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 1": {
+      "main": [
+        [
+          {
+            "node": "Continuar Frontend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 2": {
+      "main": [
+        [
+          {
+            "node": "Continuar Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 3": {
+      "main": [
+        [
+          {
+            "node": "Continuar Remotas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 4": {
+      "main": [
+        [
+          {
+            "node": "Continuar Adzuna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 5": {
+      "main": [
+        [
+          {
+            "node": "Continuar Jooble",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 6": {
+      "main": [
+        [
+          {
+            "node": "Vagas Himalayas Estagio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 7": {
+      "main": [
+        [
+          {
+            "node": "Vagas Adzuna Game Dev",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 8": {
+      "main": [
+        [
+          {
+            "node": "Vagas Adzuna Estagio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 9": {
+      "main": [
+        [
+          {
+            "node": "Vagas Jooble BR Game Dev",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 10": {
+      "main": [
+        [
+          {
+            "node": "Vagas Jooble BR Estagio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar limite — 11": {
+      "main": [
+        [
+          {
+            "node": "Normalizar coleta",
             "type": "main",
             "index": 0
           }

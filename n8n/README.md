@@ -7,7 +7,7 @@
 ```text
 G — Agenda (diário 07:00 / segunda-feira 08:00, America/Sao_Paulo)
    |
-   +-- Ler histórico data/vagas.json + arquivo data/relatorios-semanais.json
+   +-- Ler estado/histórico PostgreSQL e revisão concorrente
    |
    +-- A — Coleta (fontes e normalização)
    +-- B — Filtragem (local, modalidade, cargo, stack, experiência)
@@ -15,11 +15,11 @@ G — Agenda (diário 07:00 / segunda-feira 08:00, America/Sao_Paulo)
    +-- D — Classificação da compatibilidade (0–100)
    +-- E — Deduplicação e eventos (nova, atualizada, repetida, encerrada)
    |
-   +-- Publicar data/vagas.json com SHA atual (GitHub API)
+   +-- Commit PostgreSQL: jobs, histórico e logs (transação) 
    |
    +-- Em execução semanal:
          F — Relatório consolidado (semana anterior em pt-BR)
-         +-- Arquivar em data/relatorios-semanais.json
+         +-- Arquivar em PostgreSQL e espelhar no GitHub Pages
          +-- Enviar e-mail (inclusive quando não houver vaga nova confirmada)
 ```
 
@@ -31,20 +31,23 @@ G — Agenda (diário 07:00 / segunda-feira 08:00, America/Sao_Paulo)
 | `D-classificacao.json` | Calcula score heurístico 0–100 | `compatibility_score`, `compatibility_notes` |
 | `E-deduplicacao.json` | Cruza histórico, canonical URL, ID externo, empresa/cargo e hash | `data`, `events`, `dedupStats` |
 | `F-relatorio.json` | Relatório semanal em português com seis seções obrigatórias, atualizações e vagas sem confirmação | `report`, `reportText`, `reportHtml`, `reportSubject` |
-| `G-agendamento.json` | Orquestra a sequência, persiste histórico e envia relatório SMTP | execução diária e semanal |
+| `G-agendamento.json` | Orquestra, persiste em PostgreSQL e espelha o site no GitHub | execução diária e semanal |
 
-## Implantação segura
+## Implantação segura (versão PostgreSQL)
 
-1. Faça **backup** de seus workflows em uso e dos arquivos `data/vagas.json` e `data/relatorios-semanais.json` antes de ativar o novo pipeline.
-2. **Mescle a branch aprovada na `main`**. O workflow G grava na branch `main` via API; não rode sua versão de teste contra uma branch de produção sem alterar essa configuração.
-3. Importe os seis subworkflows **A, B, C, D, E, F** em `n8n > Workflows > Import from File`. Mantenha todos **inativos**: são chamados pelo G através do gatilho **Execute Sub-workflow Trigger**. Nas opções de cada subworkflow, permita execução pelo G.
-4. Importe o **G**, também inativo. Em seus seis nós `Executar A` a `Executar F`, **substitua os placeholders `CONFIGURE_WORKFLOW_A_ID` ... `CONFIGURE_WORKFLOW_F_ID`** pelos IDs reais dos seis workflows importados (ou selecione o workflow na interface). Os IDs são diferentes em cada instância.
-5. Atribua sua credencial **GitHub API** (somente `Contents: Read and write` neste repositório) aos quatro nós GitHub do G: **Ler vagas históricas**, **Ler relatórios anteriores**, **Publicar histórico de vagas** e **Arquivar relatório no GitHub**. Revise que a branch de publicação seja `main`.
-6. Atribua a credencial SMTP (criada diretamente no n8n) ao nó **Enviar relatório semanal por e-mail**. Configure o remetente e destinatário usando os nomes exatos `TECOPS_REPORT_EMAIL_FROM` e `TECOPS_REPORT_EMAIL_TO` como variáveis de ambiente do processo n8n ou substitua as expressões do nó pelos endereços nas configurações do n8n. Nunca adicione senhas ou destinatários pessoais ao repositório Git.
-7. Revise os HTTP Request das fontes no A e configure os tokens necessários da Adzuna/Jooble via variáveis de ambiente de sua instância n8n. Se uma fonte falhar, o diagnóstico é mantido; o histórico anterior não é eliminado.
-8. Execute **G manualmente** com mocks e controle das saídas antes de ativar. Em um teste real, o G realiza gravações na API do GitHub e um teste da ramificação semanal poderá enviar e-mail: revise destinatário e use uma caixa de teste.
-9. Quando os testes estiverem corretos, desative **os workflows legados** `monitor-vagas-workflow.json` e `validar-status-candidaturas-workflow.json` no n8n para não competir pela escrita de `data/vagas.json`. Só então ative **G**.
-10. Observe pelo menos uma execução diária e uma semanal no histórico de execuções do n8n.
+**A fonte de verdade é o PostgreSQL, não o JSON do GitHub.**
+Antes de atualizar G, execute `database/001_jobs.sql` e `database/002_pipeline_runtime.sql` e faça o bootstrap do histórico.
+Confira o roteiro de instalação completo: [Migração PostgreSQL e operação resiliente](../database/OPERACAO_POSTGRES_N8N.md).
+
+1. Faça backup da instância do n8n, workflows e dos dados do GitHub.
+2. Prepare o PostgreSQL e execute o bootstrap; nunca sobrescreva o histórico com JSON vazio.
+3. Atualize A, C e G (mantenha os IDs dos subworkflows), vincule as credenciais **Postgres**, **GitHub** e **SMTP**. B, D, E e F seguem utilizáveis.
+4. Em A, configure o **Custom Auth** da Adzuna (qs.app_id + qs.app_key); Jooble está desativado até existir uma integração segura, já que usa chave no caminho da URL.
+5. Importe H, configure sua credencial Postgres e selecione H como **Error workflow** de G e, quando necessário, dos subworkflows.
+6. Teste em ambiente separado, confira `tecops_execution_logs`, `jobs`, `tecops_pipeline_state`, a página publicada e o e-mail semanal.
+7. Desative os fluxos legados e só então ative G na produção.
+
+`G` continua com IDs de A–F configuráveis por instância. Depois de atualizar um subworkflow existente, confira se G aponta para o ID correto. As credenciais **não fazem parte dos JSON exportados** e devem ser associadas no n8n.
 
 ## Critérios e configuração
 
@@ -53,7 +56,7 @@ G — Agenda (diário 07:00 / segunda-feira 08:00, America/Sao_Paulo)
 - **Verificação histórica:** até **30 vagas não encerradas por execução**, quando a última verificação ocorreu há mais de 23 horas (`historyVerificationLimit` no perfil pode ser ajustado entre 0 e 50). Respostas 404/410 ou falhas de acesso não são automaticamente tratadas como encerramento confirmado; a situação fica pendente ou fonte indisponível.
 - **Classificação:** pontuação heurística de 0–100 baseada em tecnologias, formação, projetos, nível, localização e área. Não garante elegibilidade.
 - **Deduplicação:** preserva o ID e `first_seen_at` da vaga original. Republicações semelhantes não são contadas como oportunidades novas; fontes, links e identificadores alternativos são mantidos no histórico. Eventos são persistidos em `eventosHistorico`.
-- **Persistência:** `data/vagas.json` conserva até 400 oportunidades exibidas, demais em `historicoVagas`. O projeto dispõe de um esquema PostgreSQL opcional em `database/`, mas **a conexão não está ativa** e o G mantém GitHub JSON como origem operacional.
+- **Persistência:** o PostgreSQL armazena estado, vagas e logs de forma transacional. O arquivo `data/vagas.json` mantém a visão pública (até 400 exibidas, demais em `historicoVagas`). A conexão PostgreSQL depende de instalação e credenciais na instância.
 - **Relatórios:** o F considera o intervalo de segunda-feira 00:00 UTC anterior a segunda-feira 00:00 UTC da semana seguinte. Na segunda-feira de envio, resume a semana encerrada (a classificação de datas usa UTC; o gatilho opera em São Paulo). Organiza seis seções obrigatórias: desenvolvimento júnior, estágios em desenvolvimento, QA/testes, integração de sistemas, oportunidades anteriores e encerradas. Inclui seções complementares para outras vagas, atualizações e não verificadas.
 - **Sem novidades:** o F produz explicitamente **“Nenhuma nova vaga confirmada foi encontrada nesta semana.”**. O G executa o envio semanal **mesmo assim**, desde que SMTP e destinatário estejam corretamente configurados.
 - **Arquivo semanal:** `data/relatorios-semanais.json` guarda snapshots por `weekKey`, sem duplicar a mesma semana. A publicação exige SHA do arquivo lido e falha em caso de conflito 409/422. Reexecuções da mesma semana devem ser revisadas para evitar reenvio duplicado de e-mail.
@@ -96,3 +99,7 @@ Cada entrada informa cargo, empresa, modalidade, localidade, salário, tecnologi
 As listas `report.sections.new`, `continued`, `closed`, `updated` e `unverified` permanecem no JSON do relatório para compatibilidade com o histórico já armazenado. Os registros detalhados ficam em `report.records`. Não há necessidade de alterar o nó SMTP do G, pois ele já consome `reportHtml` e `reportSubject` do F.
 
 Para aplicar a alteração, atualize o **workflow F já importado** no n8n, mantendo o mesmo ID referenciado em G. Se importar uma cópia como workflow novo, reconfigure no G o nó `Executar F — relatório` para o ID novo. Não é necessário reimportar os demais workflows apenas para mudar o layout do relatório.
+
+## Requisições, retries, logs e credenciais
+
+O C usa **Loop Over Items** com uma vaga por lote, **Merge** e **IF** para controlar novas tentativas; aguarda 2 segundos entre verificações e usa backoff progressivo de 2, 4 e 8 segundos ou `Retry-After` numérico. O A intercala pausas de 2 segundos entre fontes e usa as tentativas nativas do HTTP Request. Limites de provedores são configuráveis e devem respeitar as respectivas cotas reais. Logs e falhas são gravados em PostgreSQL pelo G e H; nunca inclua tokens no texto de erro. Para instruções e limitações operacionais: [database/OPERACAO_POSTGRES_N8N.md](../database/OPERACAO_POSTGRES_N8N.md).

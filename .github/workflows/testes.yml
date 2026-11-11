@@ -1,0 +1,74 @@
+name: Testes TecOps
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  workflows:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tecops_test
+          POSTGRES_PASSWORD: test_only_password
+          POSTGRES_DB: tecops_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tecops_test -d tecops_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://tecops_test:test_only_password@localhost:5432/tecops_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validar JavaScript
+        run: |
+          node --check database/bootstrap-runtime.cjs
+          node --check database/import-jobs.cjs
+      - name: Testes unitários
+        run: node --test tests/*.test.cjs database/test/*.test.cjs
+      - name: Preparar driver PostgreSQL
+        run: npm --prefix database install --no-audit --no-fund
+      - name: Aplicar migrations e bootstrap em banco de teste
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const {Client}=require('./database/node_modules/pg');
+          (async()=>{
+            const db=new Client({connectionString:process.env.DATABASE_URL});
+            await db.connect();
+            try {
+              for(const sql of ['database/001_jobs.sql','database/002_pipeline_runtime.sql']){
+                await db.query(fs.readFileSync(sql,'utf8'));
+              }
+            } finally { await db.end(); }
+          })().catch(error=>{console.error(error);process.exitCode=1});
+          NODE
+          node database/bootstrap-runtime.cjs
+      - name: Verificar estado e transação SQL
+        run: |
+          node - <<'NODE'
+          const {Client}=require('./database/node_modules/pg');
+          (async()=>{
+            const db=new Client({connectionString:process.env.DATABASE_URL});
+            await db.connect();
+            try {
+              const state=await db.query('SELECT payload,revision FROM tecops_pipeline_state WHERE singleton=TRUE');
+              if(state.rowCount!==1||Number(state.rows[0].revision)!==0)throw Error('Bootstrap incompleto');
+              const payload=state.rows[0].payload;
+              const saved=await db.query('SELECT tecops_commit_pipeline($1::jsonb,$2::bigint,$3::text,$4::text,$5::jsonb) AS result',
+                [JSON.stringify(payload),0,'ci-run-1','daily','[]']);
+              if(!saved.rows[0].result.committed)throw Error('Transação sem commit');
+              const report={weekKey:'2026-11-02',sections:{new:[]},counts:{new:0}};
+              const archived=await db.query('SELECT tecops_archive_weekly_report($1::jsonb,$2::text) AS result',
+                [JSON.stringify(report),'ci-run-1']);
+              if(!archived.rows[0].result.archived)throw Error('Relatório não arquivado');
+            } finally {await db.end();}
+          })().catch(error=>{console.error(error);process.exitCode=1});
+          NODE

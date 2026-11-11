@@ -115,7 +115,7 @@ test('G: gatilhos diário e semanal e email após relatório, sem IF de vagas no
  assert.ok(d.nodes.find(n=>n.name==='Agendamento semanal'));
  const branch=d.connections['É execução semanal?'];
  assert.equal(branch.main[0][0].node,'Executar F — relatório');
- assert.equal(d.connections['Confirmar gravação do relatório'].main[0][0].node,
+ assert.equal(d.connections['Confirmar relatório PostgreSQL'].main[0][0].node,
   'Enviar relatório semanal por e-mail');
  assert.ok(d.nodes.find(n=>n.type==='n8n-nodes-base.emailSend'));
 });

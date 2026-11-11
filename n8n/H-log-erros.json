@@ -1,0 +1,76 @@
+{
+  "name": "TecOps H — Log de erros (configure como Error Workflow)",
+  "nodes": [
+    {
+      "name": "Erro no workflow",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        250
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Sanitizar diagnóstico",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Sanitiza logs: não registrar URLs com tokens, credenciais ou payloads.\nconst raw=$input.first().json||{};\nconst execution=raw.execution||{};\nconst workflow=raw.workflow||{};\nconst error=execution.error||raw.error||{};\nconst secretPattern=/([?&](?:token|key|api_key|app_key|app_id|access_token|password|secret)=)[^&\\s]+/gi;\nconst redact=value=>String(value??'').replace(secretPattern,'$1[REDACTED]')\n  .replace(/(Authorization\\s*:\\s*)(?:Bearer|Basic)\\s+[^\\s]+/gi,'$1[REDACTED]')\n  .replace(/(\\/api\\/)[A-Za-z0-9_-]{18,}/g,'$1[REDACTED]')\n  .replace(/(postgres(?:ql)?:\\/\\/)[^@\\s]+@/gi,'$1[REDACTED]@')\n  .slice(0,600);\nconst runKey=String(execution.id||raw.executionId||new Date().toISOString());\nreturn [{json:{runKey,workflow:workflow.name||'Não informado',\n kind:'error',stage:redact(execution.lastNodeExecuted||'unknown'),\n message:redact(error.message||'Falha não especificada'),at:new Date().toISOString()}}];"
+      }
+    },
+    {
+      "name": "Registrar erro PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        480,
+        250
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO tecops_execution_logs (run_key,kind,status,stage,finished_at,summary,error_message) VALUES($1::text,$2::text,'failed',$3::text,NOW(),jsonb_build_object('workflow',$4::text),$5::text) ON CONFLICT(run_key) DO UPDATE SET status='failed',stage=EXCLUDED.stage,finished_at=NOW(),error_message=EXCLUDED.error_message,summary=tecops_execution_logs.summary||EXCLUDED.summary RETURNING run_key,status;",
+        "options": {
+          "queryReplacement": "={{ [$json.runKey, $json.kind, $json.stage, $json.workflow, $json.message] }}"
+        }
+      },
+      "onError": "stopWorkflow"
+    }
+  ],
+  "connections": {
+    "Erro no workflow": {
+      "main": [
+        [
+          {
+            "node": "Sanitizar diagnóstico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sanitizar diagnóstico": {
+      "main": [
+        [
+          {
+            "node": "Registrar erro PostgreSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

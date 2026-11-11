@@ -100,6 +100,119 @@
           ]
         }
       }
+    },
+    {
+      "name": "Loop Over Items — 1 vaga",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        470,
+        300
+      ],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "name": "Respeitar limite — 2 segundos",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        950,
+        350
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "name": "Preparar requisição",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().map(i=>({json:{...i.json,attempt:Number(i.json.attempt||0)}}));"
+      }
+    },
+    {
+      "name": "Merge — requisição e HTTP",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1120,
+        260
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      }
+    },
+    {
+      "name": "Verificar retry progressivo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        260
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const rows=$input.all();\nreturn rows.map(item=>{\n const j=item.json, code=Number(j.statusCode||j.status||0);\n const err=Boolean(j.error)||j.body?.error==='ETIMEDOUT';\n const transient=code===429||code===408||code>=500||err||code===0;\n const attempts=Number(j.attempt||0);\n const shouldRetry=transient&&Boolean(j.checkedUrl)&&attempts<3;\n const next=attempts+1;\n const retryAfter=Number(j.headers?.['retry-after']||j.headers?.['Retry-After']||NaN);\n const delay=Number.isFinite(retryAfter)&&retryAfter>0?\n   Math.min(120,retryAfter):Math.min(60,2*Math.pow(2,attempts));\n return {json:{...j,attempt:next,shouldRetry,retryDelaySeconds:delay,\n   isTransientError:transient,validationHttpStatus:code}};\n});"
+      }
+    },
+    {
+      "name": "IF — tentar novamente?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1550,
+        260
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "retry-allowed",
+              "leftValue": "={{ $json.shouldRetry }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Backoff 2/4/8s — Retry-After",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1770,
+        120
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": "={{ $json.retryDelaySeconds }}",
+        "unit": "seconds"
+      }
     }
   ],
   "connections": {
@@ -129,9 +242,9 @@
       "main": [
         [
           {
-            "node": "Consolidar verificações",
+            "node": "Merge — requisição e HTTP",
             "type": "main",
-            "index": 0
+            "index": 1
           }
         ]
       ]
@@ -147,7 +260,105 @@
         ],
         [
           {
+            "node": "Loop Over Items — 1 vaga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items — 1 vaga": {
+      "main": [
+        [
+          {
+            "node": "Consolidar verificações",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar requisição",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respeitar limite — 2 segundos": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items — 1 vaga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar requisição": {
+      "main": [
+        [
+          {
             "node": "Consultar página original",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge — requisição e HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge — requisição e HTTP": {
+      "main": [
+        [
+          {
+            "node": "Verificar retry progressivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar retry progressivo": {
+      "main": [
+        [
+          {
+            "node": "IF — tentar novamente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — tentar novamente?": {
+      "main": [
+        [
+          {
+            "node": "Backoff 2/4/8s — Retry-After",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respeitar limite — 2 segundos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backoff 2/4/8s — Retry-After": {
+      "main": [
+        [
+          {
+            "node": "Preparar requisição",
             "type": "main",
             "index": 0
           }
