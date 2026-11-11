@@ -23,7 +23,7 @@
 - Fontes nacionais: issues abertas e recentes em `frontendbr/vagas` e `backend-br/vagas`.
 - Remotas: API Himalayas, filtrando candidatura aberta a BR e nível de entrada.
 - O n8n recupera o `data/vagas.json` anterior do GitHub, mescla vagas por ID e elimina repetidas.
-- Retém até 400 vagas; descarta vagas antigas (mais de 90 dias da publicação) e vagas Himalayas expiradas pelo campo `expiryDate`.
+- Mostra até 400 vagas e preserva os excedentes em `historicoVagas`. Vagas antigas ou expiradas não são excluídas do histórico.
 - Publica quando há alteração de vagas; nenhum token está no frontend.
 
 ## Limitações e atenção
@@ -31,7 +31,7 @@
 - As issues do GitHub podem estar desatualizadas, mesmo abertas: confirme sempre no anúncio original.
 - A API Himalayas é atualizada diariamente; buscas a cada hora não geram dados novos necessariamente. A API exige atribuição à fonte e `applicationLink` original, já presentes no site.
 - Os endpoints de issues retornam os 100 anúncios mais recentes de cada repositório, sem paginação adicional.
-- Se uma fonte falhar, a execução falha antes de publicar e os dados antigos continuam no GitHub.
+- Se todas as fontes falharem, a publicação é bloqueada. Falhas parciais preservam os registros antigos e registram diagnósticos das fontes indisponíveis.
 - O `vagas.json` é o histórico persistido e público. Não salve dados pessoais nele.
 - Se outro processo editar vagas.json entre a leitura e o PUT, o GitHub poderá responder 409/422; execute novamente após investigar.
 - O workflow foi preparado para importação, mas não foi executado em uma instância real do n8n; teste e ajuste se sua versão exigir pequenas mudanças.
