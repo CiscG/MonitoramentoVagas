@@ -1201,7 +1201,7 @@
       "urlsAlternativas": []
     }
   ],
-  "ultimaSincronizacao": "2026-11-11T21:55:19.295Z",
+  "ultimaSincronizacao": "2026-11-11T21:55:54.178Z",
   "ultimaSincronizacaoCompleta": null,
   "ultimaSincronizacaoParcial": "2026-11-11T21:25:27.571Z",
   "limiteHistorico": 400,
@@ -1219,7 +1219,7 @@
       "name": "Frontend BR",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-11T21:55:13.440Z",
+      "checkedAt": "2026-11-11T21:55:49.211Z",
       "quantity": 8,
       "error": null
     },
@@ -1227,7 +1227,7 @@
       "name": "Backend BR",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-11T21:55:14.225Z",
+      "checkedAt": "2026-11-11T21:55:49.471Z",
       "quantity": 41,
       "error": null
     },
@@ -1235,7 +1235,7 @@
       "name": "Himalayas",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-11T21:55:14.449Z",
+      "checkedAt": "2026-11-11T21:55:49.706Z",
       "quantity": 20,
       "error": null
     },
@@ -1243,7 +1243,7 @@
       "name": "Adzuna",
       "ok": false,
       "statusCode": 401,
-      "checkedAt": "2026-11-11T21:55:15.417Z",
+      "checkedAt": "2026-11-11T21:55:50.523Z",
       "quantity": 0,
       "error": "HTTP 401: Falha HTTP"
     },
@@ -1251,7 +1251,7 @@
       "name": "Jooble",
       "ok": false,
       "statusCode": 403,
-      "checkedAt": "2026-11-11T21:55:15.641Z",
+      "checkedAt": "2026-11-11T21:55:50.683Z",
       "quantity": 0,
       "error": "HTTP 403: Falha HTTP"
     },
@@ -1259,7 +1259,7 @@
       "name": "Himalayas Game Dev",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-11T21:55:15.792Z",
+      "checkedAt": "2026-11-11T21:55:50.868Z",
       "quantity": 5,
       "error": null
     },
@@ -1267,7 +1267,7 @@
       "name": "Himalayas Estagio",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-11T21:55:15.936Z",
+      "checkedAt": "2026-11-11T21:55:51.037Z",
       "quantity": 10,
       "error": null
     },
@@ -1275,7 +1275,7 @@
       "name": "Adzuna Game Dev",
       "ok": false,
       "statusCode": 401,
-      "checkedAt": "2026-11-11T21:55:16.711Z",
+      "checkedAt": "2026-11-11T21:55:51.806Z",
       "quantity": 0,
       "error": "HTTP 401: Falha HTTP"
     },
@@ -1283,7 +1283,7 @@
       "name": "Adzuna Estagio",
       "ok": false,
       "statusCode": 401,
-      "checkedAt": "2026-11-11T21:55:17.621Z",
+      "checkedAt": "2026-11-11T21:55:52.555Z",
       "quantity": 0,
       "error": "HTTP 401: Falha HTTP"
     },
@@ -1291,7 +1291,7 @@
       "name": "Jooble BR Game Dev",
       "ok": false,
       "statusCode": 403,
-      "checkedAt": "2026-11-11T21:55:17.733Z",
+      "checkedAt": "2026-11-11T21:55:52.666Z",
       "quantity": 0,
       "error": "HTTP 403: Falha HTTP"
     },
@@ -1299,7 +1299,7 @@
       "name": "Jooble BR Estagio",
       "ok": false,
       "statusCode": 403,
-      "checkedAt": "2026-11-11T21:55:17.844Z",
+      "checkedAt": "2026-11-11T21:55:52.769Z",
       "quantity": 0,
       "error": "HTTP 403: Falha HTTP"
     }
