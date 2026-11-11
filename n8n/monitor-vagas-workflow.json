@@ -94,3 +94,548 @@
       "name": "Vagas Backend BR",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
+      "position": [
+        630,
+        250
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const source = \"Backend BR\";\nconst shape = \"array\";\nconst now = new Date().toISOString();\nconst items=$input.all();\nconst raw=items.map(i=>i.json);\nconst response=raw.length===1?raw[0]:raw;\nlet statusCode=null, headers={}, body=response;\nif(response && typeof response==='object' && !Array.isArray(response)) {\n  if (response.statusCode!==undefined) {\n    statusCode=Number(response.statusCode);\n    headers=response.headers||{};\n    body=response.body;\n  }\n}\nfunction getHeader(key){return Object.keys(headers).find(k=>k.toLowerCase()===key.toLowerCase());}\nconst retryKey=getHeader('retry-after');\nconst retryAfter=retryKey?String(headers[retryKey]):null;\nlet error='';\nif (!items.length) error='Nenhum item retornado pelo nó HTTP';\nelse if(raw.some(x=>x && (x.error||x.message&&x.name==='NodeApiError'))) {\n  error=String((raw.find(x=>x&&(x.error||x.name==='NodeApiError'))||{}).message||'Falha de rede ou requisição');\n}\nif(statusCode!==null && (statusCode<200 || statusCode>=300)) {\n  error=`HTTP ${statusCode}: ${String(body?.message||body?.error||error||'Falha HTTP').slice(0,250)}`;\n}\nlet jobs=[];\nif(!error){\n  if (shape==='array') {\n    if (Array.isArray(body)) jobs=body.filter(x=>x && typeof x==='object' && !x.pull_request);\n    else error='Resposta inesperada: esperado array de issues';\n  }else if(body && typeof body==='object' && !Array.isArray(body) && Array.isArray(body[shape])) {\n    jobs=body[shape];\n  }else {\n    error=`Resposta inesperada: campo ${shape} ausente ou inválido`;\n  }\n}\nif(!error && jobs.some(x=>!x||typeof x!=='object'||Array.isArray(x))) {\n  error='Resposta contém vagas em formato inválido';jobs=[];\n}\n// 200 com lista vazia é sucesso. 403/429 indica limites; registrar Retry-After, sem retry infinito.\nreturn [{json:{source,ok:!error,statusCode,checkedAt:now,retryAfter,\n  jobs:error?[]:jobs,error:error||null,count:error?null:jobs.length}}];"
+      },
+      "id": "validar-vagas-backend-br",
+      "name": "Validar Backend BR",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        750,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { proximo: true } }];"
+      },
+      "id": "continuar-backend",
+      "name": "Continuar Backend",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        870,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://himalayas.app/jobs/api/search?q=developer&country=BR&seniority=Entry-level&sort=recent",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "vagas-remotas-himalayas",
+      "name": "Vagas Remotas Himalayas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1110,
+        250
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const source = \"Himalayas\";\nconst shape = \"jobs\";\nconst now = new Date().toISOString();\nconst items=$input.all();\nconst raw=items.map(i=>i.json);\nconst response=raw.length===1?raw[0]:raw;\nlet statusCode=null, headers={}, body=response;\nif(response && typeof response==='object' && !Array.isArray(response)) {\n  if (response.statusCode!==undefined) {\n    statusCode=Number(response.statusCode);\n    headers=response.headers||{};\n    body=response.body;\n  }\n}\nfunction getHeader(key){return Object.keys(headers).find(k=>k.toLowerCase()===key.toLowerCase());}\nconst retryKey=getHeader('retry-after');\nconst retryAfter=retryKey?String(headers[retryKey]):null;\nlet error='';\nif (!items.length) error='Nenhum item retornado pelo nó HTTP';\nelse if(raw.some(x=>x && (x.error||x.message&&x.name==='NodeApiError'))) {\n  error=String((raw.find(x=>x&&(x.error||x.name==='NodeApiError'))||{}).message||'Falha de rede ou requisição');\n}\nif(statusCode!==null && (statusCode<200 || statusCode>=300)) {\n  error=`HTTP ${statusCode}: ${String(body?.message||body?.error||error||'Falha HTTP').slice(0,250)}`;\n}\nlet jobs=[];\nif(!error){\n  if (shape==='array') {\n    if (Array.isArray(body)) jobs=body.filter(x=>x && typeof x==='object' && !x.pull_request);\n    else error='Resposta inesperada: esperado array de issues';\n  }else if(body && typeof body==='object' && !Array.isArray(body) && Array.isArray(body[shape])) {\n    jobs=body[shape];\n  }else {\n    error=`Resposta inesperada: campo ${shape} ausente ou inválido`;\n  }\n}\nif(!error && jobs.some(x=>!x||typeof x!=='object'||Array.isArray(x))) {\n  error='Resposta contém vagas em formato inválido';jobs=[];\n}\n// 200 com lista vazia é sucesso. 403/429 indica limites; registrar Retry-After, sem retry infinito.\nreturn [{json:{source,ok:!error,statusCode,checkedAt:now,retryAfter,\n  jobs:error?[]:jobs,error:error||null,count:error?null:jobs.length}}];"
+      },
+      "id": "validar-vagas-remotas-himalayas",
+      "name": "Validar Himalayas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1230,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { proximo: true } }];"
+      },
+      "id": "continuar-remotas",
+      "name": "Continuar Remotas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1350,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.adzuna.com/v1/api/jobs/br/search/1?app_id={{$env.ADZUNA_APP_ID}}&app_key={{$env.ADZUNA_APP_KEY}}&what=junior+developer&where=Brazil&results_per_page=20",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "vagas-adzuna",
+      "name": "Vagas Adzuna",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1590,
+        250
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const source = \"Adzuna\";\nconst shape = \"results\";\nconst now = new Date().toISOString();\nconst items=$input.all();\nconst raw=items.map(i=>i.json);\nconst response=raw.length===1?raw[0]:raw;\nlet statusCode=null, headers={}, body=response;\nif(response && typeof response==='object' && !Array.isArray(response)) {\n  if (response.statusCode!==undefined) {\n    statusCode=Number(response.statusCode);\n    headers=response.headers||{};\n    body=response.body;\n  }\n}\nfunction getHeader(key){return Object.keys(headers).find(k=>k.toLowerCase()===key.toLowerCase());}\nconst retryKey=getHeader('retry-after');\nconst retryAfter=retryKey?String(headers[retryKey]):null;\nlet error='';\nif (!items.length) error='Nenhum item retornado pelo nó HTTP';\nelse if(raw.some(x=>x && (x.error||x.message&&x.name==='NodeApiError'))) {\n  error=String((raw.find(x=>x&&(x.error||x.name==='NodeApiError'))||{}).message||'Falha de rede ou requisição');\n}\nif(statusCode!==null && (statusCode<200 || statusCode>=300)) {\n  error=`HTTP ${statusCode}: ${String(body?.message||body?.error||error||'Falha HTTP').slice(0,250)}`;\n}\nlet jobs=[];\nif(!error){\n  if (shape==='array') {\n    if (Array.isArray(body)) jobs=body.filter(x=>x && typeof x==='object' && !x.pull_request);\n    else error='Resposta inesperada: esperado array de issues';\n  }else if(body && typeof body==='object' && !Array.isArray(body) && Array.isArray(body[shape])) {\n    jobs=body[shape];\n  }else {\n    error=`Resposta inesperada: campo ${shape} ausente ou inválido`;\n  }\n}\nif(!error && jobs.some(x=>!x||typeof x!=='object'||Array.isArray(x))) {\n  error='Resposta contém vagas em formato inválido';jobs=[];\n}\n// 200 com lista vazia é sucesso. 403/429 indica limites; registrar Retry-After, sem retry infinito.\nreturn [{json:{source,ok:!error,statusCode,checkedAt:now,retryAfter,\n  jobs:error?[]:jobs,error:error||null,count:error?null:jobs.length}}];"
+      },
+      "id": "validar-vagas-adzuna",
+      "name": "Validar Adzuna",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1710,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { proximo: true } }];"
+      },
+      "id": "continuar-adzuna",
+      "name": "Continuar Adzuna",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1830,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jooble.org/api/{{$env.JOOBLE_API_KEY}}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { keywords: \"junior developer, QA, Unity, Unreal Engine, Godot, estágio, trainee\", location: \"Brazil\", page: 1, searchMode: 1 } }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "vagas-jooble",
+      "name": "Vagas Jooble",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2070,
+        250
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const source = \"Jooble\";\nconst shape = \"jobs\";\nconst now = new Date().toISOString();\nconst items=$input.all();\nconst raw=items.map(i=>i.json);\nconst response=raw.length===1?raw[0]:raw;\nlet statusCode=null, headers={}, body=response;\nif(response && typeof response==='object' && !Array.isArray(response)) {\n  if (response.statusCode!==undefined) {\n    statusCode=Number(response.statusCode);\n    headers=response.headers||{};\n    body=response.body;\n  }\n}\nfunction getHeader(key){return Object.keys(headers).find(k=>k.toLowerCase()===key.toLowerCase());}\nconst retryKey=getHeader('retry-after');\nconst retryAfter=retryKey?String(headers[retryKey]):null;\nlet error='';\nif (!items.length) error='Nenhum item retornado pelo nó HTTP';\nelse if(raw.some(x=>x && (x.error||x.message&&x.name==='NodeApiError'))) {\n  error=String((raw.find(x=>x&&(x.error||x.name==='NodeApiError'))||{}).message||'Falha de rede ou requisição');\n}\nif(statusCode!==null && (statusCode<200 || statusCode>=300)) {\n  error=`HTTP ${statusCode}: ${String(body?.message||body?.error||error||'Falha HTTP').slice(0,250)}`;\n}\nlet jobs=[];\nif(!error){\n  if (shape==='array') {\n    if (Array.isArray(body)) jobs=body.filter(x=>x && typeof x==='object' && !x.pull_request);\n    else error='Resposta inesperada: esperado array de issues';\n  }else if(body && typeof body==='object' && !Array.isArray(body) && Array.isArray(body[shape])) {\n    jobs=body[shape];\n  }else {\n    error=`Resposta inesperada: campo ${shape} ausente ou inválido`;\n  }\n}\nif(!error && jobs.some(x=>!x||typeof x!=='object'||Array.isArray(x))) {\n  error='Resposta contém vagas em formato inválido';jobs=[];\n}\n// 200 com lista vazia é sucesso. 403/429 indica limites; registrar Retry-After, sem retry infinito.\nreturn [{json:{source,ok:!error,statusCode,checkedAt:now,retryAfter,\n  jobs:error?[]:jobs,error:error||null,count:error?null:jobs.length}}];"
+      },
+      "id": "validar-vagas-jooble",
+      "name": "Validar Jooble",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2190,
+        430
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { proximo: true } }];"
+      },
+      "id": "continuar-jooble",
+      "name": "Continuar Jooble",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2310,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
+        "options": {
+          "timeout": 30000
+        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi"
+      },
+      "id": "ler-arquivo-atual-github",
+      "name": "Ler arquivo atual GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2550,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// MonitoramentoVagas — consolidação resiliente (n8n Code, Run Once for All Items).\n// Mantém o contrato do frontend: atualizadoEm, total e vagas com campos legados.\nconst now = new Date().toISOString();\nconst MAX = 400;\nconst sources = [\n  { name: 'Frontend BR', node: 'Validar Frontend BR' },\n  { name: 'Backend BR', node: 'Validar Backend BR' },\n  { name: 'Himalayas', node: 'Validar Himalayas' },\n  { name: 'Adzuna', node: 'Validar Adzuna' },\n  { name: 'Jooble', node: 'Validar Jooble' },\n];\nconst checks = sources.map(s => ({ name:s.name, ...$(s.node).first().json }));\nconst file = $input.first().json;\nif (!file || !file.sha || typeof file.content !== 'string') {\n  throw new Error('Leitura do histórico falhou. Publicação bloqueada para preservar vagas existentes.');\n}\nlet previous;\ntry { previous = JSON.parse(Buffer.from(file.content.replace(/\\s/g,''),'base64').toString('utf8')); }\ncatch (e) { throw new Error('Histórico do GitHub está inválido: '+e.message); }\nif (!previous || !Array.isArray(previous.vagas)) throw new Error('Histórico não contém o array vagas: publicação bloqueada.');\nconst old = previous.vagas;\nconst ok = checks.filter(s => s.ok);\nconst info = checks.map(s => ({ fonte:s.name, sucesso:Boolean(s.ok), statusCode:s.statusCode ?? null,\n    consultadoEm:s.checkedAt ?? now, quantidade:Array.isArray(s.jobs)?s.jobs.length:0,\n    erro:s.ok?null:(s.error||'Falha desconhecida'), retryAfter:s.retryAfter??null }));\nif (!ok.length) {\n  return [{json:{changed:false,relevantChange:false,total:old.length,novos:0,sha:file.sha,\n    content:null,preserveHistory:true,reason:'Todas as fontes falharam; histórico preservado',diagnosticos:info}}];\n}\nconst clean = v => String(v??'').replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim();\nfunction normalizeUrl(value) {\n  let s=String(value||'').trim(); if(!/^https?:\\/\\//i.test(s)) return '';\n  try { const u=new URL(s); u.hash='';\n    for (const k of [...u.searchParams.keys()])\n      if (/^(utm_.*|gclid|fbclid|mc_cid|mc_eid|ref_src)$/i.test(k)) u.searchParams.delete(k);\n    return u.toString().replace(/\\?$/,'');\n  } catch {return ''}\n}\nconst norm = s => clean(s).normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();\nfunction validDate(x) {\n  if(x===undefined||x===null||x==='') return '';\n  let d;\n  if(typeof x==='number' || /^\\d{10,13}$/.test(String(x))) {\n    const n=Number(x); d=new Date(n<1e11?n*1000:n);\n  } else d=new Date(x);\n  return Number.isNaN(d.getTime())?'':d.toISOString();\n}\nfunction row(raw, source) {\n  if (!raw || typeof raw!=='object' || Array.isArray(raw)) return null;\n  // As 5 APIs devolvem nomes diferentes para os mesmos campos.\n  const title=clean(raw.title||raw.cargo||raw.job_title||'');\n  const comp=clean(raw.company?.display_name||raw.company?.name||raw.companyName||raw.company||raw.empresa||raw.employer?.name||'Ver anúncio');\n  const url=normalizeUrl(raw.html_url||raw.applicationLink||raw.redirect_url||raw.link||raw.url||'');\n  const id0=raw.id??raw.guid??raw.uuid??url;\n  if(!title || !id0 || !url) return null;\n  const desc=clean(raw.body||raw.description||raw.descricao||raw.snippet||'').slice(0,1500);\n  const loc=clean(raw.location?.display_name||raw.location?.name||raw.location||raw.local||raw.candidate_required_location||'Brasil / ver anúncio');\n  const levelText=`${title} ${desc}`;\n  const nivel=/\\b(est[aá]gio|estagi[aá]ri[oa]|intern(ship)?|aprendiz)\\b/i.test(levelText)?'Estágio':\n    /\\btrainee\\b/i.test(levelText)?'Trainee':/\\b(junior|júnior|jr\\.?|entry[ -]?level)\\b/i.test(levelText)?'Júnior':'Não informada';\n  const modalidade=/\\b(remot[oa]|home[ -]?office|remote)\\b/i.test(`${title} ${desc}`)?'Remoto':\n    /\\b(h[ií]brid[oa]|hybrid)\\b/i.test(`${title} ${desc}`)?'Híbrido':'Não informada';\n  const entryId=String(id0).slice(0,160);\n  return {id:`${source.toLowerCase().replace(/\\W+/g,'-')}-${entryId}`.slice(0,200),cargo:title,empresa:comp,nivel,modalidade,\n    local:loc,descricao:desc.slice(0,500),publicadoEm:validDate(raw.created_at||raw.created||raw.publishedAt||raw.pubDate||raw.date||raw.publication_date),\n    fonte:source,link:url,capturadoEm:now,primeiraIdentificacao:now,ultimaIdentificacao:now,statusIdentificacao:'nova',\n    urlNormalizada:url,empresaNormalizada:norm(comp),cargoNormalizado:norm(title),fontesAlternativas:[source]};\n}\nfunction extractJobs(s){\n  return (Array.isArray(s.jobs)?s.jobs:[]).map(v=>row(v,s.name)).filter(Boolean);\n}\nconst incoming=ok.flatMap(extractJobs);\nconst byId=new Map(); const byUrl=new Map(); const merged=new Map();\nfor (const v of old){\n  if(!v || !v.id) continue;\n  const copy={...v};\n  merged.set(v.id,copy);\n  byId.set(v.id,copy);\n  const url=normalizeUrl(v.urlNormalizada||v.link);\n  if(url) byUrl.set(url,copy);\n}\nlet additions=0;\nfor (const v of incoming){\n  const prev=byId.get(v.id)||(v.urlNormalizada?byUrl.get(v.urlNormalizada):null);\n  if(prev){\n    // IDs e metadados de primeira captura não podem ser sobrescritos.\n    const result={...prev,...v,\n      id:prev.id,\n      primeiraIdentificacao:prev.primeiraIdentificacao||prev.capturadoEm||now,\n      capturadoEm:prev.capturadoEm||prev.primeiraIdentificacao||now,\n      publicadoEm:prev.publicadoEm||v.publicadoEm||'',\n      statusIdentificacao:prev.statusIdentificacao==='nova'?'existente':(prev.statusIdentificacao||'existente'),\n      // Não atualizar a cada consulta: evita commit apenas por horário.\n      ultimaIdentificacao:prev.ultimaIdentificacao||prev.capturadoEm||now,\n      fontesAlternativas:[...new Set([...(prev.fontesAlternativas||[]),prev.fonte,v.fonte].filter(Boolean))]\n    };\n    merged.set(prev.id,result); byId.set(v.id,result);\n    if(v.urlNormalizada) byUrl.set(v.urlNormalizada,result);\n  }else{\n    additions++;\n    merged.set(v.id,v);byId.set(v.id,v);if(v.urlNormalizada)byUrl.set(v.urlNormalizada,v);\n  }\n}\nconst sortKey=v=>validDate(v.primeiraIdentificacao||v.capturadoEm||v.publicadoEm)||'';\nconst candidate=[...merged.values()].sort((a,b)=>sortKey(b).localeCompare(sortKey(a))||String(a.id).localeCompare(String(b.id))).slice(0,MAX);\n// Comparação ignorando ordem original, dados voláteis e mudanças meramente cosméticas.\nfunction comparable(v){\n  return {id:v.id,cargo:v.cargo,empresa:v.empresa,nivel:v.nivel,modalidade:v.modalidade,local:v.local,\n    descricao:v.descricao,publicadoEm:v.publicadoEm,fonte:v.fonte,link:v.link,\n    primeiraIdentificacao:v.primeiraIdentificacao||v.capturadoEm||'',\n    fontesAlternativas:[...(v.fontesAlternativas||[])].sort()};\n}\nconst fingerprint=a=>JSON.stringify(a.map(comparable).sort((x,y)=>String(x.id).localeCompare(String(y.id))));\nconst changed=fingerprint(old)!==fingerprint(candidate);\nconst lastGood={...(previous.ultimaConsultaBemSucedida||{})};\nfor(const s of ok)lastGood[s.name]=s.checkedAt||now;\nconst payload={...previous, atualizadoEm:changed?now:(previous.atualizadoEm||now),total:candidate.length,vagas:candidate,\n  ultimaSincronizacao:now,\n  ultimaSincronizacaoCompleta:ok.length===sources.length?now:(previous.ultimaSincronizacaoCompleta||null),\n  ultimaSincronizacaoParcial:ok.length<sources.length?now:null,\n  limiteHistorico:MAX,historicoPreservado:true,novasNaExecucao:additions,\n  ultimaConsultaBemSucedida:lastGood,\n  // Este diagnóstico será persistido somente quando houver publicação por vagas alteradas.\n  diagnosticosFontes:info};\nreturn [{json:{changed,relevantChange:changed,total:candidate.length,novos:additions,sha:file.sha,\n  content:changed?Buffer.from(JSON.stringify(payload,null,2)+'\\n').toString('base64'):null,\n  preserveHistory:true,reason:changed?'Vagas atualizadas':'Nenhuma alteração relevante',diagnosticos:info}}];\n"
+      },
+      "id": "consolidar-historico",
+      "name": "Consolidar historico",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2790,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "changed",
+              "leftValue": "={{ $json.changed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        }
+      },
+      "id": "mudou-alguma-vaga?",
+      "name": "Mudou alguma vaga?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3030,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { message: \"Atualiza vagas automaticamente\", content: $json.content, sha: $json.sha, branch: \"main\" } }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "publicar-vagas.json",
+      "name": "Publicar vagas.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3290,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const input=$input.first().json;\nconst status=Number(input.statusCode||0);\nconst body=input.body||{};\nconst message=String(body.message||'');\nconst success=status===200||status===201;\nconst conflict=status===409||status===422;\nif(!success) throw new Error(`Falha na publicação GitHub HTTP ${status||'desconhecido'}: ${message||'verifique credenciais, SHA e permissões'}${conflict?' (SHA possivelmente desatualizado; execute novamente o workflow para reler o arquivo)':''}`);\nreturn [{json:{statusCode:status,conflict:false,message:'Publicado com sucesso',shouldRetry:false,publicationAttempted:true}}];"
+      },
+      "id": "tratar-resultado-publicacao",
+      "name": "Tratar resultado de publicação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3510,
+        180
+      ]
+    }
+  ],
+  "connections": {
+    "A cada 60 minutos": {
+      "main": [
+        [
+          {
+            "node": "Vagas Frontend BR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vagas Frontend BR": {
+      "main": [
+        [
+          {
+            "node": "Validar Frontend BR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar Frontend": {
+      "main": [
+        [
+          {
+            "node": "Vagas Backend BR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vagas Backend BR": {
+      "main": [
+        [
+          {
+            "node": "Validar Backend BR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar Backend": {
+      "main": [
+        [
+          {
+            "node": "Vagas Remotas Himalayas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vagas Remotas Himalayas": {
+      "main": [
+        [
+          {
+            "node": "Validar Himalayas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar Remotas": {
+      "main": [
+        [
+          {
+            "node": "Vagas Adzuna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vagas Adzuna": {
+      "main": [
+        [
+          {
+            "node": "Validar Adzuna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar Adzuna": {
+      "main": [
+        [
+          {
+            "node": "Vagas Jooble",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vagas Jooble": {
+      "main": [
+        [
+          {
+            "node": "Validar Jooble",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar Jooble": {
+      "main": [
+        [
+          {
+            "node": "Ler arquivo atual GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler arquivo atual GitHub": {
+      "main": [
+        [
+          {
+            "node": "Consolidar historico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar historico": {
+      "main": [
+        [
+          {
+            "node": "Mudou alguma vaga?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mudou alguma vaga?": {
+      "main": [
+        [
+          {
+            "node": "Publicar vagas.json",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Publicar vagas.json": {
+      "main": [
+        [
+          {
+            "node": "Tratar resultado de publicação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Frontend BR": {
+      "main": [
+        [
+          {
+            "node": "Continuar Frontend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Backend BR": {
+      "main": [
+        [
+          {
+            "node": "Continuar Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Himalayas": {
+      "main": [
+        [
+          {
+            "node": "Continuar Remotas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Adzuna": {
+      "main": [
+        [
+          {
+            "node": "Continuar Adzuna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Jooble": {
+      "main": [
+        [
+          {
+            "node": "Continuar Jooble",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
