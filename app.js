@@ -1,12 +1,13 @@
 let vagas = [];
 const quickSearchTags = new Set();
-
 const $ = id => document.getElementById(id);
 const text = value => value == null ? '' : String(value).trim();
-const normalize = value => text(value)
-  .toLocaleLowerCase('pt-BR')
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g, '');
+const normalize = value => text(value).toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+// Keep the document and visible brand consistent with the requested rename.
+document.title = 'TecOps — oportunidades em tecnologia';
+const pageHeading = document.querySelector('header h1');
+if (pageHeading) pageHeading.textContent = 'TecOps';
 
 function el(tag, cls, content) {
   const element = document.createElement(tag);
@@ -17,9 +18,7 @@ function el(tag, cls, content) {
 
 function formatDate(value) {
   const date = value ? new Date(value) : null;
-  return date && !Number.isNaN(date.getTime())
-    ? date.toLocaleDateString('pt-BR')
-    : 'Data não informada';
+  return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString('pt-BR') : 'Data não informada';
 }
 
 function levelKey(value) {
@@ -33,10 +32,19 @@ function levelKey(value) {
 
 function modalityKey(value) {
   const mode = normalize(value);
-  if (mode.includes('remot') || mode === 'home office' || mode === 'homeoffice') return 'remoto';
   if (mode.includes('hibrid') || mode.includes('hybrid')) return 'hibrido';
   if (mode.includes('presencial') || mode.includes('on-site') || mode.includes('onsite') || mode === 'office') return 'presencial';
+  if (mode.includes('remot') || mode.includes('home office') || mode.includes('homeoffice')) return 'remoto';
   return mode;
+}
+
+// Some providers label every result as remote. Prefer explicit modality wording
+// in the title/location/description so hybrid and onsite jobs are not hidden.
+function jobModalityKey(job) {
+  const details = normalize([job.modalidade, job.cargo, job.local, job.descricao].map(text).join(' '));
+  if (/\b(hibrid[oa]s?|hybrid)\b/.test(details)) return 'hibrido';
+  if (/\b(presencial|on[ -]?site|in[ -]?office|office based)\b/.test(details)) return 'presencial';
+  return modalityKey(job.modalidade);
 }
 
 function isRioGrandeDoSul(value) {
@@ -50,15 +58,14 @@ function jobCategories(job) {
 }
 
 function jobSearchText(job) {
-  const values = [
-    job.cargo, job.empresa, job.descricao, job.local,
-    job.nivel, job.modalidade, job.fonte, job.area,
+  return normalize([
+    job.cargo, job.empresa, job.descricao, job.local, job.nivel,
+    job.modalidade, job.fonte, job.area,
     ...(Array.isArray(job.areas) ? job.areas : []),
     ...(Array.isArray(job.tags) ? job.tags : []),
     ...(Array.isArray(job.tecnologias) ? job.tecnologias : []),
     ...(Array.isArray(job.especializacoes) ? job.especializacoes : [])
-  ];
-  return normalize(values.map(text).join(' '));
+  ].map(text).join(' '));
 }
 
 function dateValue(value) {
@@ -78,13 +85,25 @@ function populateSelect(id, values, placeholder) {
   if ([...select.options].some(option => option.value === selected)) select.value = selected;
 }
 
+function populateModalityFilter() {
+  const select = $('mode');
+  if (!select) return;
+  const selected = modalityKey(select.value);
+  select.replaceChildren(
+    new Option('Todas as modalidades', ''),
+    new Option('Remoto', 'remoto'),
+    new Option('Híbrido', 'hibrido'),
+    new Option('Presencial', 'presencial')
+  );
+  if (['remoto', 'hibrido', 'presencial'].includes(selected)) select.value = selected;
+}
+
 function addCategoryFilter() {
   const filters = document.querySelector('.filters');
   if (!filters || $('category')) return;
   const select = el('select');
   select.id = 'category';
   select.setAttribute('aria-label', 'Filtrar categoria');
-  select.dataset.dynamicFilter = 'category';
   filters.append(select);
   select.addEventListener('change', render);
 }
@@ -102,46 +121,23 @@ function refreshQuickSearchTags() {
 function addQuickSearchTags() {
   const filters = document.querySelector('.filters');
   if (!filters || filters.querySelector('[data-quick-search-tags]')) return;
-
   const group = el('div');
   group.dataset.quickSearchTags = '';
   group.setAttribute('role', 'group');
   group.setAttribute('aria-label', 'Tags rápidas de pesquisa');
-  Object.assign(group.style, {
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: '8px',
-    gridColumn: '1 / -1',
-    marginTop: '4px'
-  });
-
+  Object.assign(group.style, { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', gridColumn: '1 / -1', marginTop: '4px' });
   const label = el('span', '', 'Tags rápidas:');
-  label.style.fontSize = '0.85rem';
-  label.style.fontWeight = '600';
-  label.style.color = '#475569';
+  Object.assign(label.style, { fontSize: '0.85rem', fontWeight: '600', color: '#475569' });
   group.append(label);
-
   [
-    ['presencial', 'Presencial'],
-    ['hibrido', 'Híbrido'],
-    ['santa-rosa', 'Santa Rosa'],
-    ['rio-grande-do-sul', 'Rio Grande do Sul (RS)']
+    ['remoto', 'Remoto'], ['hibrido', 'Híbrido'], ['presencial', 'Presencial'],
+    ['santa-rosa', 'Santa Rosa'], ['rio-grande-do-sul', 'Rio Grande do Sul (RS)']
   ].forEach(([key, title]) => {
     const button = el('button', '', title);
     button.type = 'button';
     button.dataset.quickSearchTag = key;
     button.setAttribute('aria-pressed', 'false');
-    Object.assign(button.style, {
-      border: '1px solid #cbd5e1',
-      borderRadius: '999px',
-      padding: '6px 12px',
-      background: '#fff',
-      color: '#1f2937',
-      cursor: 'pointer',
-      font: 'inherit',
-      fontSize: '0.85rem'
-    });
+    Object.assign(button.style, { border: '1px solid #cbd5e1', borderRadius: '999px', padding: '6px 12px', background: '#fff', color: '#1f2937', cursor: 'pointer', font: 'inherit', fontSize: '0.85rem' });
     button.addEventListener('click', () => {
       if (quickSearchTags.has(key)) quickSearchTags.delete(key);
       else quickSearchTags.add(key);
@@ -150,14 +146,12 @@ function addQuickSearchTags() {
     });
     group.append(button);
   });
-
   filters.append(group);
 }
 
 function render() {
   const search = normalize($('search')?.value);
   const level = $('level')?.value || '';
-  // Normalize both sides: HTML options may use either Portuguese or English values.
   const mode = modalityKey($('mode')?.value || '');
   const source = $('source')?.value || '';
   const location = $('location')?.value || '';
@@ -165,38 +159,31 @@ function render() {
   const period = $('period')?.value || '';
   const sort = $('sort')?.value || 'recent';
   const now = Date.now();
-  const cutoff = period === '24h' ? now - 24 * 60 * 60 * 1000
-    : period === '7d' ? now - 7 * 24 * 60 * 60 * 1000
-      : null;
+  const cutoff = period === '24h' ? now - 24 * 60 * 60 * 1000 : period === '7d' ? now - 7 * 24 * 60 * 60 * 1000 : null;
 
   const filtered = vagas.filter(job => {
-    const searchable = jobSearchText(job);
-    const jobLocation = normalize(job.local);
     const categories = jobCategories(job);
-    const matchesSearch = !search || search.split(/\s+/).every(term => searchable.includes(term));
+    const modality = jobModalityKey(job);
+    const jobLocation = normalize(job.local);
+    const matchesSearch = !search || search.split(/\s+/).every(term => jobSearchText(job).includes(term));
     const matchesLevel = !level || levelKey(job.nivel) === levelKey(level);
-    const matchesMode = !mode || modalityKey(job.modalidade) === mode;
+    const matchesMode = !mode || modality === mode;
     const matchesSource = !source || text(job.fonte) === source;
     const matchesLocation = !location || text(job.local) === location;
     const matchesCategory = !category || categories.some(value => normalize(value) === category);
-    const matchesQuickMode = (!quickSearchTags.has('presencial') || modalityKey(job.modalidade) === 'presencial')
-      && (!quickSearchTags.has('hibrido') || modalityKey(job.modalidade) === 'hibrido');
+    const selectedModalities = ['remoto', 'hibrido', 'presencial'].filter(key => quickSearchTags.has(key));
+    const matchesQuickMode = !selectedModalities.length || selectedModalities.includes(modality);
     const matchesSantaRosa = !quickSearchTags.has('santa-rosa') || jobLocation.includes('santa rosa');
     const matchesRioGrandeDoSul = !quickSearchTags.has('rio-grande-do-sul') || isRioGrandeDoSul(job.local);
     const published = dateValue(job.publicadoEm);
     const matchesPeriod = cutoff === null || (published !== null && published >= cutoff && published <= now);
-
     return matchesSearch && matchesLevel && matchesMode && matchesSource && matchesLocation
       && matchesCategory && matchesQuickMode && matchesSantaRosa && matchesRioGrandeDoSul && matchesPeriod;
   });
 
   filtered.sort((a, b) => {
-    if (sort === 'company') {
-      return text(a.empresa).localeCompare(text(b.empresa), 'pt-BR', { sensitivity: 'base' });
-    }
-    if (sort === 'title') {
-      return text(a.cargo).localeCompare(text(b.cargo), 'pt-BR', { sensitivity: 'base' });
-    }
+    if (sort === 'company') return text(a.empresa).localeCompare(text(b.empresa), 'pt-BR', { sensitivity: 'base' });
+    if (sort === 'title') return text(a.cargo).localeCompare(text(b.cargo), 'pt-BR', { sensitivity: 'base' });
     const dateA = dateValue(a.publicadoEm);
     const dateB = dateValue(b.publicadoEm);
     if (dateA === null && dateB === null) return 0;
@@ -207,7 +194,6 @@ function render() {
 
   const count = $('count');
   if (count) count.textContent = `${filtered.length} de ${vagas.length} ${vagas.length === 1 ? 'vaga' : 'vagas'}`;
-
   const box = $('jobs');
   if (!box) return;
   box.replaceChildren();
@@ -215,18 +201,14 @@ function render() {
     box.append(el('p', 'empty', 'Nenhuma vaga encontrada com os filtros atuais.'));
     return;
   }
-
   filtered.forEach(job => {
     const card = el('article', 'job');
     const tags = el('div', 'tags');
-    [job.nivel || 'Não informado', job.modalidade || 'Não informado', job.fonte || 'Não informado']
+    [job.nivel || 'Não informado', jobModalityKey(job) === 'hibrido' ? 'Híbrido' : jobModalityKey(job) === 'presencial' ? 'Presencial' : job.modalidade || 'Não informado', job.fonte || 'Não informado']
       .forEach(tag => tags.append(el('span', 'tag', text(tag))));
-    card.append(
-      tags,
-      el('h3', '', text(job.cargo) || 'Cargo não informado'),
+    card.append(tags, el('h3', '', text(job.cargo) || 'Cargo não informado'),
       el('div', 'meta', `${text(job.empresa) || 'Empresa não informada'} · ${text(job.local) || 'Local não informado'} · ${formatDate(job.publicadoEm)}`),
-      el('p', 'description', text(job.descricao) || 'Consulte os requisitos no anúncio original.')
-    );
+      el('p', 'description', text(job.descricao) || 'Consulte os requisitos no anúncio original.'));
     if (/^https:\/\//i.test(text(job.link))) {
       const link = el('a', 'apply', 'Ver oportunidade');
       link.href = text(job.link);
@@ -239,10 +221,7 @@ function render() {
 }
 
 function clearFilters() {
-  ['search', 'level', 'mode', 'source', 'location', 'category', 'period'].forEach(id => {
-    const control = $(id);
-    if (control) control.value = '';
-  });
+  ['search', 'level', 'mode', 'source', 'location', 'category', 'period'].forEach(id => { if ($(id)) $(id).value = ''; });
   quickSearchTags.clear();
   refreshQuickSearchTags();
   if ($('sort')) $('sort').value = 'recent';
@@ -255,18 +234,14 @@ async function load() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     vagas = Array.isArray(data.vagas) ? data.vagas.filter(job => job && typeof job === 'object') : [];
-
     const updated = $('updated');
     if (updated) {
       const timestamp = dateValue(data.atualizadoEm);
-      updated.textContent = timestamp === null
-        ? 'Aguardando a primeira sincronização'
-        : `Atualizado em ${new Date(timestamp).toLocaleString('pt-BR')}`;
+      updated.textContent = timestamp === null ? 'Aguardando a primeira sincronização' : `Atualizado em ${new Date(timestamp).toLocaleString('pt-BR')}`;
     }
     if ($('total')) $('total').textContent = String(vagas.length);
-    if ($('remote')) $('remote').textContent = String(vagas.filter(job => modalityKey(job.modalidade) === 'remoto').length);
+    if ($('remote')) $('remote').textContent = String(vagas.filter(job => jobModalityKey(job) === 'remoto').length);
     if ($('intern')) $('intern').textContent = String(vagas.filter(job => levelKey(job.nivel) === 'estagio').length);
-
     populateSelect('source', vagas.map(job => job.fonte), 'Todas as fontes');
     populateSelect('location', vagas.map(job => job.local), 'Todas as localizações');
     populateSelect('category', vagas.flatMap(jobCategories), 'Todas as categorias');
@@ -275,22 +250,19 @@ async function load() {
     const updated = $('updated');
     if (updated) updated.textContent = 'Falha ao atualizar os dados';
     const box = $('jobs');
-    if (box && !vagas.length) {
-      box.replaceChildren(el('p', 'empty error', 'Não foi possível carregar as vagas. Tente atualizar a página.'));
-    } else {
-      render();
-    }
+    if (box && !vagas.length) box.replaceChildren(el('p', 'empty error', 'Não foi possível carregar as vagas. Tente atualizar a página.'));
+    else render();
     console.error(error);
   }
 }
 
 addCategoryFilter();
 addQuickSearchTags();
+populateModalityFilter();
 ['search', 'level', 'mode', 'source', 'location', 'category', 'period', 'sort'].forEach(id => {
   const control = $(id);
   if (control) control.addEventListener(id === 'search' ? 'input' : 'change', render);
 });
 if ($('clear-filters')) $('clear-filters').addEventListener('click', clearFilters);
-
 load();
 setInterval(load, 5 * 60 * 1000);
