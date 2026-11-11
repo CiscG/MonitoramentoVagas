@@ -1,5 +1,9 @@
 # MonitoramentoVagas (TecOps) — n8n + GitHub Pages
 
+## Persistência PostgreSQL e workflows n8n atualizados
+
+A nova versão do workflow **G** utiliza **PostgreSQL como fonte de verdade** para vagas, histórico, execução e relatórios. O arquivo `data/vagas.json` é atualizado como **espelho do site GitHub Pages**, e não deve ser usado como origem para restaurar o banco sem revisão. A migração requer SQL, bootstrap e credenciais locais antes da ativação. Leia primeiro [Migração e operação PostgreSQL](database/OPERACAO_POSTGRES_N8N.md) e [guia n8n](n8n/README.md). Os workflows monolíticos antigos permanecem no repositório apenas para referência e não devem rodar em paralelo com G.
+
 ## Nova arquitetura modular n8n (A–G)
 
 A execução foi dividida em **sete workflows independentes**: coleta, filtragem, validação, classificação, deduplicação, relatório e agendamento. Veja o guia completo de importação e configuração em [n8n/README.md](n8n/README.md). O agendador G roda diariamente e consolida os relatórios toda segunda-feira, incluindo semanas sem novas vagas confirmadas.
