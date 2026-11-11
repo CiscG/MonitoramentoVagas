@@ -30,7 +30,7 @@ G — Agenda (diário 07:00 / segunda-feira 08:00, America/Sao_Paulo)
 | `C-validacao.json` | Verifica evidências da candidatura, em vez de presumir abertura por HTTP 200 | `jobs`, `validationStats` |
 | `D-classificacao.json` | Calcula score heurístico 0–100 | `compatibility_score`, `compatibility_notes` |
 | `E-deduplicacao.json` | Cruza histórico, canonical URL, ID externo, empresa/cargo e hash | `data`, `events`, `dedupStats` |
-| `F-relatorio.json` | Relatório semanal em português de cinco categorias | `report`, `reportText`, `reportHtml`, `reportSubject` |
+| `F-relatorio.json` | Relatório semanal em português com seis seções obrigatórias, atualizações e vagas sem confirmação | `report`, `reportText`, `reportHtml`, `reportSubject` |
 | `G-agendamento.json` | Orquestra a sequência, persiste histórico e envia relatório SMTP | execução diária e semanal |
 
 ## Implantação segura
@@ -54,7 +54,7 @@ G — Agenda (diário 07:00 / segunda-feira 08:00, America/Sao_Paulo)
 - **Classificação:** pontuação heurística de 0–100 baseada em tecnologias, formação, projetos, nível, localização e área. Não garante elegibilidade.
 - **Deduplicação:** preserva o ID e `first_seen_at` da vaga original. Republicações semelhantes não são contadas como oportunidades novas; fontes, links e identificadores alternativos são mantidos no histórico. Eventos são persistidos em `eventosHistorico`.
 - **Persistência:** `data/vagas.json` conserva até 400 oportunidades exibidas, demais em `historicoVagas`. O projeto dispõe de um esquema PostgreSQL opcional em `database/`, mas **a conexão não está ativa** e o G mantém GitHub JSON como origem operacional.
-- **Relatórios:** o F considera o intervalo de segunda-feira 00:00 UTC anterior a segunda-feira 00:00 UTC da semana seguinte. Na segunda-feira de envio, resume a semana encerrada (a classificação de datas usa UTC; o gatilho opera em São Paulo). Identifica novidades confirmadas, vagas de relatórios anteriores ainda verificadas como abertas, encerramentos, atualizações e vagas que não puderam ser verificadas.
+- **Relatórios:** o F considera o intervalo de segunda-feira 00:00 UTC anterior a segunda-feira 00:00 UTC da semana seguinte. Na segunda-feira de envio, resume a semana encerrada (a classificação de datas usa UTC; o gatilho opera em São Paulo). Organiza seis seções obrigatórias: desenvolvimento júnior, estágios em desenvolvimento, QA/testes, integração de sistemas, oportunidades anteriores e encerradas. Inclui seções complementares para outras vagas, atualizações e não verificadas.
 - **Sem novidades:** o F produz explicitamente **“Nenhuma nova vaga confirmada foi encontrada nesta semana.”**. O G executa o envio semanal **mesmo assim**, desde que SMTP e destinatário estejam corretamente configurados.
 - **Arquivo semanal:** `data/relatorios-semanais.json` guarda snapshots por `weekKey`, sem duplicar a mesma semana. A publicação exige SHA do arquivo lido e falha em caso de conflito 409/422. Reexecuções da mesma semana devem ser revisadas para evitar reenvio duplicado de e-mail.
 
@@ -84,3 +84,15 @@ O workflow E precisa de `previous.vagas` (e do contexto `github.jobsSha` para pu
 Depois de importar a versão atualizada de `E-deduplicacao.json`, associe a credencial **GitHub API** com acesso de leitura ao nó **Recuperar histórico GitHub**. Se o n8n já possuir o E importado, atualize o workflow existente (evite criar uma segunda cópia que não seja chamada pelo G). Se importar uma nova cópia, atualize o ID selecionado no nó `Executar E — deduplicação` do G.
 
 Execute o G para verificar o encadeamento completo. A recuperação é um fallback; a forma normal continua sendo o G repassar o histórico através de A, B, C e D. Caso o GitHub esteja inacessível ou retorne JSON inválido, o E continuará bloqueando a consolidação, **para evitar perda de dados**.
+
+## Relatório detalhado do workflow F
+
+O e-mail HTML, o texto e o registro `report.records` são gerados a partir dos dados persistidos no histórico. As seis seções principais são: **(1)** vagas de desenvolvimento júnior (não identificadas como estágio), **(2)** estágios em desenvolvimento, **(3)** QA e automação de testes, **(4)** integração de sistemas e correlatas, **(5)** oportunidades anteriormente encontradas e **(6)** vagas encerradas. As vagas novas confirmadas são distribuídas nas quatro primeiras seções. Oportunidades que não se encaixam nas quatro áreas, atualizações e vagas não verificadas aparecem em seções complementares.
+
+Cada entrada informa cargo, empresa, modalidade, localidade, salário, tecnologias, formação exigida, experiência obrigatória/desejável, prazo de inscrição, score de compatibilidade, razão da classificação, notas do score, data da última verificação e link de candidatura. **Não se supõem dados ausentes**: são marcados como `Não informado`. Salário só exibe moeda quando fornecida; os requisitos de formação só vêm de campos explícitos, não de inferência sobre o cargo.
+
+**Links oficiais:** a URL oficial da candidatura é exibida somente quando a fonte traz campo inequívoco (por exemplo `official_application_url`) ou confirmação explícita (`linkOficialConfirmado`). Links de issues GitHub e agregadores são mostrados separadamente como **link do anúncio na fonte**, sem afirmar que são links oficiais. O nível júnior sem indicação de estágio não confirma, por si só, contratação CLT ou regime efetivo; confira o anúncio.
+
+As listas `report.sections.new`, `continued`, `closed`, `updated` e `unverified` permanecem no JSON do relatório para compatibilidade com o histórico já armazenado. Os registros detalhados ficam em `report.records`. Não há necessidade de alterar o nó SMTP do G, pois ele já consome `reportHtml` e `reportSubject` do F.
+
+Para aplicar a alteração, atualize o **workflow F já importado** no n8n, mantendo o mesmo ID referenciado em G. Se importar uma cópia como workflow novo, reconfigure no G o nó `Executar F — relatório` para o ID novo. Não é necessário reimportar os demais workflows apenas para mudar o layout do relatório.
