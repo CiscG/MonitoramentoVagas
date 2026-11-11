@@ -1,0 +1,25 @@
+{
+  "greenhouse": [
+    { "boardToken": "company-board-token", "company": "Example Company" }
+  ],
+  "lever": [
+    { "site": "company-board-slug", "company": "Example Company" }
+  ],
+  "ashby": [
+    { "boardName": "company-board-name", "company": "Example Company" }
+  ],
+  "gupyPublicPages": [
+    { "url": "https://public-company-careers.example/jobs", "company": "Example Company" }
+  ],
+  "workablePublicPages": [],
+  "solidesPublicPages": [],
+  "companyCareerPages": [],
+  "linkedinJobs": {
+    "enabled": false,
+    "integration": "Configure apenas feed/API oficial ou parceiro autorizado"
+  },
+  "indeed": {
+    "enabled": false,
+    "integration": "Configure apenas API/feed oficial ou parceiro autorizado"
+  }
+}
