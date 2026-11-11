@@ -1,0 +1,50 @@
+{
+  "name": "TecOps B — Filtragem por perfil",
+  "nodes": [
+    {
+      "name": "Entrada B",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        260
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "name": "Filtrar vagas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        250,
+        260
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// B — filtragem configurável. Um único item entra, um único item sai.\nconst envelope=$input.first().json||{};\nconst jobs=Array.isArray(envelope.jobs)?envelope.jobs:[];\nconst pref=envelope.profile||{};\nconst norm=value=>String(value??'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').trim();\nconst asList=value=>Array.isArray(value)?value.map(norm).filter(Boolean):[];\nconst locations=asList(pref.locations);\nconst modes=asList(pref.workModes);\nconst roles=asList(pref.roleKeywords);\nconst techs=asList(pref.technologies);\nconst allowedLevels=asList(pref.jobLevels);\nconst allowUnknownLocation=pref.allowUnknownLocation!==false;\nconst includeRemote=pref.includeRemote!==false;\nconst maxExperienceYears=Number.isFinite(Number(pref.maxExperienceYears))?Number(pref.maxExperienceYears):null;\nconst reasons={location:0,mode:0,role:0,technologies:0,experience:0,level:0};\nfunction includesTerm(haystack,term){\n return norm(haystack).includes(term);\n}\nfunction check(job){\n const title=norm(job.cargo||job.title);\n const location=norm(job.local||job.location);\n const combined=norm([job.cargo,job.descricao,job.requisitos,...(job.tecnologias||[])].join(' '));\n const mode=norm(job.modalidade||job.work_mode||'nao informada');\n const remote=mode.includes('remot')||(/\\bhome.?office\\b/.test(mode));\n if(modes.length&&!modes.some(m=>mode.includes(m)))return 'mode';\n if(!includeRemote&&remote)return 'mode';\n if(locations.length&&!remote){\n   const known=location.length>0&&!/^(ver anuncio|local nao informado|nao informado)$/.test(location);\n   if((known||!allowUnknownLocation)&&!locations.some(l=>includesTerm(location,l)))return 'location';\n }\n if(roles.length&&!roles.some(r=>includesTerm(title,r)))return 'role';\n if(techs.length&&!techs.some(t=>includesTerm(combined,t)))return 'technologies';\n const level=norm(job.nivel||job.job_level||'nao informada');\n if(allowedLevels.length&&!allowedLevels.some(l=>level.includes(l)))return 'level';\n const xp=norm(job.experiencia||job.experience_requirement);\n const rawYears=job.experienciaObrigatoriaAnos??job.experience_required_years;\n const years=rawYears===null||rawYears===undefined||rawYears===''?NaN:Number(rawYears);\n if(maxExperienceYears!==null &&\n   ((Number.isFinite(years)&&years>maxExperienceYears) ||\n    (pref.excludeMandatoryExperience===true&&xp==='obrigatoria'&&!Number.isFinite(years))))return 'experience';\n return '';\n}\nconst selected=[];\nfor(const job of jobs){\n const reason=check(job);\n if(reason)reasons[reason]++;\n else selected.push(job);\n}\nreturn [{json:{...envelope,jobs:selected,filterStats:{\n received:jobs.length,accepted:selected.length,rejected:jobs.length-selected.length,\n reasons,applied:{locations,modes,roles,techs,allowedLevels,includeRemote,maxExperienceYears}\n}}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Entrada B": {
+      "main": [
+        [
+          {
+            "node": "Filtrar vagas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

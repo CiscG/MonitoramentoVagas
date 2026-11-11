@@ -1,0 +1,618 @@
+{
+  "name": "TecOps G — Agendamento e orquestração",
+  "nodes": [
+    {
+      "name": "Agendamento diário",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -350,
+        170
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Agendamento semanal",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -350,
+        360
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Contexto da execução",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const previous=$prevNode?.name||'';\nreturn [{json:{run:{kind:previous==='Agendamento semanal'?'weekly':'daily',\n requestedAt:new Date().toISOString()},profile:{\n locations:['Santa Rosa','Rio Grande do Sul','RS','Remoto'],\n workModes:[],includeRemote:true,allowUnknownLocation:true,\n roleKeywords:[],technologies:[],jobLevels:['Estágio','Júnior','Trainee','Não informada'],\n maxExperienceYears:2,excludeMandatoryExperience:false,\n priorityAreas:['Backend','Full Stack','QA','Desenvolvimento de Jogos','Unity','Game Dev','IoT']\n}}}];"
+      }
+    },
+    {
+      "name": "Ler vagas históricas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        140,
+        250
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "name": "Ler relatórios anteriores",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        250
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/relatorios-semanais.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "name": "Preparar entrada A",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Dados históricos exigem SHA para prevenir sobrescrita silenciosa.\nconst context=$('Contexto da execução').first().json;\nconst jobsFile=$('Ler vagas históricas').first().json;\nconst reportFile=$('Ler relatórios anteriores').first().json;\nfunction decode(file,label){\n if(!file.sha||typeof file.content!=='string')throw new Error(label+': arquivo do GitHub ausente ou sem SHA');\n const payload=JSON.parse(Buffer.from(file.content.replace(/\\s/g,''),'base64').toString('utf8'));\n return payload;\n}\nconst previous=decode(jobsFile,'Histórico de vagas');\nif(!Array.isArray(previous.vagas))throw new Error('Histórico inválido: não contém vagas');\nconst reportsArchive=decode(reportFile,'Histórico de relatórios');\nif(!Array.isArray(reportsArchive.reports))throw new Error('Histórico inválido: não contém reports');\nreturn [{json:{...context,previous,reportsArchive,\n github:{jobsSha:jobsFile.sha,reportsSha:reportFile.sha}}}];"
+      }
+    },
+    {
+      "name": "Executar A — coleta",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        250
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "CONFIGURE_WORKFLOW_A_ID",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "name": "Executar B — filtragem",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1020,
+        250
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "CONFIGURE_WORKFLOW_B_ID",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "name": "Executar C — validação",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1240,
+        250
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "CONFIGURE_WORKFLOW_C_ID",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "name": "Executar D — classificação",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1460,
+        250
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "CONFIGURE_WORKFLOW_D_ID",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "name": "Executar E — deduplicação",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1680,
+        250
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "CONFIGURE_WORKFLOW_E_ID",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "name": "Preparar publicação de vagas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1900,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const packet=$input.first().json;\nif(!packet.data||!packet.github?.jobsSha)throw new Error('Resultado E sem dados/SHA, publicação bloqueada');\nreturn [{json:{...packet,githubPayload:{\n message:'TecOps: atualizar histórico e eventos das vagas',\n sha:packet.github.jobsSha,branch:'main',\n content:Buffer.from(JSON.stringify(packet.data,null,2)+'\\n','utf8').toString('base64')\n}}}];"
+      }
+    },
+    {
+      "name": "Publicar histórico de vagas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2120,
+        250
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.githubPayload }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Confirmar gravação das vagas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2340,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const result=$input.first().json;\nconst status=Number(result.statusCode||0);\nif(status!==200&&status!==201)throw new Error('GitHub: falha ao salvar vagas.json HTTP '+status+'. Reexecute após atualizar SHA; não usar dados desatualizados.');\nreturn [{json:$('Preparar publicação de vagas').first().json}];"
+      }
+    },
+    {
+      "name": "É execução semanal?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3150,
+        240
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "is-weekly",
+              "leftValue": "={{ $json.run.kind }}",
+              "rightValue": "weekly",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Finalizar execução diária",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3370,
+        410
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const packet=$input.first().json;\nreturn [{json:{kind:'daily',processedAt:new Date().toISOString(),status:'Concluído. Envio semanal não previsto hoje.',dedupStats:packet.dedupStats||{}}}];"
+      }
+    },
+    {
+      "name": "Executar F — relatório",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3370,
+        80
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "CONFIGURE_WORKFLOW_F_ID",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "name": "Preparar arquivo do relatório",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3590,
+        80
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data=$input.first().json;\nif(!data.report||!data.github?.reportsSha)throw new Error('Relatório/SHA ausente');\nconst archive=JSON.parse(JSON.stringify(data.reportsArchive||{reports:[]}));\nif(!Array.isArray(archive.reports))archive.reports=[];\narchive.reports=archive.reports.filter(r=>r.weekKey!==data.report.weekKey);\narchive.reports.push(data.report);\narchive.reports.sort((a,b)=>String(a.weekKey).localeCompare(String(b.weekKey)));\narchive.updatedAt=new Date().toISOString();\nreturn [{json:{...data,reportArchivePayload:{\n message:'TecOps: arquivar relatório semanal '+data.report.weekKey,\n sha:data.github.reportsSha,branch:'main',\n content:Buffer.from(JSON.stringify(archive,null,2)+'\\n','utf8').toString('base64')\n}}}];"
+      }
+    },
+    {
+      "name": "Arquivar relatório no GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3810,
+        80
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/relatorios-semanais.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.reportArchivePayload }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Confirmar gravação do relatório",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4030,
+        80
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const result=$input.first().json;\nconst status=Number(result.statusCode||0);\nif(status!==200&&status!==201)throw new Error('GitHub: falha ao arquivar relatório semanal HTTP '+status+'. Relatório não enviado para evitar histórico inconsistente.');\nreturn [{json:$('Preparar arquivo do relatório').first().json}];"
+      }
+    },
+    {
+      "name": "Enviar relatório semanal por e-mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        4450,
+        80
+      ],
+      "parameters": {
+        "fromEmail": "={{ $env.TECOPS_REPORT_EMAIL_FROM }}",
+        "toEmail": "={{ $env.TECOPS_REPORT_EMAIL_TO }}",
+        "subject": "={{ $json.reportSubject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.reportHtml }}",
+        "options": {}
+      },
+      "onError": "stopWorkflow"
+    }
+  ],
+  "connections": {
+    "Agendamento diário": {
+      "main": [
+        [
+          {
+            "node": "Contexto da execução",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agendamento semanal": {
+      "main": [
+        [
+          {
+            "node": "Contexto da execução",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contexto da execução": {
+      "main": [
+        [
+          {
+            "node": "Ler vagas históricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler vagas históricas": {
+      "main": [
+        [
+          {
+            "node": "Ler relatórios anteriores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler relatórios anteriores": {
+      "main": [
+        [
+          {
+            "node": "Preparar entrada A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar entrada A": {
+      "main": [
+        [
+          {
+            "node": "Executar A — coleta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar A — coleta": {
+      "main": [
+        [
+          {
+            "node": "Executar B — filtragem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar B — filtragem": {
+      "main": [
+        [
+          {
+            "node": "Executar C — validação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar C — validação": {
+      "main": [
+        [
+          {
+            "node": "Executar D — classificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar D — classificação": {
+      "main": [
+        [
+          {
+            "node": "Executar E — deduplicação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar E — deduplicação": {
+      "main": [
+        [
+          {
+            "node": "Preparar publicação de vagas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar publicação de vagas": {
+      "main": [
+        [
+          {
+            "node": "Publicar histórico de vagas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicar histórico de vagas": {
+      "main": [
+        [
+          {
+            "node": "Confirmar gravação das vagas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar gravação das vagas": {
+      "main": [
+        [
+          {
+            "node": "É execução semanal?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É execução semanal?": {
+      "main": [
+        [
+          {
+            "node": "Executar F — relatório",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Finalizar execução diária",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar F — relatório": {
+      "main": [
+        [
+          {
+            "node": "Preparar arquivo do relatório",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar arquivo do relatório": {
+      "main": [
+        [
+          {
+            "node": "Arquivar relatório no GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Arquivar relatório no GitHub": {
+      "main": [
+        [
+          {
+            "node": "Confirmar gravação do relatório",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar gravação do relatório": {
+      "main": [
+        [
+          {
+            "node": "Enviar relatório semanal por e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

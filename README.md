@@ -1,5 +1,13 @@
 # MonitoramentoVagas (TecOps) — n8n + GitHub Pages
 
+## Nova arquitetura modular n8n (A–G)
+
+A execução foi dividida em **sete workflows independentes**: coleta, filtragem, validação, classificação, deduplicação, relatório e agendamento. Veja o guia completo de importação e configuração em [n8n/README.md](n8n/README.md). O agendador G roda diariamente e consolida os relatórios toda segunda-feira, incluindo semanas sem novas vagas confirmadas.
+
+O novo pipeline usa **`data/vagas.json`** e o arquivo público de relatórios **`data/relatorios-semanais.json`**. A migração PostgreSQL permanece opcional; o n8n ainda não usa a tabela `jobs` como fonte operacional.
+
+**Não ative simultaneamente os workflows monolíticos antigos e o agendador G.** Depois de configurar credenciais, IDs dos subworkflows e SMTP, teste o G e desative os dois legados antes de ativar o agendamento. A importação dos arquivos no n8n não é automática.
+
 ## Pré-requisitos
 - Ubuntu Server 26.04, Docker e n8n funcionando.
 - Repositório GitHub **CiscG/MonitoramentoVagas** (ou adapte as URLs de ambos os nós GitHub no workflow).
