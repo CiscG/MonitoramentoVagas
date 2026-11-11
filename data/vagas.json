@@ -47,7 +47,12 @@
         "Backend BR"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://github.com/backend-br/vagas/issues/12493"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/bigdatacorp/jobs/back-end-jr-l-pesquisa-e-desenvolvimento",
@@ -90,7 +95,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/bigdatacorp/jobs/back-end-jr-l-pesquisa-e-desenvolvimento?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/bip-brasil/jobs/desenvolvedor-full-stack-junior",
@@ -133,7 +143,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/bip-brasil/jobs/desenvolvedor-full-stack-junior?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/bip-brasil/jobs/pessoa-desenvolvedora-de-ia-rpa-junior",
@@ -176,7 +191,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/bip-brasil/jobs/pessoa-desenvolvedora-de-ia-rpa-junior?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/cloud-people/jobs/servicenow-developer",
@@ -218,7 +238,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/cloud-people/jobs/servicenow-developer?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/concurrences/jobs/ai-full-stack-developer-new-grad",
@@ -260,7 +285,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/concurrences/jobs/ai-full-stack-developer-new-grad?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/evoluservices-meios-de-pagamentos/jobs/analista-backend-java-junior",
@@ -308,7 +338,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/evoluservices-meios-de-pagamentos/jobs/analista-backend-java-junior?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/my-va-support-inc/jobs/web-developer",
@@ -350,7 +385,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/my-va-support-inc/jobs/web-developer?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/quality-digital/jobs/pessoa-desenvolvedora-junior-vtex-front-end",
@@ -393,7 +433,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/quality-digital/jobs/pessoa-desenvolvedora-junior-vtex-front-end?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/sensedia/jobs/desenvolvedor-java-junior-13938",
@@ -441,7 +486,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/sensedia/jobs/desenvolvedor-java-junior-13938?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/sensedia/jobs/java-developer-junior-13938-exclusivo-pcd",
@@ -489,7 +539,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/sensedia/jobs/java-developer-junior-13938-exclusivo-pcd?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/telus-digital/jobs/full-stack-ai-logic-expert-ai-community-5029362594",
@@ -531,7 +586,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/telus-digital/jobs/full-stack-ai-logic-expert-ai-community-5029362594?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/unimed-vale-do-sinos-rs/jobs/programador-junior-rpa",
@@ -574,7 +634,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/unimed-vale-do-sinos-rs/jobs/programador-junior-rpa?utm_source=api"
     },
     {
       "id": "himalayas-https://himalayas.app/companies/viceri-seidor/jobs/pessoa-desenvolvedora-fullstack-nodejs-angular-java-junior-remoto",
@@ -626,7 +691,12 @@
         "Himalayas"
       ],
       "buscasCorrespondentes": [],
-      "urlNormalizada": ""
+      "urlNormalizada": "",
+      "statusCandidatura": "PENDING_VALIDATION",
+      "ultimaVerificacaoCandidatura": "2026-11-11T18:13:17.735Z",
+      "motivoVerificacaoCandidatura": "URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.",
+      "httpStatusVerificacao": null,
+      "urlVerificada": "https://himalayas.app/companies/viceri-seidor/jobs/pessoa-desenvolvedora-fullstack-nodejs-angular-java-junior-remoto?utm_source=api"
     }
   ],
   "ultimaSincronizacao": "2026-11-11T01:29:13.308Z",
@@ -742,5 +812,6 @@
       "erro": "HTTP 403: Falha HTTP",
       "retryAfter": null
     }
-  ]
+  ],
+  "validacaoCandidaturasAtualizadaEm": "2026-11-11T18:13:17.735Z"
 }
