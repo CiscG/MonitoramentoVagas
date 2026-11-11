@@ -328,7 +328,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const data=$input.first().json;\nif(!data.report||!data.github?.reportsSha)throw new Error('Relatório/SHA ausente');\nconst archive=structuredClone(data.reportsArchive||{reports:[]});\nif(!Array.isArray(archive.reports))archive.reports=[];\narchive.reports=archive.reports.filter(r=>r.weekKey!==data.report.weekKey);\narchive.reports.push(data.report);\narchive.reports.sort((a,b)=>String(a.weekKey).localeCompare(String(b.weekKey)));\narchive.updatedAt=new Date().toISOString();\nreturn [{json:{...data,reportArchivePayload:{\n message:'TecOps: arquivar relatório semanal '+data.report.weekKey,\n sha:data.github.reportsSha,branch:'main',\n content:Buffer.from(JSON.stringify(archive,null,2)+'\\n','utf8').toString('base64')\n}}}];"
+        "jsCode": "const data=$input.first().json;\nif(!data.report||!data.github?.reportsSha)throw new Error('Relatório/SHA ausente');\nconst archive=JSON.parse(JSON.stringify(data.reportsArchive||{reports:[]}));\nif(!Array.isArray(archive.reports))archive.reports=[];\narchive.reports=archive.reports.filter(r=>r.weekKey!==data.report.weekKey);\narchive.reports.push(data.report);\narchive.reports.sort((a,b)=>String(a.weekKey).localeCompare(String(b.weekKey)));\narchive.updatedAt=new Date().toISOString();\nreturn [{json:{...data,reportArchivePayload:{\n message:'TecOps: arquivar relatório semanal '+data.report.weekKey,\n sha:data.github.reportsSha,branch:'main',\n content:Buffer.from(JSON.stringify(archive,null,2)+'\\n','utf8').toString('base64')\n}}}];"
       }
     },
     {
