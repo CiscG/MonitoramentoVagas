@@ -1,0 +1,98 @@
+{
+  "name": "TecOps — Validação de candidaturas (6h)",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [{ "field": "hours", "hoursInterval": 6 }] } },
+      "id": "status-schedule",
+      "name": "A cada 6 horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": { "timeout": 30000 }
+      },
+      "id": "read-jobs",
+      "name": "Ler vagas do GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 300],
+      "onError": "stopWorkflow"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const file=$input.first().json;\nif(!file.sha || typeof file.content!=='string') throw new Error('GitHub não retornou SHA/conteúdo; validação cancelada para preservar os dados.');\nlet data; try { data=JSON.parse(Buffer.from(file.content.replace(/\\s/g,''),'base64').toString('utf8')); } catch(e) { throw new Error('data/vagas.json inválido: '+e.message); }\nif(!Array.isArray(data.vagas)) throw new Error('data/vagas.json não contém lista vagas.');\nconst safeUrl=value=>{try{const u=new URL(String(value||''));if(u.protocol!=='https:'||u.username||u.password||!u.hostname||u.hostname==='localhost'||u.hostname.endsWith('.localhost')||u.hostname==='127.0.0.1'||u.hostname==='::1'||/^10\\.|^192\\.168\\.|^172\\.(1[6-9]|2[0-9]|3[01])\\./.test(u.hostname))return null;return u.href;}catch{return null;}};\nconst jobs=data.vagas.map((job,index)=>({job,index,checkedUrl:safeUrl(job.link)}));\nreturn jobs.map(item=>({json:{...item,originalData:data,sha:file.sha}}));"
+      },
+      "id": "prepare-jobs",
+      "name": "Preparar URLs originais",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.checkedUrl || 'https://invalid.invalid/' }}",
+        "options": {
+          "timeout": 20000,
+          "redirect": { "redirect": { "followRedirects": true, "maxRedirects": 5 } },
+          "response": { "response": { "fullResponse": true, "neverError": true, "responseFormat": "text" } }
+        }
+      },
+      "id": "check-original-page",
+      "name": "Consultar página original",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 300],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const checks=$input.all();\nconst prepared=$('Preparar URLs originais').all();\nconst now=new Date().toISOString();\nconst closedRe=/(vaga|oportunidade|position|job|application|candidatura).{0,80}(encerrad[oa]|fechad[oa]|expirad[oa]|preenchid[oa]|nao est[aá] mais dispon[ií]vel|n[aã]o aceita mais candidaturas|no longer accepting|no longer available|position has been filled|job has been filled|applications are closed|this role is closed|job expired)/i;\nconst expiredRe=/(prazo|deadline|application deadline|data limite).{0,60}(expirad[oa]|encerrad[oa]|passad[oa]|closed|expired)|application deadline has passed/i;\nconst applyControlRe=/<form\\b[^>]*(apply|application|candidatur)|<(button|a|input)\\b[^>]*(apply|application|candidatur|candidate)|\\b(apply now|apply for this job|apply for position|candidatar-se|candidate-se|enviar candidatura|inscreva-se)\\b/i;\nconst results=[];\nfor(let i=0;i<prepared.length;i++){\n const p=prepared[i].json, r=checks[i]?.json||{};\n const status=Number(r.statusCode||r.status||0);\n const body=typeof r.body==='string'?r.body:typeof r.data==='string'?r.data:JSON.stringify(r.body||r.data||'');\n let state='PENDING_VALIDATION', reason='Não foi possível confirmar publicação e candidatura na página original.';\n const link=String(p.job?.link||'');\n if(!p.checkedUrl){state='PENDING_VALIDATION';reason='URL original inválida ou não HTTPS; nenhuma oportunidade é marcada ativa sem validação.';}\n else if(status===404||status===410){state='SOURCE_UNAVAILABLE';reason='Página original retornou HTTP '+status+'; remoção da página, sozinha, não confirma encerramento da vaga.';}\n else if(!status||status===401||status===403||status===429||status>=500){state='SOURCE_UNAVAILABLE';reason=status?'Fonte indisponível/restrita (HTTP '+status+').':'Erro de rede ao consultar a página original.';}\n else if(status>=200&&status<300){\n   const job= p.job||{};\n   const expiry=Date.parse(job.expiraEm||job.expiryDate||'');\n   if(Number.isFinite(expiry)&&expiry<Date.now()){state='EXPIRED';reason='A data de expiração informada pela fonte já passou.';}\n   else if(expiredRe.test(body)){state='EXPIRED';reason='A página indica que o prazo de candidatura expirou.';}\n   else if(closedRe.test(body)){state='CLOSED';reason='A página original informa encerramento, preenchimento ou indisponibilidade da oportunidade.';}\n   else if(applyControlRe.test(body)){state='ACTIVE';reason='Página original acessível e controle de candidatura encontrado; não foram detectadas mensagens de encerramento.';}\n   else {state='PENDING_VALIDATION';reason='Página acessível, mas não foi encontrado formulário/botão de candidatura nem confirmação explícita de inscrições abertas.';}\n } else {state='PENDING_VALIDATION';reason='Resposta HTTP '+status+'; estado da candidatura não confirmado.';}\n results.push({...p.job,statusCandidatura:state,ultimaVerificacaoCandidatura:now,motivoVerificacaoCandidatura:reason,httpStatusVerificacao:status||null,urlVerificada:link});\n}\nconst base=prepared[0]?.json;\nif(!base) return [];\nconst data={...base.originalData,vagas:results,total:results.length,validacaoCandidaturasAtualizadaEm:now};\nconst content=Buffer.from(JSON.stringify(data,null,2)+'\\n','utf8').toString('base64');\nreturn [{json:{sha:base.sha,content,total:results.length,checkedAt:now,counts:results.reduce((a,j)=>(a[j.statusCandidatura]=(a[j.statusCandidatura]||0)+1,a),{})}}];"
+      },
+      "id": "classify-status",
+      "name": "Classificar e preparar resultados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 300]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { message: 'Valida status de candidatura das oportunidades', content: $json.content, sha: $json.sha, branch: 'main' } }}",
+        "options": { "timeout": 30000, "response": { "response": { "fullResponse": true, "neverError": true } } }
+      },
+      "id": "save-status",
+      "name": "Salvar status no GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 300],
+      "onError": "stopWorkflow"
+    }
+  ],
+  "connections": {
+    "A cada 6 horas": { "main": [[{ "node": "Ler vagas do GitHub", "type": "main", "index": 0 }]] },
+    "Ler vagas do GitHub": { "main": [[{ "node": "Preparar URLs originais", "type": "main", "index": 0 }]] },
+    "Preparar URLs originais": { "main": [[{ "node": "Consultar página original", "type": "main", "index": 0 }]] },
+    "Consultar página original": { "main": [[{ "node": "Classificar e preparar resultados", "type": "main", "index": 0 }]] },
+    "Classificar e preparar resultados": { "main": [[{ "node": "Salvar status no GitHub", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1", "timezone": "America/Sao_Paulo" },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
