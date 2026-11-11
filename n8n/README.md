@@ -76,3 +76,11 @@ node --test tests/workflow-dedup.test.cjs
 ```
 
 Testes sintáticos e simulações com dados fictícios não substituem testes de autenticação e envio na instância n8n.
+
+## Solução de erro no E: histórico indisponível
+
+O workflow E precisa de `previous.vagas` (e do contexto `github.jobsSha` para publicação pelo G). Caso o subworkflow E seja executado sozinho, ou o encadeamento não forneça `previous`, ele agora verifica o campo e recupera `data/vagas.json` diretamente da API do GitHub. Antes de consolidar, valida JSON, formato e SHA. **Não cria histórico vazio como substituto.**
+
+Depois de importar a versão atualizada de `E-deduplicacao.json`, associe a credencial **GitHub API** com acesso de leitura ao nó **Recuperar histórico GitHub**. Se o n8n já possuir o E importado, atualize o workflow existente (evite criar uma segunda cópia que não seja chamada pelo G). Se importar uma nova cópia, atualize o ID selecionado no nó `Executar E — deduplicação` do G.
+
+Execute o G para verificar o encadeamento completo. A recuperação é um fallback; a forma normal continua sendo o G repassar o histórico através de A, B, C e D. Caso o GitHub esteja inacessível ou retorne JSON inválido, o E continuará bloqueando a consolidação, **para evitar perda de dados**.
