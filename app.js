@@ -1,4 +1,5 @@
 let vagas = [];
+const quickSearchTags = new Set();
 
 const $ = id => document.getElementById(id);
 const text = value => value == null ? '' : String(value).trim();
@@ -38,6 +39,11 @@ function modalityKey(value) {
   return mode;
 }
 
+function isRioGrandeDoSul(value) {
+  const location = normalize(value);
+  return location.includes('rio grande do sul') || /(^|[\s,/-])rs($|[\s,/-])/.test(location);
+}
+
 function dateValue(value) {
   if (!value) return null;
   const timestamp = Date.parse(value);
@@ -53,6 +59,70 @@ function populateSelect(id, values, placeholder) {
     .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }))
     .forEach(value => select.add(new Option(value, value)));
   if ([...select.options].some(option => option.value === selected)) select.value = selected;
+}
+
+function refreshQuickSearchTags() {
+  document.querySelectorAll('[data-quick-search-tag]').forEach(button => {
+    const active = quickSearchTags.has(button.dataset.quickSearchTag);
+    button.setAttribute('aria-pressed', String(active));
+    button.style.background = active ? '#2563eb' : '#fff';
+    button.style.color = active ? '#fff' : '#1f2937';
+    button.style.borderColor = active ? '#2563eb' : '#cbd5e1';
+  });
+}
+
+function addQuickSearchTags() {
+  const filters = document.querySelector('.filters');
+  if (!filters || filters.querySelector('[data-quick-search-tags]')) return;
+
+  const group = el('div');
+  group.dataset.quickSearchTags = '';
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-label', 'Tags rápidas de pesquisa');
+  Object.assign(group.style, {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: '8px',
+    gridColumn: '1 / -1',
+    marginTop: '4px'
+  });
+
+  const label = el('span', '', 'Tags rápidas:');
+  label.style.fontSize = '0.85rem';
+  label.style.fontWeight = '600';
+  label.style.color = '#475569';
+  group.append(label);
+
+  [
+    ['presencial', 'Presencial'],
+    ['santa-rosa', 'Santa Rosa'],
+    ['rio-grande-do-sul', 'Rio Grande do Sul (RS)']
+  ].forEach(([key, title]) => {
+    const button = el('button', '', title);
+    button.type = 'button';
+    button.dataset.quickSearchTag = key;
+    button.setAttribute('aria-pressed', 'false');
+    Object.assign(button.style, {
+      border: '1px solid #cbd5e1',
+      borderRadius: '999px',
+      padding: '6px 12px',
+      background: '#fff',
+      color: '#1f2937',
+      cursor: 'pointer',
+      font: 'inherit',
+      fontSize: '0.85rem'
+    });
+    button.addEventListener('click', () => {
+      if (quickSearchTags.has(key)) quickSearchTags.delete(key);
+      else quickSearchTags.add(key);
+      refreshQuickSearchTags();
+      render();
+    });
+    group.append(button);
+  });
+
+  filters.append(group);
 }
 
 function render() {
@@ -73,15 +143,20 @@ function render() {
       job.cargo, job.empresa, job.descricao, job.local,
       job.nivel, job.modalidade, job.fonte
     ].map(text).join(' '));
+    const jobLocation = normalize(job.local);
     const matchesSearch = !search || search.split(/\s+/).every(term => searchable.includes(term));
     const matchesLevel = !level || levelKey(job.nivel) === level;
     const matchesMode = !mode || modalityKey(job.modalidade) === mode;
     const matchesSource = !source || text(job.fonte) === source;
     const matchesLocation = !location || text(job.local) === location;
+    const matchesQuickMode = !quickSearchTags.has('presencial') || modalityKey(job.modalidade) === 'presencial';
+    const matchesSantaRosa = !quickSearchTags.has('santa-rosa') || jobLocation.includes('santa rosa');
+    const matchesRioGrandeDoSul = !quickSearchTags.has('rio-grande-do-sul') || isRioGrandeDoSul(job.local);
     const published = dateValue(job.publicadoEm);
     const matchesPeriod = cutoff === null || (published !== null && published >= cutoff && published <= now);
 
-    return matchesSearch && matchesLevel && matchesMode && matchesSource && matchesLocation && matchesPeriod;
+    return matchesSearch && matchesLevel && matchesMode && matchesSource && matchesLocation
+      && matchesQuickMode && matchesSantaRosa && matchesRioGrandeDoSul && matchesPeriod;
   });
 
   filtered.sort((a, b) => {
@@ -137,6 +212,8 @@ function clearFilters() {
     const control = $(id);
     if (control) control.value = '';
   });
+  quickSearchTags.clear();
+  refreshQuickSearchTags();
   if ($('sort')) $('sort').value = 'recent';
   render();
 }
@@ -175,6 +252,7 @@ async function load() {
   }
 }
 
+addQuickSearchTags();
 ['search', 'level', 'mode', 'source', 'location', 'period', 'sort'].forEach(id => {
   const control = $(id);
   if (control) control.addEventListener(id === 'search' ? 'input' : 'change', render);
