@@ -54,7 +54,10 @@
             }
           }
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 4000
     },
     {
       "name": "Consolidar verificações",
@@ -100,6 +103,33 @@
           ]
         }
       }
+    },
+    {
+      "name": "Loop Over Items — 1 vaga",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        470,
+        300
+      ],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "name": "Respeitar limite — 2 segundos",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        950,
+        350
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      }
     }
   ],
   "connections": {
@@ -129,7 +159,7 @@
       "main": [
         [
           {
-            "node": "Consolidar verificações",
+            "node": "Respeitar limite — 2 segundos",
             "type": "main",
             "index": 0
           }
@@ -147,7 +177,36 @@
         ],
         [
           {
+            "node": "Loop Over Items — 1 vaga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items — 1 vaga": {
+      "main": [
+        [
+          {
+            "node": "Consolidar verificações",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "Consultar página original",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respeitar limite — 2 segundos": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items — 1 vaga",
             "type": "main",
             "index": 0
           }
