@@ -60,7 +60,7 @@ jobs:
             await db.connect();
             try {
               const state=await db.query('SELECT payload,revision FROM tecops_pipeline_state WHERE singleton=TRUE');
-              if(state.rowCount!==1||state.rows[0].revision!==0)throw Error('Bootstrap incompleto');
+              if(state.rowCount!==1||Number(state.rows[0].revision)!==0)throw Error('Bootstrap incompleto');
               const payload=state.rows[0].payload;
               const saved=await db.query('SELECT tecops_commit_pipeline($1::jsonb,$2::bigint,$3::text,$4::text,$5::jsonb) AS result',
                 [JSON.stringify(payload),0,'ci-run-1','daily','[]']);
