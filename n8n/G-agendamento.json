@@ -184,7 +184,7 @@
       }
     },
     {
-      "name": "Finalizar execução diária",
+      "name": "Finalizar execução",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -193,7 +193,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const packet=$input.first().json;\nreturn [{json:{kind:'daily',processedAt:new Date().toISOString(),status:'Concluído. Envio semanal não previsto hoje.',dedupStats:packet.dedupStats||{}}}];"
+        "jsCode": "const packet=$('Confirmar transação PostgreSQL').first().json;\nreturn [{json:{kind:packet.run.kind,processedAt:new Date().toISOString(),status:'Persistência PostgreSQL confirmada. Espelho GitHub processado.',\n dedupStats:packet.dedupStats||{},revision:packet.committed?.revision}}];"
       }
     },
     {
@@ -617,7 +617,7 @@
       "main": [
         [
           {
-            "node": "Ler versão pública GitHub",
+            "node": "É execução semanal?",
             "type": "main",
             "index": 0
           }
@@ -657,7 +657,7 @@
         ],
         [
           {
-            "node": "É execução semanal?",
+            "node": "Finalizar execução",
             "type": "main",
             "index": 0
           }
@@ -679,7 +679,7 @@
       "main": [
         [
           {
-            "node": "É execução semanal?",
+            "node": "Finalizar execução",
             "type": "main",
             "index": 0
           }
@@ -697,7 +697,7 @@
         ],
         [
           {
-            "node": "Finalizar execução diária",
+            "node": "Ler versão pública GitHub",
             "type": "main",
             "index": 0
           }
@@ -731,6 +731,17 @@
         [
           {
             "node": "Enviar relatório semanal por e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar relatório semanal por e-mail": {
+      "main": [
+        [
+          {
+            "node": "Ler versão pública GitHub",
             "type": "main",
             "index": 0
           }
