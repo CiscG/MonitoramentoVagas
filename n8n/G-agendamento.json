@@ -285,7 +285,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const p=$input.first().json;\nif(!p.data||!p.run?.id||!Number.isSafeInteger(Number(p.pg?.revision)))throw new Error('Estado/SHA lógico ausente, abortando.');\nreturn [{json:{...p,transactionReady:true}}];"
+        "jsCode": "// Sanitiza diagnósticos antes do commit e do registro público.\nconst p=$input.first().json;\nif(!p.data||!p.run?.id||!Number.isSafeInteger(Number(p.pg?.revision)))\n  throw new Error('Estado/revisão de PostgreSQL ausente, abortando sem publicação.');\nfunction redact(value){\n return String(value??'')\n .replace(/([?&](?:app_key|app_id|api_key|token|access_token|secret|password)=)[^&\\s]+/gi,'$1[REDACTED]')\n .replace(/(Authorization\\s*:\\s*)(?:Bearer|Basic)\\s+\\S+/gi,'$1[REDACTED]')\n .replace(/(\\/api\\/)[A-Za-z0-9_-]{18,}/g,'$1[REDACTED]')\n .slice(0,500);\n}\nconst safeDiagnostics=(Array.isArray(p.diagnostics)?p.diagnostics:[]).map(d=>({\n name:redact(d.name),ok:d.ok===true,statusCode:d.statusCode??null,\n checkedAt:d.checkedAt??null,quantity:d.quantity??0,\n error:d.error?redact(d.error):null\n}));\nconst data={...p.data,diagnosticosFontes:safeDiagnostics};\nreturn [{json:{...p,diagnostics:safeDiagnostics,data,transactionReady:true}}];"
       }
     },
     {
