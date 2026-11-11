@@ -1,0 +1,14 @@
+{
+  "name": "tecops-postgresql",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Importador opcional de histórico para PostgreSQL",
+  "scripts": {
+    "test": "node --test test/*.test.cjs",
+    "import:dry-run": "node import-jobs.cjs --dry-run",
+    "import": "node import-jobs.cjs"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  }
+}
