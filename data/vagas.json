@@ -1,49 +1,7 @@
 {
-  "atualizadoEm": "2026-11-10T20:13:35.061Z",
+  "atualizadoEm": "2026-11-11T01:29:13.308Z",
   "total": 14,
   "vagas": [
-    {
-      "id": "himalayas-https://himalayas.app/companies/bip-brasil/jobs/desenvolvedor-full-stack-junior",
-      "cargo": "Desenvolvedor Full Stack  - Junior",
-      "empresa": "BIP Brasil",
-      "nivel": "Júnior",
-      "modalidade": "Remoto",
-      "local": "Brasil",
-      "descricao": "Buscamos uma pessoa profissional de nível júnior para atuar no desenvolvimento de aplicações e soluções inteligentes, combinando desenvolvimento de software tradicional com tecnologias de Inteligência Artificial.",
-      "publicadoEm": "2026-11-08T23:03:56.000Z",
-      "expiraEm": "2027-01-07T23:03:55.000Z",
-      "fonte": "Himalayas",
-      "link": "https://himalayas.app/companies/bip-brasil/jobs/desenvolvedor-full-stack-junior?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
-    },
-    {
-      "id": "himalayas-https://himalayas.app/companies/bip-brasil/jobs/pessoa-desenvolvedora-de-ia-rpa-junior",
-      "cargo": "Pessoa Desenvolvedora de IA/RPA  - Junior",
-      "empresa": "BIP Brasil",
-      "nivel": "Júnior",
-      "modalidade": "Remoto",
-      "local": "Brasil",
-      "descricao": "Buscamos uma pessoa profissional de nível júnior para atuar no desenvolvimento de soluções de automação de processos, combinando tecnologias de RPA tradicional com recursos de Inteligência Artificial, incluindo modelos de IA Generativa (GenAI) e agentes inteligentes.",
-      "publicadoEm": "2026-11-08T13:30:58.000Z",
-      "expiraEm": "2027-01-07T13:30:57.000Z",
-      "fonte": "Himalayas",
-      "link": "https://himalayas.app/companies/bip-brasil/jobs/pessoa-desenvolvedora-de-ia-rpa-junior?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
-    },
-    {
-      "id": "himalayas-https://himalayas.app/companies/telus-digital/jobs/full-stack-ai-logic-expert-ai-community-5029362594",
-      "cargo": "Full-Stack AI Logic Expert (AI Community)",
-      "empresa": "TELUS Digital",
-      "nivel": "Júnior",
-      "modalidade": "Remoto",
-      "local": "Mundial (ver restrições)",
-      "descricao": "About the Role: At TELUS Digital, we are bridging the gap between how a human thinks and how a machine writes code.",
-      "publicadoEm": "2026-11-08T04:04:33.000Z",
-      "expiraEm": "2026-12-06T09:07:10.000Z",
-      "fonte": "Himalayas",
-      "link": "https://himalayas.app/companies/telus-digital/jobs/full-stack-ai-logic-expert-ai-community-5029362594?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
-    },
     {
       "id": "backend-br-6264105358",
       "cargo": "[Remoto] Desenvolvedor(a) Back-end Júnior - Python / AI Coding & Agentic AI - MKdigital",
@@ -55,63 +13,41 @@
       "publicadoEm": "2026-11-07T20:58:13.000Z",
       "fonte": "Backend BR",
       "link": "https://github.com/backend-br/vagas/issues/12493",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
-    },
-    {
-      "id": "himalayas-https://himalayas.app/companies/sensedia/jobs/desenvolvedor-java-junior-13938",
-      "cargo": "Desenvolvedor Java | Júnior (13938)",
-      "empresa": "Sensedia",
-      "nivel": "Júnior",
-      "modalidade": "Remoto",
-      "local": "Brasil",
-      "descricao": "Vaga 100% remotaAqui a gente conecta o mundo Sensedia é uma multinacional brasileira provedora de plataforma de gerenciamento de APIs, governança de agentes e soluções de integração, além de serviços profissionais.",
-      "publicadoEm": "2026-11-06T15:18:48.000Z",
-      "expiraEm": "2027-01-05T15:18:47.000Z",
-      "fonte": "Himalayas",
-      "link": "https://himalayas.app/companies/sensedia/jobs/desenvolvedor-java-junior-13938?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
-    },
-    {
-      "id": "himalayas-https://himalayas.app/companies/sensedia/jobs/java-developer-junior-13938-exclusivo-pcd",
-      "cargo": "Java Developer | Junior (13938) [Exclusivo PCD]",
-      "empresa": "Sensedia",
-      "nivel": "Júnior",
-      "modalidade": "Remoto",
-      "local": "Brasil",
-      "descricao": "Vaga 100% remotaEsta é uma oportunidade exclusiva para Pessoas com Deficiência (PcD)Aqui a gente conecta o mundoA Sensedia é uma multinacional brasileira provedora de plataforma de gerenciamento de APIs, governança de agentes e soluções de integração, além de serviços profissionais.",
-      "publicadoEm": "2026-11-06T08:11:41.000Z",
-      "expiraEm": "2027-01-05T08:11:40.000Z",
-      "fonte": "Himalayas",
-      "link": "https://himalayas.app/companies/sensedia/jobs/java-developer-junior-13938-exclusivo-pcd?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
-    },
-    {
-      "id": "himalayas-https://himalayas.app/companies/my-va-support-inc/jobs/web-developer",
-      "cargo": "Web Developer",
-      "empresa": "My VA Support, Inc.",
-      "nivel": "Júnior",
-      "modalidade": "Remoto",
-      "local": "Brasil",
-      "descricao": "This is a remote position. Only LATAM-based candidates (bilingual in Spanish and English)The RoleThis position is best suited for a candidate with early to mid-level experience in WordPress development.",
-      "publicadoEm": "2026-11-01T11:57:20.000Z",
-      "expiraEm": "2026-12-21T16:28:20.000Z",
-      "fonte": "Himalayas",
-      "link": "https://himalayas.app/companies/my-va-support-inc/jobs/web-developer?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
-    },
-    {
-      "id": "himalayas-https://himalayas.app/companies/evoluservices-meios-de-pagamentos/jobs/analista-backend-java-junior",
-      "cargo": "Analista Backend Java Júnior",
-      "empresa": "Evoluservices Meios de Pagamentos",
-      "nivel": "Júnior",
-      "modalidade": "Remoto",
-      "local": "Brasil",
-      "descricao": "Sobre a Evoluservices:Somos a principal fintech de meios de pagamento na área da Saúde e seguimos crescendo a cada ano!",
-      "publicadoEm": "2026-10-31T21:47:02.000Z",
-      "expiraEm": "2026-12-30T21:47:01.000Z",
-      "fonte": "Himalayas",
-      "link": "https://himalayas.app/companies/evoluservices-meios-de-pagamentos/jobs/analista-backend-java-junior?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento Backend",
+      "areas": [
+        "Desenvolvimento Backend"
+      ],
+      "especializacoes": [],
+      "tecnologias": [
+        "Python"
+      ],
+      "linguagens": [
+        "Python"
+      ],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento Backend",
+        "Python",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Alta"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento Backend por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Backend BR"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
     },
     {
       "id": "himalayas-https://himalayas.app/companies/bigdatacorp/jobs/back-end-jr-l-pesquisa-e-desenvolvimento",
@@ -125,27 +61,128 @@
       "expiraEm": "2026-12-29T02:15:49.000Z",
       "fonte": "Himalayas",
       "link": "https://himalayas.app/companies/bigdatacorp/jobs/back-end-jr-l-pesquisa-e-desenvolvimento?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento Backend",
+      "areas": [
+        "Desenvolvimento Backend"
+      ],
+      "especializacoes": [],
+      "tecnologias": [],
+      "linguagens": [],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento Backend",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Não determinada"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento Backend por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
     },
     {
-      "id": "himalayas-https://himalayas.app/companies/viceri-seidor/jobs/pessoa-desenvolvedora-fullstack-nodejs-angular-java-junior-remoto",
-      "cargo": "Pessoa Desenvolvedora FullStack (NodeJS / Angular / Java) - Junior (Remoto)",
-      "empresa": "Viceri SEIDOR",
+      "id": "himalayas-https://himalayas.app/companies/bip-brasil/jobs/desenvolvedor-full-stack-junior",
+      "cargo": "Desenvolvedor Full Stack  - Junior",
+      "empresa": "BIP Brasil",
       "nivel": "Júnior",
       "modalidade": "Remoto",
       "local": "Brasil",
-      "descricao": "Quem somos! Tornamos as pessoas melhores através da tecnologia.",
-      "publicadoEm": "2026-10-29T02:25:32.000Z",
-      "expiraEm": "2026-12-28T02:25:32.000Z",
+      "descricao": "Buscamos uma pessoa profissional de nível júnior para atuar no desenvolvimento de aplicações e soluções inteligentes, combinando desenvolvimento de software tradicional com tecnologias de Inteligência Artificial.",
+      "publicadoEm": "2026-11-08T23:03:56.000Z",
+      "expiraEm": "2027-01-07T23:03:55.000Z",
       "fonte": "Himalayas",
-      "link": "https://himalayas.app/companies/viceri-seidor/jobs/pessoa-desenvolvedora-fullstack-nodejs-angular-java-junior-remoto?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
+      "link": "https://himalayas.app/companies/bip-brasil/jobs/desenvolvedor-full-stack-junior?utm_source=api",
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento Full Stack",
+      "areas": [
+        "Desenvolvimento Full Stack"
+      ],
+      "especializacoes": [],
+      "tecnologias": [],
+      "linguagens": [],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento Full Stack",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Não determinada"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento Full Stack por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
+    },
+    {
+      "id": "himalayas-https://himalayas.app/companies/bip-brasil/jobs/pessoa-desenvolvedora-de-ia-rpa-junior",
+      "cargo": "Pessoa Desenvolvedora de IA/RPA  - Junior",
+      "empresa": "BIP Brasil",
+      "nivel": "Júnior",
+      "modalidade": "Remoto",
+      "local": "Brasil",
+      "descricao": "Buscamos uma pessoa profissional de nível júnior para atuar no desenvolvimento de soluções de automação de processos, combinando tecnologias de RPA tradicional com recursos de Inteligência Artificial, incluindo modelos de IA Generativa (GenAI) e agentes inteligentes.",
+      "publicadoEm": "2026-11-08T13:30:58.000Z",
+      "expiraEm": "2027-01-07T13:30:57.000Z",
+      "fonte": "Himalayas",
+      "link": "https://himalayas.app/companies/bip-brasil/jobs/pessoa-desenvolvedora-de-ia-rpa-junior?utm_source=api",
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento de Software",
+      "areas": [
+        "Desenvolvimento de Software"
+      ],
+      "especializacoes": [],
+      "tecnologias": [],
+      "linguagens": [],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento de Software",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Não determinada"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento de Software por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
     },
     {
       "id": "himalayas-https://himalayas.app/companies/cloud-people/jobs/servicenow-developer",
       "cargo": "ServiceNow Developer",
       "empresa": "Cloud People",
-      "nivel": "Júnior",
+      "nivel": "Não informada",
       "modalidade": "Remoto",
       "local": "Brasil",
       "descricao": "At The Cloud People, we are accelerating our impact across through the power of ServiceNow.",
@@ -153,13 +190,41 @@
       "expiraEm": "2026-12-27T21:31:52.000Z",
       "fonte": "Himalayas",
       "link": "https://himalayas.app/companies/cloud-people/jobs/servicenow-developer?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento de Software",
+      "areas": [
+        "Desenvolvimento de Software"
+      ],
+      "especializacoes": [],
+      "tecnologias": [],
+      "linguagens": [],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento de Software"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Não determinada",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Não determinada"
+      },
+      "justificativaClassificacao": "Nível não indicado explicitamente; área Desenvolvimento de Software por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
     },
     {
       "id": "himalayas-https://himalayas.app/companies/concurrences/jobs/ai-full-stack-developer-new-grad",
       "cargo": "AI Full-Stack Developer, New Grad",
       "empresa": "Concurrences",
-      "nivel": "Júnior",
+      "nivel": "Não informada",
       "modalidade": "Remoto",
       "local": "Brasil",
       "descricao": "About ConcurrencesMission: \"Connecting Antitrust People.",
@@ -167,7 +232,125 @@
       "expiraEm": "2026-12-26T03:23:06.000Z",
       "fonte": "Himalayas",
       "link": "https://himalayas.app/companies/concurrences/jobs/ai-full-stack-developer-new-grad?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento Full Stack",
+      "areas": [
+        "Desenvolvimento Full Stack"
+      ],
+      "especializacoes": [],
+      "tecnologias": [],
+      "linguagens": [],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento Full Stack"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Não determinada",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Não determinada"
+      },
+      "justificativaClassificacao": "Nível não indicado explicitamente; área Desenvolvimento Full Stack por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
+    },
+    {
+      "id": "himalayas-https://himalayas.app/companies/evoluservices-meios-de-pagamentos/jobs/analista-backend-java-junior",
+      "cargo": "Analista Backend Java Júnior",
+      "empresa": "Evoluservices Meios de Pagamentos",
+      "nivel": "Júnior",
+      "modalidade": "Remoto",
+      "local": "Brasil",
+      "descricao": "Sobre a Evoluservices:Somos a principal fintech de meios de pagamento na área da Saúde e seguimos crescendo a cada ano!",
+      "publicadoEm": "2026-10-31T21:47:02.000Z",
+      "expiraEm": "2026-12-30T21:47:01.000Z",
+      "fonte": "Himalayas",
+      "link": "https://himalayas.app/companies/evoluservices-meios-de-pagamentos/jobs/analista-backend-java-junior?utm_source=api",
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento Backend",
+      "areas": [
+        "Desenvolvimento Backend"
+      ],
+      "especializacoes": [],
+      "tecnologias": [
+        "Java"
+      ],
+      "linguagens": [
+        "Java"
+      ],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento Backend",
+        "Java",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Alta"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento Backend por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
+    },
+    {
+      "id": "himalayas-https://himalayas.app/companies/my-va-support-inc/jobs/web-developer",
+      "cargo": "Web Developer",
+      "empresa": "My VA Support, Inc.",
+      "nivel": "Não informada",
+      "modalidade": "Remoto",
+      "local": "Brasil",
+      "descricao": "This is a remote position. Only LATAM-based candidates (bilingual in Spanish and English)The RoleThis position is best suited for a candidate with early to mid-level experience in WordPress development.",
+      "publicadoEm": "2026-11-01T11:57:20.000Z",
+      "expiraEm": "2026-12-21T16:28:20.000Z",
+      "fonte": "Himalayas",
+      "link": "https://himalayas.app/companies/my-va-support-inc/jobs/web-developer?utm_source=api",
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento Frontend",
+      "areas": [
+        "Desenvolvimento Frontend"
+      ],
+      "especializacoes": [],
+      "tecnologias": [],
+      "linguagens": [],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento Frontend"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Não determinada",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Não determinada"
+      },
+      "justificativaClassificacao": "Nível não indicado explicitamente; área Desenvolvimento Frontend por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
     },
     {
       "id": "himalayas-https://himalayas.app/companies/quality-digital/jobs/pessoa-desenvolvedora-junior-vtex-front-end",
@@ -181,7 +364,174 @@
       "expiraEm": "2026-12-23T17:44:52.000Z",
       "fonte": "Himalayas",
       "link": "https://himalayas.app/companies/quality-digital/jobs/pessoa-desenvolvedora-junior-vtex-front-end?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento Frontend",
+      "areas": [
+        "Desenvolvimento Frontend"
+      ],
+      "especializacoes": [],
+      "tecnologias": [],
+      "linguagens": [],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento Frontend",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Não determinada"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento Frontend por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
+    },
+    {
+      "id": "himalayas-https://himalayas.app/companies/sensedia/jobs/desenvolvedor-java-junior-13938",
+      "cargo": "Desenvolvedor Java | Júnior (13938)",
+      "empresa": "Sensedia",
+      "nivel": "Júnior",
+      "modalidade": "Remoto",
+      "local": "Brasil",
+      "descricao": "Vaga 100% remotaAqui a gente conecta o mundo Sensedia é uma multinacional brasileira provedora de plataforma de gerenciamento de APIs, governança de agentes e soluções de integração, além de serviços profissionais.",
+      "publicadoEm": "2026-11-06T15:18:48.000Z",
+      "expiraEm": "2027-01-05T15:18:47.000Z",
+      "fonte": "Himalayas",
+      "link": "https://himalayas.app/companies/sensedia/jobs/desenvolvedor-java-junior-13938?utm_source=api",
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento de Software",
+      "areas": [
+        "Desenvolvimento de Software"
+      ],
+      "especializacoes": [],
+      "tecnologias": [
+        "Java"
+      ],
+      "linguagens": [
+        "Java"
+      ],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento de Software",
+        "Java",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Alta"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento de Software por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
+    },
+    {
+      "id": "himalayas-https://himalayas.app/companies/sensedia/jobs/java-developer-junior-13938-exclusivo-pcd",
+      "cargo": "Java Developer | Junior (13938) [Exclusivo PCD]",
+      "empresa": "Sensedia",
+      "nivel": "Júnior",
+      "modalidade": "Remoto",
+      "local": "Brasil",
+      "descricao": "Vaga 100% remotaEsta é uma oportunidade exclusiva para Pessoas com Deficiência (PcD)Aqui a gente conecta o mundoA Sensedia é uma multinacional brasileira provedora de plataforma de gerenciamento de APIs, governança de agentes e soluções de integração, além de serviços profissionais.",
+      "publicadoEm": "2026-11-06T08:11:41.000Z",
+      "expiraEm": "2027-01-05T08:11:40.000Z",
+      "fonte": "Himalayas",
+      "link": "https://himalayas.app/companies/sensedia/jobs/java-developer-junior-13938-exclusivo-pcd?utm_source=api",
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento de Software",
+      "areas": [
+        "Desenvolvimento de Software"
+      ],
+      "especializacoes": [],
+      "tecnologias": [
+        "Java"
+      ],
+      "linguagens": [
+        "Java"
+      ],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento de Software",
+        "Java",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Alta"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento de Software por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
+    },
+    {
+      "id": "himalayas-https://himalayas.app/companies/telus-digital/jobs/full-stack-ai-logic-expert-ai-community-5029362594",
+      "cargo": "Full-Stack AI Logic Expert (AI Community)",
+      "empresa": "TELUS Digital",
+      "nivel": "Não informada",
+      "modalidade": "Remoto",
+      "local": "Mundial (ver restrições)",
+      "descricao": "About the Role: At TELUS Digital, we are bridging the gap between how a human thinks and how a machine writes code.",
+      "publicadoEm": "2026-11-08T04:04:33.000Z",
+      "expiraEm": "2026-12-06T09:07:10.000Z",
+      "fonte": "Himalayas",
+      "link": "https://himalayas.app/companies/telus-digital/jobs/full-stack-ai-logic-expert-ai-community-5029362594?utm_source=api",
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento Full Stack",
+      "areas": [
+        "Desenvolvimento Full Stack"
+      ],
+      "especializacoes": [],
+      "tecnologias": [],
+      "linguagens": [],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento Full Stack"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Não determinada",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Não determinada"
+      },
+      "justificativaClassificacao": "Nível não indicado explicitamente; área Desenvolvimento Full Stack por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
     },
     {
       "id": "himalayas-https://himalayas.app/companies/unimed-vale-do-sinos-rs/jobs/programador-junior-rpa",
@@ -195,7 +545,202 @@
       "expiraEm": "2026-12-21T19:23:52.000Z",
       "fonte": "Himalayas",
       "link": "https://himalayas.app/companies/unimed-vale-do-sinos-rs/jobs/programador-junior-rpa?utm_source=api",
-      "capturadoEm": "2026-11-10T20:13:35.061Z"
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento de Software",
+      "areas": [
+        "Desenvolvimento de Software"
+      ],
+      "especializacoes": [],
+      "tecnologias": [],
+      "linguagens": [],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento de Software",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Não determinada"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento de Software por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
+    },
+    {
+      "id": "himalayas-https://himalayas.app/companies/viceri-seidor/jobs/pessoa-desenvolvedora-fullstack-nodejs-angular-java-junior-remoto",
+      "cargo": "Pessoa Desenvolvedora FullStack (NodeJS / Angular / Java) - Junior (Remoto)",
+      "empresa": "Viceri SEIDOR",
+      "nivel": "Júnior",
+      "modalidade": "Remoto",
+      "local": "Brasil",
+      "descricao": "Quem somos! Tornamos as pessoas melhores através da tecnologia.",
+      "publicadoEm": "2026-10-29T02:25:32.000Z",
+      "expiraEm": "2026-12-28T02:25:32.000Z",
+      "fonte": "Himalayas",
+      "link": "https://himalayas.app/companies/viceri-seidor/jobs/pessoa-desenvolvedora-fullstack-nodejs-angular-java-junior-remoto?utm_source=api",
+      "capturadoEm": "2026-11-10T20:13:35.061Z",
+      "area": "Desenvolvimento Full Stack",
+      "areas": [
+        "Desenvolvimento Full Stack"
+      ],
+      "especializacoes": [],
+      "tecnologias": [
+        "Java",
+        "Angular",
+        "Node.js"
+      ],
+      "linguagens": [
+        "Java"
+      ],
+      "engines": [],
+      "tags": [
+        "Desenvolvimento Full Stack",
+        "Java",
+        "Angular",
+        "Node.js",
+        "Júnior"
+      ],
+      "experiencia": "Não informada",
+      "experienciaObrigatoriaAnos": null,
+      "experienciaDesejavelAnos": null,
+      "evidenciasExperiencia": [],
+      "confiancaClassificacao": {
+        "nivel": "Alta",
+        "area": "Alta",
+        "experiencia": "Não determinada",
+        "tecnologias": "Alta"
+      },
+      "justificativaClassificacao": "Nível Júnior identificado no título ou nível informado; área Desenvolvimento Full Stack por termos técnicos; experiência não informada.",
+      "primeiraIdentificacao": "2026-11-10T20:13:35.061Z",
+      "fontesAlternativas": [
+        "Himalayas"
+      ],
+      "buscasCorrespondentes": [],
+      "urlNormalizada": ""
+    }
+  ],
+  "ultimaSincronizacao": "2026-11-11T01:29:13.308Z",
+  "ultimaSincronizacaoCompleta": null,
+  "ultimaSincronizacaoParcial": "2026-11-11T01:29:13.308Z",
+  "limiteHistorico": 400,
+  "historicoPreservado": true,
+  "novasNaExecucao": 0,
+  "ultimaConsultaBemSucedida": {
+    "Frontend BR": "2026-11-11T01:29:08.595Z",
+    "Backend BR": "2026-11-11T01:29:08.934Z",
+    "Himalayas": "2026-11-11T01:29:09.222Z",
+    "Himalayas Game Dev": "2026-11-11T01:29:10.595Z",
+    "Himalayas Estagio": "2026-11-11T01:29:10.765Z"
+  },
+  "diagnosticosFontes": [
+    {
+      "fonte": "Frontend BR",
+      "sucesso": true,
+      "statusCode": 200,
+      "consultadoEm": "2026-11-11T01:29:08.595Z",
+      "quantidade": 8,
+      "erro": null,
+      "retryAfter": null
+    },
+    {
+      "fonte": "Backend BR",
+      "sucesso": true,
+      "statusCode": 200,
+      "consultadoEm": "2026-11-11T01:29:08.934Z",
+      "quantidade": 41,
+      "erro": null,
+      "retryAfter": null
+    },
+    {
+      "fonte": "Himalayas",
+      "sucesso": true,
+      "statusCode": 200,
+      "consultadoEm": "2026-11-11T01:29:09.222Z",
+      "quantidade": 20,
+      "erro": null,
+      "retryAfter": null
+    },
+    {
+      "fonte": "Adzuna",
+      "sucesso": false,
+      "statusCode": 401,
+      "consultadoEm": "2026-11-11T01:29:10.094Z",
+      "quantidade": null,
+      "erro": "HTTP 401: Falha HTTP",
+      "retryAfter": null
+    },
+    {
+      "fonte": "Jooble",
+      "sucesso": false,
+      "statusCode": 403,
+      "consultadoEm": "2026-11-11T01:29:10.354Z",
+      "quantidade": null,
+      "erro": "HTTP 403: Falha HTTP",
+      "retryAfter": null
+    },
+    {
+      "fonte": "Himalayas Game Dev",
+      "sucesso": true,
+      "statusCode": 200,
+      "consultadoEm": "2026-11-11T01:29:10.595Z",
+      "quantidade": 5,
+      "erro": null,
+      "retryAfter": null
+    },
+    {
+      "fonte": "Himalayas Estagio",
+      "sucesso": true,
+      "statusCode": 200,
+      "consultadoEm": "2026-11-11T01:29:10.765Z",
+      "quantidade": 9,
+      "erro": null,
+      "retryAfter": null
+    },
+    {
+      "fonte": "Adzuna Game Dev",
+      "sucesso": false,
+      "statusCode": 401,
+      "consultadoEm": "2026-11-11T01:29:11.622Z",
+      "quantidade": null,
+      "erro": "HTTP 401: Falha HTTP",
+      "retryAfter": null
+    },
+    {
+      "fonte": "Adzuna Estagio",
+      "sucesso": false,
+      "statusCode": 401,
+      "consultadoEm": "2026-11-11T01:29:12.417Z",
+      "quantidade": null,
+      "erro": "HTTP 401: Falha HTTP",
+      "retryAfter": null
+    },
+    {
+      "fonte": "Jooble BR Game Dev",
+      "sucesso": false,
+      "statusCode": 403,
+      "consultadoEm": "2026-11-11T01:29:12.604Z",
+      "quantidade": null,
+      "erro": "HTTP 403: Falha HTTP",
+      "retryAfter": null
+    },
+    {
+      "fonte": "Jooble BR Estagio",
+      "sucesso": false,
+      "statusCode": 403,
+      "consultadoEm": "2026-11-11T01:29:12.759Z",
+      "quantidade": null,
+      "erro": "HTTP 403: Falha HTTP",
+      "retryAfter": null
     }
   ]
 }
