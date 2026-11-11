@@ -186,7 +186,8 @@ BEGIN
       first_seen_at = least(jobs.first_seen_at, v_first),
       last_seen_at = greatest(jobs.last_seen_at, v_last),
       last_verified_at = greatest(jobs.last_verified_at, nullif(p->>'last_verified_at','')::timestamptz),
-      application_status = CASE WHEN nullif(p->>'last_verified_at','')::timestamptz >= jobs.last_verified_at
+      application_status = CASE WHEN nullif(p->>'last_verified_at','')::timestamptz IS NOT NULL
+        AND (jobs.last_verified_at IS NULL OR nullif(p->>'last_verified_at','')::timestamptz >= jobs.last_verified_at)
         THEN coalesce(nullif(p->>'application_status',''),jobs.application_status) ELSE jobs.application_status END,
       compatibility_score = coalesce(nullif(p->>'compatibility_score','')::smallint, jobs.compatibility_score),
       compatibility_notes = coalesce(nullif(p->>'compatibility_notes',''), jobs.compatibility_notes),
