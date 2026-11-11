@@ -83,8 +83,8 @@ BEGIN
   SELECT COALESCE(report_archive->'reports','[]'::jsonb) INTO v_reports
     FROM tecops_pipeline_state WHERE singleton=TRUE FOR UPDATE;
   IF v_reports IS NULL THEN RAISE EXCEPTION 'Estado não inicializado'; END IF;
-  SELECT COALESCE(jsonb_agg(e),'[]'::jsonb) INTO v_reports
-    FROM jsonb_array_elements(v_reports) e WHERE e->>'weekKey' <> v_week;
+  SELECT COALESCE(jsonb_agg(item),'[]'::jsonb) INTO v_reports
+    FROM jsonb_array_elements(v_reports) AS records(item) WHERE item->>'weekKey' <> v_week;
   v_reports=v_reports || jsonb_build_array(p_report);
   UPDATE tecops_pipeline_state SET
     report_archive=jsonb_build_object('updatedAt',NOW(),'reports',v_reports),
