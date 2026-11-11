@@ -68,6 +68,38 @@
         "mode": "runOnceForAllItems",
         "jsCode": "// C — interpreta evidências conservadoramente e devolve envelope único.\nconst envelope=$('Entrada C').first().json||{};\nconst checked=$input.all();\nconst prepared=$('Preparar verificações').all();\nconst original=prepared.filter(p=>!p.json.skip).map(p=>p.json.job);\nconst now=new Date().toISOString();\nconst closedRe=/(vaga|oportunidade|position|job|application|candidatura).{0,80}(encerrad[oa]|fechad[oa]|expirad[oa]|preenchid[oa]|nao est[aá] mais dispon[ií]vel|n[aã]o aceita mais candidaturas|no longer accepting|no longer available|position has been filled|job has been filled|applications are closed|this role is closed|job expired)/i;\nconst expiredRe=/(prazo|deadline|application deadline|data limite).{0,60}(expirad[oa]|encerrad[oa]|passad[oa]|closed|expired)|application deadline has passed/i;\nconst applyControlRe=/<form\\b[^>]*(apply|application|candidatur)|<(button|a|input)\\b[^>]*(apply|application|candidatur|candidate)|\\b(apply now|apply for this job|apply for position|candidatar-se|candidate-se|enviar candidatura|inscreva-se)\\b/i;\n\nconst results=[];\nfor(let i=0;i<original.length;i++){\n const p=prepared[i]?.json||{}, r=checked[i]?.json||{}, job=original[i];\n const status=Number(r.statusCode||r.status||0);\n const body=typeof r.body==='string'?r.body:typeof r.data==='string'?r.data:JSON.stringify(r.body||r.data||'');\n let state='PENDING_VALIDATION', reason='Sem confirmação explícita na página original.';\n if(!p.checkedUrl){state='PENDING_VALIDATION';reason='URL inválida ou não HTTPS; não foi possível verificar.';}\n else if(status===404||status===410){state='SOURCE_UNAVAILABLE';reason='Página retornou HTTP '+status+'; não prova encerramento.';}\n else if(!status||[401,403,429].includes(status)||status>=500){\n   state='SOURCE_UNAVAILABLE';reason=status?'Fonte indisponível ou restrita (HTTP '+status+').':'Erro de rede ou timeout.';\n }else if(status>=200&&status<300){\n   const expiry=Date.parse(job.expiraEm||job.deadline||'');\n   if(Number.isFinite(expiry)&&expiry<Date.now()){state='EXPIRED';reason='Prazo de candidatura expirado.';}\n   else if(expiredRe.test(body)){state='EXPIRED';reason='Página indica prazo expirado.';}\n   else if(closedRe.test(body)){state='CLOSED';reason='Página indica encerramento da vaga.';}\n   else if(applyControlRe.test(body)){state='ACTIVE';reason='Página acessível e controle de candidatura encontrado.';}\n   else{state='PENDING_VALIDATION';reason='Página acessível mas inscrições não confirmadas.';}\n }else{state='PENDING_VALIDATION';reason='Resposta HTTP '+status+' não conclusiva.';}\n results.push({...job,statusCandidatura:state,application_status:state,\n   ultimaVerificacaoCandidatura:now,last_verified_at:now,\n   motivoVerificacaoCandidatura:reason,httpStatusVerificacao:status||null,\n   urlVerificada:p.checkedUrl||null});\n}\nreturn [{json:{...envelope,jobs:results,validationStats:{\nchecked:results.length,counts:results.reduce((a,j)=>(a[j.statusCandidatura]=(a[j.statusCandidatura]||0)+1,a),{})\n},validatedAt:now}}];"
       }
+    },
+    {
+      "name": "Há vagas para verificar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        365,
+        280
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-jobs",
+              "leftValue": "={{ $json.skip === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "connections": {
@@ -86,7 +118,7 @@
       "main": [
         [
           {
-            "node": "Consultar página original",
+            "node": "Há vagas para verificar?",
             "type": "main",
             "index": 0
           }
@@ -98,6 +130,24 @@
         [
           {
             "node": "Consolidar verificações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Há vagas para verificar?": {
+      "main": [
+        [
+          {
+            "node": "Consolidar verificações",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consultar página original",
             "type": "main",
             "index": 0
           }
