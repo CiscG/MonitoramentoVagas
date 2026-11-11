@@ -49,7 +49,7 @@ BEGIN
   END IF;
   -- Salva a tabela jobs e a visão JSON no MESMO commit, nunca em etapas isoladas.
   FOR v_job IN
-    SELECT item FROM jsonb_array_elements(p_payload->'vagas' || p_payload->'historicoVagas') AS item
+    SELECT item FROM jsonb_array_elements(p_payload->'vagas' || p_payload->'historicoVagas') AS entries(item)
   LOOP
     SELECT * INTO v_result FROM tecops_upsert_job(v_job);
     v_upserted := v_upserted + 1;
