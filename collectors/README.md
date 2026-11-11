@@ -16,18 +16,24 @@ Copie `sources.example.json` para `sources.json` fora do site público, substitu
 
 ## Uso em Node.js 18+
 
-```js
-const { collectAll } = require('./job-board-collectors.cjs');
-const config = require('./sources.json');
-const { jobs, diagnostics, fallbackUsed } = await collectAll(config);
-console.log({ jobs, diagnostics, fallbackUsed });
+```bash
+node collectors/run-job-board-collectors.js
+node collectors/run-job-board-collectors.js --write-to-data
 ```
 
-As chamadas Greenhouse, Lever e Ashby usam apenas as interfaces públicas documentadas. Páginas Gupy/Workable/Sólides sem JSON-LD compatível retornam zero vagas; configure feeds ou integrações oficialmente autorizadas quando disponíveis. O conector não contorna proteção técnica e não promete busca global quando a plataforma não a oferece.
+A saída JSON inclui `vagas`, `diagnostics`, `fallbackUsed` e `total`. Com `--write-to-data`, o script mescla os resultados no histórico `data/vagas.json` preservando a lista atual e mantendo deduplicação por URL.
 
-## Ligação ao n8n existente
+## Integração ao workflow n8n
 
-Este repositório armazena um workflow n8n importável, mas não há execução de código local do repositório dentro do workflow atual. Para usar este módulo em produção, execute-o em um serviço Node autorizado acessível ao n8n ou empacote-o no ambiente do n8n e chame-o por um sub-workflow/HTTP Request. Não importe as páginas para GitHub Pages como se o navegador fosse o coletor. Preserve o passo de merge/histórico e publique somente após validar o resultado. O workflow legado continua sendo fallback até a integração e os testes na instância n8n.
+O workflow n8n atual ainda é responsável por coletar as fontes existentes e publicar o JSON para o GitHub. Para integrar os novos coletores de forma segura:
+
+1. Em um ambiente Node com acesso ao repositório, execute o script `collectors/run-job-board-collectors.js` com `--write-to-data`.
+2. Verifique a saída JSON e confirme que cada item possui `cargo`, `empresa`, `local`, `modalidade`, `descricao`, `link` e `fonte`.
+3. Adicione no n8n um nó `Execute Command` (ou `Code`/`HTTP Request` equivalente) que invoque `node collectors/run-job-board-collectors.js --write-to-data`.
+4. Conecte esse nó antes do passo de `Consolidar historico`/`Publicar vagas.json`, de modo que o JSON final seja validado e publicado apenas após a coleta modular.
+5. Mantenha o workflow atual como fallback: se o coletor modular falhar, o fluxo legado continua ativo e a publicação anterior permanece intacta.
+
+As chamadas Greenhouse, Lever e Ashby usam somente as interfaces públicas documentadas. Páginas Gupy/Workable/Sólides sem JSON-LD compatível retornam zero vagas; configure feeds ou integrações oficialmente autorizadas quando disponíveis. O conector não contorna proteção técnica e não promete busca global quando a plataforma não a oferece.
 
 ## Teste rápido sem rede
 
