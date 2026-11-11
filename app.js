@@ -48,6 +48,14 @@ const APPLICATION_STATUS = {
   SOURCE_UNAVAILABLE: 'Fonte indisponível'
 };
 
+const SCORE_RANGES = Object.freeze({
+  '85-100': [85, 100],
+  '70-84': [70, 84],
+  '50-69': [50, 69],
+  '30-49': [30, 49],
+  '0-29': [0, 29]
+});
+
 document.title = 'TecOps — oportunidades em tecnologia';
 const pageHeading = document.querySelector('header h1');
 if (pageHeading) pageHeading.textContent = 'TecOps';
@@ -149,6 +157,12 @@ function roleScore(job) {
   if (matches(jobPreferences.roles.secondary.terms)) return 3;
   return 0;
 }
+function technologyMatches(job) {
+  const content = jobSearchText(job);
+  return Object.entries(jobPreferences.technologies)
+    .filter(([, terms]) => terms.some(term => content.includes(normalize(term))))
+    .map(([group]) => ({ group }));
+}
 function technologyScore(job) {
   const content = jobSearchText(job);
   const totalTerms = Object.values(jobPreferences.technologies).flat().length;
@@ -198,6 +212,13 @@ function compatibility(job) {
   const label = score >= 85 ? 'Excelente compatibilidade' : score >= 70 ? 'Alta compatibilidade' : score >= 50 ? 'Compatibilidade intermediária' : score >= 30 ? 'Baixa compatibilidade' : 'Pouco compatível';
   return { score, rawScore, label, components, explicitRequired, experienceClass };
 }
+function scoreTier(score) {
+  if (score >= 85) return 'excellent';
+  if (score >= 70) return 'high';
+  if (score >= 50) return 'medium';
+  if (score >= 30) return 'low';
+  return 'minimal';
+}
 function addPreferenceFilters() {
   const filters = document.querySelector('.filters');
   if (!filters) return;
@@ -210,6 +231,21 @@ function addPreferenceFilters() {
     const select = el('select'); select.id = 'experience-filter'; select.setAttribute('aria-label', 'Filtrar classificação de experiência');
     select.replaceChildren(new Option('Todas as classificações de experiência', ''), ...Object.entries(EXPERIENCE).map(([key, item]) => new Option(item.label, key)));
     filters.append(select); select.addEventListener('change', render);
+  }
+  if (!$('score-range')) {
+    const select = el('select');
+    select.id = 'score-range';
+    select.setAttribute('aria-label', 'Filtrar por faixa de pontuação de compatibilidade');
+    select.replaceChildren(
+      new Option('Todas as faixas de pontuação', ''),
+      new Option('85–100 · Excelente', '85-100'),
+      new Option('70–84 · Alta', '70-84'),
+      new Option('50–69 · Intermediária', '50-69'),
+      new Option('30–49 · Baixa', '30-49'),
+      new Option('0–29 · Pouco compatível', '0-29')
+    );
+    filters.append(select);
+    select.addEventListener('change', render);
   }
   if (!$('category')) { const select = el('select'); select.id = 'category'; select.setAttribute('aria-label', 'Filtrar categoria'); filters.append(select); select.addEventListener('change', render); }
   if (!$('profile-match')) {
@@ -232,7 +268,8 @@ function render() {
   const search = normalize($('search')?.value), level = $('level')?.value || '', mode = modalityKey($('mode')?.value || '');
   const source = $('source')?.value || '', location = $('location')?.value || '', priorityLocation = $('priority-location')?.value || '';
   const category = normalize($('category')?.value || ''), experienceFilter = $('experience-filter')?.value || '';
-  const prioritizeProfile = Boolean($('profile-match')?.checked), period = $('period')?.value || '', sort = $('sort')?.value || 'recent';
+  const prioritizeProfile = Boolean($('profile-match')?.checked), period = $('period')?.value || '', sort = $('sort')?.value || 'compatibility';
+  const scoreRange = SCORE_RANGES[$('score-range')?.value] || null;
   const now = Date.now(), cutoff = period === '24h' ? now - 86400000 : period === '7d' ? now - 7 * 86400000 : null;
   const filtered = vagas.filter(job => {
     const content = jobSearchText(job), jobLocation = normalize([job.local, job.cargo, job.descricao].map(text).join(' '));
@@ -250,17 +287,27 @@ function render() {
       || priorityLocation === 'porto-alegre' && (jobLocation.includes('porto alegre') || modality === 'remoto');
     const matchesCategory = !category || categories.some(item => normalize(item) === category), matchesExperience = !experienceFilter || expClass === experienceFilter;
     const selectedModes = ['remoto', 'hibrido', 'presencial'].filter(item => quickSearchTags.has(item)), matchesQuickMode = !selectedModes.length || selectedModes.includes(modality);
-    const matchesProfile = !prioritizeProfile || roleScore(job) > 0 || technologyMatches(job).length > 0 || locationScore(job) >= 70;
+    const matchesProfile = !prioritizeProfile || roleScore(job) > 0 || technologyMatches(job).length > 0 || locationScore(job) >= 12;
+    const matchScore = scoreRange ? compatibility(job).score : null;
+    const matchesScore = !scoreRange || (matchScore >= scoreRange[0] && matchScore <= scoreRange[1]);
     const published = dateValue(job.publicadoEm), matchesPeriod = cutoff === null || (published !== null && published >= cutoff && published <= now);
-    return matchesSearch && matchesLevel && matchesMode && matchesSource && matchesLocation && matchesPriorityLocation && matchesCategory && matchesExperience && matchesQuickMode && matchesProfile && matchesPeriod;
+    return matchesSearch && matchesLevel && matchesMode && matchesSource && matchesLocation && matchesPriorityLocation && matchesCategory && matchesExperience && matchesQuickMode && matchesProfile && matchesPeriod && matchesScore;
   });
   filtered.sort((a, b) => {
     const statusRank = { ACTIVE: 0, PENDING_VALIDATION: 1, SOURCE_UNAVAILABLE: 2, CLOSED: 3, EXPIRED: 4 };
-    const statusDifference = statusRank[applicationStatus(a)] - statusRank[applicationStatus(b)];
+    const statusA = applicationStatus(a), statusB = applicationStatus(b);
+    const isClosed = status => status === 'CLOSED' || status === 'EXPIRED';
+    if (sort === 'compatibility' || prioritizeProfile) {
+      // Encerradas/expiradas nunca ultrapassam oportunidades potencialmente disponíveis.
+      const closedDifference = Number(isClosed(statusA)) - Number(isClosed(statusB));
+      if (closedDifference) return closedDifference;
+      const scoreDifference = compatibility(b).score - compatibility(a).score;
+      if (scoreDifference) return scoreDifference;
+    }
+    const statusDifference = statusRank[statusA] - statusRank[statusB];
     if (statusDifference) return statusDifference;
     const expDifference = EXPERIENCE[experienceInfo(a)].rank - EXPERIENCE[experienceInfo(b)].rank;
     if (expDifference) return expDifference;
-    if (prioritizeProfile && compatibility(a).score !== compatibility(b).score) return compatibility(b).score - compatibility(a).score;
     if (sort === 'company') return text(a.empresa).localeCompare(text(b.empresa), 'pt-BR', { sensitivity: 'base' });
     if (sort === 'title') return text(a.cargo).localeCompare(text(b.cargo), 'pt-BR', { sensitivity: 'base' });
     return (dateValue(b.publicadoEm) || 0) - (dateValue(a.publicadoEm) || 0);
@@ -282,8 +329,24 @@ function render() {
     if (expClass === 'EXPERIENCIA_OBRIGATORIA') { expBadge.textContent = 'Aviso: esta vaga exige experiência profissional formal; mantida na lista, mas com prioridade menor.'; expBadge.style.color = '#a33b2f'; }
     card.append(expBadge);
     const match = compatibility(job);
-    const score = el('p', 'match-score', `Compatibilidade: ${match.score}/100 — ${match.label}`);
-    score.style.cssText = 'font-size:.85rem;color:#475569;margin:.4rem 0'; card.append(score);
+    const scoreSummary = el('div', 'score-summary');
+    const scoreBadge = el('div', `match-score score-tier-${scoreTier(match.score)}`);
+    scoreBadge.title = 'Pontuação estimada de compatibilidade; verifique os requisitos no anúncio original.';
+    scoreBadge.append(
+      el('strong', 'score-value', `${match.score}/100`),
+      el('span', 'score-label', match.label)
+    );
+    const scoreMeter = el('div', 'score-meter');
+    scoreMeter.setAttribute('role', 'meter');
+    scoreMeter.setAttribute('aria-label', 'Pontuação estimada de compatibilidade');
+    scoreMeter.setAttribute('aria-valuemin', '0');
+    scoreMeter.setAttribute('aria-valuemax', '100');
+    scoreMeter.setAttribute('aria-valuenow', String(match.score));
+    const scoreFill = el('span', `score-fill score-tier-${scoreTier(match.score)}`);
+    scoreFill.style.width = `${match.score}%`;
+    scoreMeter.append(scoreFill);
+    scoreSummary.append(scoreBadge, scoreMeter);
+    card.append(scoreSummary);
     if (match.explicitRequired) card.append(el('p', 'eligibility-warning', 'Requisito eliminatório possível: a vaga exige experiência profissional formal. Confira o anúncio original antes de se candidatar.'));
     const techMatches = technologyMatches(job); if (techMatches.length) card.append(el('p', 'match-tech', `Tecnologias: ${techMatches.map(group => group.group).join(' · ')}`));
     card.append(el('div', 'meta', `${text(job.empresa) || 'Empresa não informada'} · ${text(job.local) || 'Local não informado'} · ${formatDate(job.publicadoEm)}`), el('p', 'description', text(job.descricao) || 'Consulte os requisitos no anúncio original.'));
@@ -292,9 +355,9 @@ function render() {
   });
 }
 function clearFilters() {
-  ['search', 'level', 'mode', 'source', 'location', 'priority-location', 'category', 'experience-filter', 'period'].forEach(id => { if ($(id)) $(id).value = ''; });
+  ['search', 'level', 'mode', 'source', 'location', 'priority-location', 'category', 'experience-filter', 'score-range', 'period'].forEach(id => { if ($(id)) $(id).value = ''; });
   quickSearchTags.clear(); document.querySelectorAll('[data-quick-search-tag]').forEach(button => button.setAttribute('aria-pressed', 'false'));
-  if ($('profile-match')) $('profile-match').checked = false; if ($('sort')) $('sort').value = 'recent'; render();
+  if ($('profile-match')) $('profile-match').checked = false; if ($('sort')) $('sort').value = 'compatibility'; render();
 }
 async function load() {
   try {
