@@ -49,56 +49,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const previous=$prevNode?.name||'';\nreturn [{json:{run:{kind:previous==='Agendamento semanal'?'weekly':'daily',\n requestedAt:new Date().toISOString()},profile:{\n locations:['Santa Rosa','Rio Grande do Sul','RS','Remoto'],\n workModes:[],includeRemote:true,allowUnknownLocation:true,\n roleKeywords:[],technologies:[],jobLevels:['Estágio','Júnior','Trainee','Não informada'],\n maxExperienceYears:2,excludeMandatoryExperience:false,\n priorityAreas:['Backend','Full Stack','QA','Desenvolvimento de Jogos','Unity','Game Dev','IoT']\n}}}];"
-      }
-    },
-    {
-      "name": "Ler vagas históricas",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        140,
-        250
-      ],
-      "parameters": {
-        "method": "GET",
-        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "options": {
-          "timeout": 30000
-        }
-      }
-    },
-    {
-      "name": "Ler relatórios anteriores",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        360,
-        250
-      ],
-      "parameters": {
-        "method": "GET",
-        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/relatorios-semanais.json",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "options": {
-          "timeout": 30000
-        }
-      }
-    },
-    {
-      "name": "Preparar entrada A",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        580,
-        250
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "// Dados históricos exigem SHA para prevenir sobrescrita silenciosa.\nconst context=$('Contexto da execução').first().json;\nconst jobsFile=$('Ler vagas históricas').first().json;\nconst reportFile=$('Ler relatórios anteriores').first().json;\nfunction decode(file,label){\n if(!file.sha||typeof file.content!=='string')throw new Error(label+': arquivo do GitHub ausente ou sem SHA');\n const payload=JSON.parse(Buffer.from(file.content.replace(/\\s/g,''),'base64').toString('utf8'));\n return payload;\n}\nconst previous=decode(jobsFile,'Histórico de vagas');\nif(!Array.isArray(previous.vagas))throw new Error('Histórico inválido: não contém vagas');\nconst reportsArchive=decode(reportFile,'Histórico de relatórios');\nif(!Array.isArray(reportsArchive.reports))throw new Error('Histórico inválido: não contém reports');\nreturn [{json:{...context,previous,reportsArchive,\n github:{jobsSha:jobsFile.sha,reportsSha:reportFile.sha}}}];"
+        "jsCode": "const previous=$prevNode?.name||'';\nreturn [{json:{run:{kind:previous==='Agendamento semanal'?'weekly':'daily',\n requestedAt:new Date().toISOString(),id:String($execution.id||new Date().toISOString())},profile:{\n locations:['Santa Rosa','Rio Grande do Sul','RS','Remoto'],\n workModes:[],includeRemote:true,allowUnknownLocation:true,\n roleKeywords:[],technologies:[],jobLevels:['Estágio','Júnior','Trainee','Não informada'],\n maxExperienceYears:2,excludeMandatoryExperience:false,\n priorityAreas:['Backend','Full Stack','QA','Desenvolvimento de Jogos','Unity','Game Dev','IoT']\n}}}];"
       }
     },
     {
@@ -202,59 +153,6 @@
       }
     },
     {
-      "name": "Preparar publicação de vagas",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1900,
-        250
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const packet=$input.first().json;\nif(!packet.data||!packet.github?.jobsSha)throw new Error('Resultado E sem dados/SHA, publicação bloqueada');\nreturn [{json:{...packet,githubPayload:{\n message:'TecOps: atualizar histórico e eventos das vagas',\n sha:packet.github.jobsSha,branch:'main',\n content:Buffer.from(JSON.stringify(packet.data,null,2)+'\\n','utf8').toString('base64')\n}}}];"
-      }
-    },
-    {
-      "name": "Publicar histórico de vagas",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        2120,
-        250
-      ],
-      "parameters": {
-        "method": "PUT",
-        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.githubPayload }}",
-        "options": {
-          "timeout": 30000,
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "neverError": true
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "Confirmar gravação das vagas",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2340,
-        250
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const result=$input.first().json;\nconst status=Number(result.statusCode||0);\nif(status!==200&&status!==201)throw new Error('GitHub: falha ao salvar vagas.json HTTP '+status+'. Reexecute após atualizar SHA; não usar dados desatualizados.');\nreturn [{json:$('Preparar publicação de vagas').first().json}];"
-      }
-    },
-    {
       "name": "É execução semanal?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -319,59 +217,6 @@
       }
     },
     {
-      "name": "Preparar arquivo do relatório",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        3590,
-        80
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const data=$input.first().json;\nif(!data.report||!data.github?.reportsSha)throw new Error('Relatório/SHA ausente');\nconst archive=JSON.parse(JSON.stringify(data.reportsArchive||{reports:[]}));\nif(!Array.isArray(archive.reports))archive.reports=[];\narchive.reports=archive.reports.filter(r=>r.weekKey!==data.report.weekKey);\narchive.reports.push(data.report);\narchive.reports.sort((a,b)=>String(a.weekKey).localeCompare(String(b.weekKey)));\narchive.updatedAt=new Date().toISOString();\nreturn [{json:{...data,reportArchivePayload:{\n message:'TecOps: arquivar relatório semanal '+data.report.weekKey,\n sha:data.github.reportsSha,branch:'main',\n content:Buffer.from(JSON.stringify(archive,null,2)+'\\n','utf8').toString('base64')\n}}}];"
-      }
-    },
-    {
-      "name": "Arquivar relatório no GitHub",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        3810,
-        80
-      ],
-      "parameters": {
-        "method": "PUT",
-        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/relatorios-semanais.json",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.reportArchivePayload }}",
-        "options": {
-          "timeout": 30000,
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "neverError": true
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "Confirmar gravação do relatório",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        4030,
-        80
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const result=$input.first().json;\nconst status=Number(result.statusCode||0);\nif(status!==200&&status!==201)throw new Error('GitHub: falha ao arquivar relatório semanal HTTP '+status+'. Relatório não enviado para evitar histórico inconsistente.');\nreturn [{json:$('Preparar arquivo do relatório').first().json}];"
-      }
-    },
-    {
       "name": "Enviar relatório semanal por e-mail",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
@@ -388,6 +233,235 @@
         "options": {}
       },
       "onError": "stopWorkflow"
+    },
+    {
+      "name": "Merge — contexto e estado",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        390,
+        250
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      }
+    },
+    {
+      "name": "Ler estado PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        200,
+        390
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT payload,report_archive,revision FROM tecops_pipeline_state WHERE singleton=TRUE;",
+        "options": {}
+      }
+    },
+    {
+      "name": "Preparar estado e histórico",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const packet=$input.first().json||{};\nif(!packet.payload||!Array.isArray(packet.payload.vagas)||!Array.isArray(packet.payload.historicoVagas)||\n !Number.isSafeInteger(Number(packet.revision))||!packet.report_archive||\n !Array.isArray(packet.report_archive.reports)){\n throw new Error('PostgreSQL sem estado válido. Execute database/bootstrap-runtime.cjs; não crie histórico vazio.');\n}\nreturn [{json:{run:packet.run,profile:packet.profile,previous:packet.payload,\n reportsArchive:packet.report_archive,pg:{revision:Number(packet.revision)}}}];"
+      }
+    },
+    {
+      "name": "Preparar transação PostgreSQL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1880,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const p=$input.first().json;\nif(!p.data||!p.run?.id||!Number.isSafeInteger(Number(p.pg?.revision)))throw new Error('Estado/SHA lógico ausente, abortando.');\nreturn [{json:{...p,transactionReady:true}}];"
+      }
+    },
+    {
+      "name": "Persistir PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2100,
+        250
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT tecops_commit_pipeline($1::jsonb,$2::bigint,$3::text,$4::text,$5::jsonb) AS committed_result;",
+        "options": {
+          "queryReplacement": "={{ [JSON.stringify($json.data), Number($json.pg.revision), String($json.run.id), String($json.run.kind), JSON.stringify($json.diagnostics || [])] }}"
+        }
+      }
+    },
+    {
+      "name": "Confirmar transação PostgreSQL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const result=$input.first().json.committed_result;\nif(result?.committed!==true)throw new Error('Transação PostgreSQL não confirmada: não publicar no GitHub.');\nreturn [{json:{...$('Preparar transação PostgreSQL').first().json,committed:result}}];"
+      }
+    },
+    {
+      "name": "Ler versão pública GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2540,
+        250
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json?ref=main",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Preparar espelho GitHub",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2760,
+        250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const p=$('Confirmar transação PostgreSQL').first().json;\nconst file=$input.first().json||{};\nif(!file.sha||typeof file.content!=='string')throw new Error('Espelho GitHub indisponível: dados PostgreSQL preservados. Verifique a publicação.');\nconst next=JSON.stringify(p.data,null,2)+'\\n';\nconst current=Buffer.from(file.content.replace(/\\s/g,''),'base64').toString('utf8');\nreturn [{json:{...p,needsMirror:current!==next,\n publishPayload:{message:'TecOps: atualizar espelho de vagas após commit PostgreSQL',sha:file.sha,\n branch:'main',content:Buffer.from(next,'utf8').toString('base64')}}}];"
+      }
+    },
+    {
+      "name": "IF — espelho alterado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2970,
+        250
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "changed-public",
+              "leftValue": "={{ $json.needsMirror }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Publicar espelho GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3190,
+        90
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.publishPayload }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Confirmar espelho",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3400,
+        90
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const result=$input.first().json;\nconst status=Number(result.statusCode||0);\nif(status!==200&&status!==201)throw new Error('PostgreSQL gravado mas espelho GitHub falhou HTTP '+status+'; reexecute para reconciliar.');\nreturn [{json:$('Preparar espelho GitHub').first().json}];"
+      }
+    },
+    {
+      "name": "Arquivar relatório PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3640,
+        60
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT tecops_archive_weekly_report($1::jsonb,$2::text) AS archive_result;",
+        "options": {
+          "queryReplacement": "={{ [JSON.stringify($json.report), String($json.run.id)] }}"
+        }
+      }
+    },
+    {
+      "name": "Confirmar relatório PostgreSQL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3860,
+        60
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const result=$input.first().json.archive_result;\nif(result?.archived!==true)throw new Error('Relatório não arquivado no PostgreSQL.');\nreturn [{json:$('Executar F — relatório').first().json}];"
+      }
     }
   ],
   "connections": {
@@ -417,36 +491,41 @@
       "main": [
         [
           {
-            "node": "Ler vagas históricas",
+            "node": "Ler estado PostgreSQL",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge — contexto e estado",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Ler vagas históricas": {
+    "Ler estado PostgreSQL": {
       "main": [
         [
           {
-            "node": "Ler relatórios anteriores",
+            "node": "Merge — contexto e estado",
             "type": "main",
-            "index": 0
+            "index": 1
           }
         ]
       ]
     },
-    "Ler relatórios anteriores": {
+    "Merge — contexto e estado": {
       "main": [
         [
           {
-            "node": "Preparar entrada A",
+            "node": "Preparar estado e histórico",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Preparar entrada A": {
+    "Preparar estado e histórico": {
       "main": [
         [
           {
@@ -505,36 +584,98 @@
       "main": [
         [
           {
-            "node": "Preparar publicação de vagas",
+            "node": "Preparar transação PostgreSQL",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Preparar publicação de vagas": {
+    "Preparar transação PostgreSQL": {
       "main": [
         [
           {
-            "node": "Publicar histórico de vagas",
+            "node": "Persistir PostgreSQL",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Publicar histórico de vagas": {
+    "Persistir PostgreSQL": {
       "main": [
         [
           {
-            "node": "Confirmar gravação das vagas",
+            "node": "Confirmar transação PostgreSQL",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Confirmar gravação das vagas": {
+    "Confirmar transação PostgreSQL": {
+      "main": [
+        [
+          {
+            "node": "Ler versão pública GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler versão pública GitHub": {
+      "main": [
+        [
+          {
+            "node": "Preparar espelho GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar espelho GitHub": {
+      "main": [
+        [
+          {
+            "node": "IF — espelho alterado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — espelho alterado?": {
+      "main": [
+        [
+          {
+            "node": "Publicar espelho GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "É execução semanal?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicar espelho GitHub": {
+      "main": [
+        [
+          {
+            "node": "Confirmar espelho",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar espelho": {
       "main": [
         [
           {
@@ -567,36 +708,25 @@
       "main": [
         [
           {
-            "node": "Preparar arquivo do relatório",
+            "node": "Arquivar relatório PostgreSQL",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Preparar arquivo do relatório": {
+    "Arquivar relatório PostgreSQL": {
       "main": [
         [
           {
-            "node": "Arquivar relatório no GitHub",
+            "node": "Confirmar relatório PostgreSQL",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Arquivar relatório no GitHub": {
-      "main": [
-        [
-          {
-            "node": "Confirmar gravação do relatório",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Confirmar gravação do relatório": {
+    "Confirmar relatório PostgreSQL": {
       "main": [
         [
           {
