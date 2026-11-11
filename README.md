@@ -1,15 +1,15 @@
-# DevVagas — n8n + Ubuntu Server + GitHub Pages
+# MonitoramentoVagas (TecOps) — n8n + GitHub Pages
 
 ## Pré-requisitos
 - Ubuntu Server 26.04, Docker e n8n funcionando.
-- Repositório GitHub **CiscG/DevVagas** (ou adapte as URLs de ambos os nós GitHub no workflow).
+- Repositório GitHub **CiscG/MonitoramentoVagas** (ou adapte as URLs de ambos os nós GitHub no workflow).
 - Token pessoal **fine-grained**, limitado ao repositório DevVagas, permissão **Contents: Read and write**. Nunca publique o token em arquivos do site.
 
 ## Publicar a página uma vez
-1. Crie o repositório `DevVagas` no GitHub.
-2. Copie **somente o conteúdo da pasta `site/` para a raiz do repositório** (index.html, app.js, style.css, data/vagas.json).
+1. Crie o repositório `MonitoramentoVagas` no GitHub.
+2. Mantenha os arquivos `index.html`, `app.js`, `style.css` e `data/vagas.json` na raiz (a estrutura atual já está pronta para GitHub Pages).
 3. Em Settings > Pages, escolha Deploy from a branch / main / (root).
-4. Confira `https://ciscg.github.io/DevVagas/` após o primeiro deploy.
+4. Confira `https://ciscg.github.io/MonitoramentoVagas/` após o primeiro deploy.
 
 ## Importar workflow n8n
 1. Abra o n8n > Workflows > Add workflow > Import from File (o nome exato pode variar por versão).
@@ -35,3 +35,9 @@
 - O `vagas.json` é o histórico persistido e público. Não salve dados pessoais nele.
 - Se outro processo editar vagas.json entre a leitura e o PUT, o GitHub poderá responder 409/422; execute novamente após investigar.
 - O workflow foi preparado para importação, mas não foi executado em uma instância real do n8n; teste e ajuste se sua versão exigir pequenas mudanças.
+
+## Deduplicação e histórico
+
+O workflow principal consolida vagas por identificador externo, URL canônica, empresa/cargo normalizados e hash da descrição. Republicações reconhecidas preservam a primeira identificação, em vez de contabilizar uma vaga nova. A listagem pública continua limitada a 400 registros em `vagas`; os excedentes são guardados em `historicoVagas` dentro de `data/vagas.json`. O segundo workflow, de validação, preserva esses dados adicionais.
+
+**PostgreSQL não está conectado a este repositório atualmente.** A migração e o importador opcionais ficam em [database/README.md](database/README.md): incluem o esquema `jobs`, histórico de publicações e snapshots de relatórios, sem interferir na coleta atual. Recomenda-se manter cópias periódicas do JSON completo, inclusive do histórico; registros perdidos antes desta versão não podem ser recriados automaticamente.
