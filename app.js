@@ -4,7 +4,17 @@ const $ = id => document.getElementById(id);
 const text = value => value == null ? '' : String(value).trim();
 const normalize = value => text(value).toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-// Keep the document and visible brand consistent with the requested rename.
+// Aderência usa interesses e competências técnicas, sem expor um currículo pessoal.
+// A experiência técnica inclui suporte/infraestrutura, jogos e projetos práticos;
+// isso não deve ser confundido com anos de experiência profissional como dev.
+const profileGroups = {
+  'Software, APIs e Web': ['software', 'desenvolvedor', 'desenvolvedora', 'programador', 'programadora', 'backend', 'back-end', 'frontend', 'front-end', 'full stack', 'web', 'api', 'integração de sistemas', 'integração', 'python', 'c#', 'java', 'sql', 'rest'],
+  'Suporte, Infra e DevOps': ['suporte técnico', 'suporte ti', 'infraestrutura', 'infra', 'devops', 'cloud', 'linux', 'docker', 'redes', 'sistemas', 'banco de dados', 'database', 'iot'],
+  'Dados e Integrações': ['dados', 'data', 'analytics', 'etl', 'visualização', 'visualizacao', 'bi', 'integração', 'integracao', 'api', 'iot', 'sql', 'python'],
+  'Jogos e Unity': ['jogos', 'game', 'unity', 'c#', 'csharp', 'unreal', 'godot', 'gameplay']
+};
+
+// Use application copy for the requested TecOps brand.
 document.title = 'TecOps — oportunidades em tecnologia';
 const pageHeading = document.querySelector('header h1');
 if (pageHeading) pageHeading.textContent = 'TecOps';
@@ -38,8 +48,6 @@ function modalityKey(value) {
   return mode;
 }
 
-// Some providers label every result as remote. Prefer explicit modality wording
-// in the title/location/description so hybrid and onsite jobs are not hidden.
 function jobModalityKey(job) {
   const details = normalize([job.modalidade, job.cargo, job.local, job.descricao].map(text).join(' '));
   if (/\b(hibrid[oa]s?|hybrid)\b/.test(details)) return 'hibrido';
@@ -68,6 +76,18 @@ function jobSearchText(job) {
   ].map(text).join(' '));
 }
 
+function profileMatches(job) {
+  const content = jobSearchText(job);
+  return Object.entries(profileGroups).map(([group, terms]) => ({
+    group,
+    matches: terms.filter(term => content.includes(normalize(term)))
+  })).filter(item => item.matches.length > 0);
+}
+
+function profileScore(job) {
+  return profileMatches(job).reduce((score, item) => score + Math.min(item.matches.length, 3), 0);
+}
+
 function dateValue(value) {
   if (!value) return null;
   const timestamp = Date.parse(value);
@@ -89,12 +109,7 @@ function populateModalityFilter() {
   const select = $('mode');
   if (!select) return;
   const selected = modalityKey(select.value);
-  select.replaceChildren(
-    new Option('Todas as modalidades', ''),
-    new Option('Remoto', 'remoto'),
-    new Option('Híbrido', 'hibrido'),
-    new Option('Presencial', 'presencial')
-  );
+  select.replaceChildren(new Option('Todas as modalidades', ''), new Option('Remoto', 'remoto'), new Option('Híbrido', 'hibrido'), new Option('Presencial', 'presencial'));
   if (['remoto', 'hibrido', 'presencial'].includes(selected)) select.value = selected;
 }
 
@@ -106,6 +121,28 @@ function addCategoryFilter() {
   select.setAttribute('aria-label', 'Filtrar categoria');
   filters.append(select);
   select.addEventListener('change', render);
+}
+
+function addProfileToggle() {
+  const filters = document.querySelector('.filters');
+  if (!filters || $('profile-match')) return;
+  const label = el('label', 'profile-filter');
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.id = 'profile-match';
+  checkbox.addEventListener('change', render);
+  label.append(checkbox, document.createTextNode(' Priorizar vagas compatíveis com meu perfil'));
+  label.style.gridColumn = '1 / -1';
+  label.style.display = 'flex';
+  label.style.alignItems = 'center';
+  label.style.gap = '8px';
+  label.style.fontSize = '0.9rem';
+  filters.append(label);
+
+  const note = el('small', 'profile-note', 'A compatibilidade considera desenvolvimento, suporte/infraestrutura e experiência prática em projetos; não presume ausência de experiência técnica por falta de tempo formal como desenvolvedor.');
+  note.style.gridColumn = '1 / -1';
+  note.style.color = '#475569';
+  filters.append(note);
 }
 
 function refreshQuickSearchTags() {
@@ -129,10 +166,7 @@ function addQuickSearchTags() {
   const label = el('span', '', 'Tags rápidas:');
   Object.assign(label.style, { fontSize: '0.85rem', fontWeight: '600', color: '#475569' });
   group.append(label);
-  [
-    ['remoto', 'Remoto'], ['hibrido', 'Híbrido'], ['presencial', 'Presencial'],
-    ['santa-rosa', 'Santa Rosa'], ['rio-grande-do-sul', 'Rio Grande do Sul (RS)']
-  ].forEach(([key, title]) => {
+  [['remoto', 'Remoto'], ['hibrido', 'Híbrido'], ['presencial', 'Presencial'], ['santa-rosa', 'Santa Rosa'], ['rio-grande-do-sul', 'Rio Grande do Sul (RS)']].forEach(([key, title]) => {
     const button = el('button', '', title);
     button.type = 'button';
     button.dataset.quickSearchTag = key;
@@ -156,6 +190,7 @@ function render() {
   const source = $('source')?.value || '';
   const location = $('location')?.value || '';
   const category = normalize($('category')?.value || '');
+  const profileOnly = Boolean($('profile-match')?.checked);
   const period = $('period')?.value || '';
   const sort = $('sort')?.value || 'recent';
   const now = Date.now();
@@ -175,13 +210,15 @@ function render() {
     const matchesQuickMode = !selectedModalities.length || selectedModalities.includes(modality);
     const matchesSantaRosa = !quickSearchTags.has('santa-rosa') || jobLocation.includes('santa rosa');
     const matchesRioGrandeDoSul = !quickSearchTags.has('rio-grande-do-sul') || isRioGrandeDoSul(job.local);
+    const matchesProfile = !profileOnly || profileScore(job) > 0;
     const published = dateValue(job.publicadoEm);
     const matchesPeriod = cutoff === null || (published !== null && published >= cutoff && published <= now);
     return matchesSearch && matchesLevel && matchesMode && matchesSource && matchesLocation
-      && matchesCategory && matchesQuickMode && matchesSantaRosa && matchesRioGrandeDoSul && matchesPeriod;
+      && matchesCategory && matchesQuickMode && matchesSantaRosa && matchesRioGrandeDoSul && matchesProfile && matchesPeriod;
   });
 
   filtered.sort((a, b) => {
+    if (profileOnly && profileScore(a) !== profileScore(b)) return profileScore(b) - profileScore(a);
     if (sort === 'company') return text(a.empresa).localeCompare(text(b.empresa), 'pt-BR', { sensitivity: 'base' });
     if (sort === 'title') return text(a.cargo).localeCompare(text(b.cargo), 'pt-BR', { sensitivity: 'base' });
     const dateA = dateValue(a.publicadoEm);
@@ -206,8 +243,16 @@ function render() {
     const tags = el('div', 'tags');
     [job.nivel || 'Não informado', jobModalityKey(job) === 'hibrido' ? 'Híbrido' : jobModalityKey(job) === 'presencial' ? 'Presencial' : job.modalidade || 'Não informado', job.fonte || 'Não informado']
       .forEach(tag => tags.append(el('span', 'tag', text(tag))));
-    card.append(tags, el('h3', '', text(job.cargo) || 'Cargo não informado'),
-      el('div', 'meta', `${text(job.empresa) || 'Empresa não informada'} · ${text(job.local) || 'Local não informado'} · ${formatDate(job.publicadoEm)}`),
+    card.append(tags, el('h3', '', text(job.cargo) || 'Cargo não informado'));
+    const matches = profileMatches(job);
+    if (matches.length) {
+      const fit = el('p', 'profile-fit', `Compatibilidade: ${matches.map(item => item.group).join(' · ')}`);
+      fit.style.color = '#2563eb';
+      fit.style.fontSize = '0.85rem';
+      fit.style.fontWeight = '600';
+      card.append(fit);
+    }
+    card.append(el('div', 'meta', `${text(job.empresa) || 'Empresa não informada'} · ${text(job.local) || 'Local não informado'} · ${formatDate(job.publicadoEm)}`),
       el('p', 'description', text(job.descricao) || 'Consulte os requisitos no anúncio original.'));
     if (/^https:\/\//i.test(text(job.link))) {
       const link = el('a', 'apply', 'Ver oportunidade');
@@ -224,6 +269,7 @@ function clearFilters() {
   ['search', 'level', 'mode', 'source', 'location', 'category', 'period'].forEach(id => { if ($(id)) $(id).value = ''; });
   quickSearchTags.clear();
   refreshQuickSearchTags();
+  if ($('profile-match')) $('profile-match').checked = false;
   if ($('sort')) $('sort').value = 'recent';
   render();
 }
@@ -258,6 +304,7 @@ async function load() {
 
 addCategoryFilter();
 addQuickSearchTags();
+addProfileToggle();
 populateModalityFilter();
 ['search', 'level', 'mode', 'source', 'location', 'category', 'period', 'sort'].forEach(id => {
   const control = $(id);
