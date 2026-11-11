@@ -119,3 +119,32 @@ test('G: gatilhos diário e semanal e email após relatório, sem IF de vagas no
   'Enviar relatório semanal por e-mail');
  assert.ok(d.nodes.find(n=>n.type==='n8n-nodes-base.emailSend'));
 });
+
+test('E: recupera histórico ausente somente após validação de SHA e JSON',()=>{
+ const workflow=workflows.E;
+ const branch=workflow.connections['Histórico presente na entrada?'];
+ assert.equal(branch.main[0][0].node,'Consolidar identidades e eventos');
+ assert.equal(branch.main[1][0].node,'Recuperar histórico GitHub');
+ const code=js('E','Anexar histórico recuperado');
+ const history={vagas:[{id:'antiga',fonte:'Backend BR',cargo:'Vaga preservada'}],historicoVagas:[]};
+ const payload={jobs:[],github:{},run:{kind:'daily'}};
+ const file={sha:'old-file-sha',content:Buffer.from(JSON.stringify(history)).toString('base64')};
+ const $=name=>({first:()=>({json:name==='Entrada E'?payload:{}})});
+ const scope={Buffer,$,$input:{first:()=>({json:file})}};
+ const result=vm.runInNewContext('(function(){\n'+code+'\n})()',scope,{timeout:2000})[0].json;
+ assert.equal(result.previous.vagas.length,1);
+ assert.equal(result.previous.vagas[0].id,'antiga');
+ assert.equal(result.github.jobsSha,'old-file-sha');
+ assert.equal(result.historyRecoveredFromGitHub,true);
+ assert.throws(()=>{
+   const altered={...file,sha:'other-sha'};
+   const withMismatch={...payload,github:{jobsSha:'previous-sha'}};
+   vm.runInNewContext('(function(){\n'+code+'\n})()',{
+     Buffer,$:()=>({first:()=>({json:withMismatch})}),
+     $input:{first:()=>({json:altered})}
+   },{timeout:2000});
+ },/SHA divergente/);
+ assert.throws(()=>vm.runInNewContext('(function(){\n'+code+'\n})()',{
+   Buffer,$,$input:{first:()=>({json:{sha:'ok',content:Buffer.from('{}').toString('base64')}})}
+ },{timeout:2000}),/não contém o array vagas/);
+});
