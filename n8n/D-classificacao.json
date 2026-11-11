@@ -1,0 +1,50 @@
+{
+  "name": "TecOps D — Classificação de compatibilidade",
+  "nodes": [
+    {
+      "name": "Entrada D",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        280
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "name": "Calcular compatibilidade",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        280
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// D — classificação e compatibilidade (0–100) com perfil configurável.\nconst envelope=$input.first().json||{},jobs=Array.isArray(envelope.jobs)?envelope.jobs:[];\nconst p=envelope.profile||{};\nconst norm=s=>String(s??'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();\nconst list=(value,fallback)=>Array.isArray(value)?value:fallback;\nconst stack=list(p.technologies,['Python','Java','C#','.NET','SQL','PostgreSQL','MySQL','Git','Linux','Docker','FastAPI','Unity','JavaScript']);\nconst role=list(p.roleKeywords,['backend','back-end','full stack','fullstack','desenvolvedor','developer','estagio','programador','qa','game dev','unity']);\nconst locations=list(p.locations,['Santa Rosa','Rio Grande do Sul','RS']);\nconst priorities=list(p.priorityAreas,['Backend','Full Stack','QA','Desenvolvimento de Jogos','Unity','Game Dev','IoT']);\nconst education=list(p.educationKeywords,['sistemas de informacao','ciencia da computacao','analise e desenvolvimento de sistemas','tecnologia da informacao','jogos digitais']);\nconst practical=list(p.practicalKeywords,['projetos','portfolio','api','integracao','github','desenvolvimento de jogos','unity','iot']);\nconst weights={technology:30,education:15,practical:20,experience:15,location:15,area:5};\nfunction score(job){\n const title=norm(job.cargo||job.title),body=norm([job.descricao,job.requisitos,job.tecnologias?.join(' '),job.areas?.join(' ')].join(' '));\n const mode=norm(job.modalidade||job.work_mode);\n const location=norm(job.local||job.location);\n const level=norm(job.nivel||job.job_level);\n const hit=terms=>terms.filter(t=>body.includes(norm(t))).length;\n const components={\n  technology:Math.round(weights.technology*Math.min(1,hit(stack)/Math.min(Math.max(1,stack.length),5))),\n  education:education.some(t=>body.includes(norm(t)))?weights.education:0,\n  practical:Math.min(weights.practical,hit(practical)*4),\n  experience:/(estag|junior|trainee|entry.level)/.test(level)?15:level==='nao informada'?7:0,\n  location:/remot/.test(mode)||locations.some(t=>location.includes(norm(t)))?15:/hibrid/.test(mode)?4:0,\n  area:priorities.some(t=>(title+' '+norm(job.area||'')).includes(norm(t)))?5:0\n };\n let points=Object.values(components).reduce((a,b)=>a+b,0);\n const mandatory=norm(job.experiencia||job.experience_requirement)==='obrigatoria'||job.experienciaClassificacao==='EXPERIENCIA_OBRIGATORIA';\n if(mandatory)points-=20;\n points=Math.max(0,Math.min(100,points));\n const label=points>=85?'Excelente':points>=70?'Alta':points>=50?'Intermediária':points>=30?'Baixa':'Pouco compatível';\n return {score:points,notes:'Compatibilidade estimada ('+label+'): tecnologias '+components.technology+'/30; formação '+components.education+'/15; prática '+components.practical+'/20; experiência '+components.experience+'/15; local '+components.location+'/15; área '+components.area+'/5'+(mandatory?'; penalização por experiência obrigatória (-20)':'')+'.'};\n}\nreturn [{json:{...envelope,jobs:jobs.map(job=>{\n const result=score(job);\n return {...job,compatibility_score:result.score,compatibility_notes:result.notes};\n}),classifiedAt:new Date().toISOString()}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Entrada D": {
+      "main": [
+        [
+          {
+            "node": "Calcular compatibilidade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
