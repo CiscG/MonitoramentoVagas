@@ -1201,7 +1201,7 @@
       "urlsAlternativas": []
     }
   ],
-  "ultimaSincronizacao": "2026-11-11T21:25:27.571Z",
+  "ultimaSincronizacao": "2026-11-11T21:53:42.363Z",
   "ultimaSincronizacaoCompleta": null,
   "ultimaSincronizacaoParcial": "2026-11-11T21:25:27.571Z",
   "limiteHistorico": 400,
@@ -1216,108 +1216,100 @@
   },
   "diagnosticosFontes": [
     {
-      "fonte": "Frontend BR",
-      "sucesso": true,
+      "name": "Frontend BR",
+      "ok": true,
       "statusCode": 200,
-      "consultadoEm": "2026-11-11T21:25:22.695Z",
-      "quantidade": 8,
-      "erro": null,
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:33.401Z",
+      "quantity": 8,
+      "error": null
     },
     {
-      "fonte": "Backend BR",
-      "sucesso": true,
+      "name": "Backend BR",
+      "ok": true,
       "statusCode": 200,
-      "consultadoEm": "2026-11-11T21:25:23.029Z",
-      "quantidade": 41,
-      "erro": null,
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:34.252Z",
+      "quantity": 41,
+      "error": null
     },
     {
-      "fonte": "Himalayas",
-      "sucesso": true,
+      "name": "Himalayas",
+      "ok": true,
       "statusCode": 200,
-      "consultadoEm": "2026-11-11T21:25:23.303Z",
-      "quantidade": 20,
-      "erro": null,
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:34.515Z",
+      "quantity": 20,
+      "error": null
     },
     {
-      "fonte": "Adzuna",
-      "sucesso": false,
+      "name": "Adzuna",
+      "ok": false,
       "statusCode": 401,
-      "consultadoEm": "2026-11-11T21:25:24.172Z",
-      "quantidade": null,
-      "erro": "HTTP 401: Falha HTTP",
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:35.501Z",
+      "quantity": 0,
+      "error": "HTTP 401: Falha HTTP"
     },
     {
-      "fonte": "Jooble",
-      "sucesso": false,
+      "name": "Jooble",
+      "ok": false,
       "statusCode": 403,
-      "consultadoEm": "2026-11-11T21:25:24.440Z",
-      "quantidade": null,
-      "erro": "HTTP 403: Falha HTTP",
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:35.672Z",
+      "quantity": 0,
+      "error": "HTTP 403: Falha HTTP"
     },
     {
-      "fonte": "Himalayas Game Dev",
-      "sucesso": true,
+      "name": "Himalayas Game Dev",
+      "ok": true,
       "statusCode": 200,
-      "consultadoEm": "2026-11-11T21:25:24.690Z",
-      "quantidade": 5,
-      "erro": null,
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:35.897Z",
+      "quantity": 5,
+      "error": null
     },
     {
-      "fonte": "Himalayas Estagio",
-      "sucesso": true,
+      "name": "Himalayas Estagio",
+      "ok": true,
       "statusCode": 200,
-      "consultadoEm": "2026-11-11T21:25:24.935Z",
-      "quantidade": 10,
-      "erro": null,
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:36.041Z",
+      "quantity": 10,
+      "error": null
     },
     {
-      "fonte": "Adzuna Game Dev",
-      "sucesso": false,
+      "name": "Adzuna Game Dev",
+      "ok": false,
       "statusCode": 401,
-      "consultadoEm": "2026-11-11T21:25:25.770Z",
-      "quantidade": null,
-      "erro": "HTTP 401: Falha HTTP",
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:36.816Z",
+      "quantity": 0,
+      "error": "HTTP 401: Falha HTTP"
     },
     {
-      "fonte": "Adzuna Estagio",
-      "sucesso": false,
+      "name": "Adzuna Estagio",
+      "ok": false,
       "statusCode": 401,
-      "consultadoEm": "2026-11-11T21:25:26.623Z",
-      "quantidade": null,
-      "erro": "HTTP 401: Falha HTTP",
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:37.583Z",
+      "quantity": 0,
+      "error": "HTTP 401: Falha HTTP"
     },
     {
-      "fonte": "Jooble BR Game Dev",
-      "sucesso": false,
+      "name": "Jooble BR Game Dev",
+      "ok": false,
       "statusCode": 403,
-      "consultadoEm": "2026-11-11T21:25:26.824Z",
-      "quantidade": null,
-      "erro": "HTTP 403: Falha HTTP",
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:37.705Z",
+      "quantity": 0,
+      "error": "HTTP 403: Falha HTTP"
     },
     {
-      "fonte": "Jooble BR Estagio",
-      "sucesso": false,
+      "name": "Jooble BR Estagio",
+      "ok": false,
       "statusCode": 403,
-      "consultadoEm": "2026-11-11T21:25:26.990Z",
-      "quantidade": null,
-      "erro": "HTTP 403: Falha HTTP",
-      "retryAfter": null
+      "checkedAt": "2026-11-11T21:52:37.857Z",
+      "quantity": 0,
+      "error": "HTTP 403: Falha HTTP"
     }
   ],
   "validacaoCandidaturasAtualizadaEm": "2026-11-11T21:45:44.449Z",
   "historicoVagas": [],
   "totalHistorico": 14,
   "totalArquivadas": 0,
-  "limiteExibicao": 400
+  "limiteExibicao": 400,
+  "eventosHistorico": [],
+  "atualizadasNaExecucao": 0,
+  "repetidasNaExecucao": 0
 }
