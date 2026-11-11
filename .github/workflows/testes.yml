@@ -1,0 +1,19 @@
+name: Testes TecOps
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validar JavaScript
+        run: |
+          node --check database/bootstrap-runtime.cjs
+          node --check database/import-jobs.cjs
+      - name: Testar workflows, classificação e runtime
+        run: node --test tests/*.test.cjs database/test/*.test.cjs
