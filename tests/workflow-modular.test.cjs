@@ -148,3 +148,84 @@ test('E: recupera histórico ausente somente após validação de SHA e JSON',()
    Buffer,$,$input:{first:()=>({json:{sha:'ok',content:Buffer.from('{}').toString('base64')}})}
  },{timeout:2000}),/não contém o array vagas/);
 });
+
+test('F: seis categorias obrigatórias, todos os campos e ausências sem inferência',()=>{
+ const now=new Date();
+ const monday=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()));
+ monday.setUTCDate(monday.getUTCDate()-(monday.getUTCDay()+6)%7);
+ const recent=new Date(monday.getTime()-3*86400000).toISOString();
+ const old=new Date(monday.getTime()-25*86400000).toISOString();
+ const checked=new Date().toISOString();
+ const common={
+  empresa:'Empresa X',modalidade:'Remoto',local:'Brasil',tecnologias:['Python','Docker'],
+  fonte:'Backend BR',compatibility_score:85,
+  compatibility_notes:'Tecnologias + localidade compatíveis',
+  justificativaClassificacao:'Classificado pela área',
+  statusCandidatura:'ACTIVE',ultimaVerificacaoCandidatura:checked,
+  primeiraIdentificacao:recent,
+  link:'https://github.com/backend-br/vagas/issues/1'
+ };
+ const jobs=[
+  {id:'junior',cargo:'Desenvolvedor Backend Júnior',nivel:'Júnior',...common},
+  {id:'intern',cargo:'Estágio em Desenvolvimento Web',nivel:'Estágio',...common},
+  {id:'qa',cargo:'Analista de QA Júnior',area:'QA e Testes',...common},
+  {id:'integration',cargo:'Desenvolvedor de Integração Júnior',area:'Integração de Sistemas',...common},
+  {id:'other',cargo:'Desenvolvedor Unity',...common},
+  {id:'previous',cargo:'Desenvolvedor Frontend Júnior',...common,primeiraIdentificacao:old},
+  {id:'closed',cargo:'Desenvolvedor Back-end Júnior',...common,statusCandidatura:'CLOSED',primeiraIdentificacao:old},
+  {id:'unknown',cargo:'Analista de QA',...common,statusCandidatura:'SOURCE_UNAVAILABLE'}
+ ];
+ const packet={data:{vagas:jobs,events:[],eventosHistorico:[
+  ...['junior','intern','qa','integration','other'].map(id=>({id,tipo:'nova',em:recent})),
+  {id:'closed',tipo:'encerrada',em:recent}
+ ]},reportsArchive:{reports:[]}};
+ const result=execute(js('F','Montar relatório consolidado'),packet);
+ const sections=result.report.sections;
+ for(const [key,id] of [
+  ['juniorDevelopment','junior'],['internships','intern'],['qaTesting','qa'],
+  ['systemIntegration','integration'],['previous','previous'],['closed','closed'],
+  ['otherNew','other'],['unverified','unknown']
+ ]) assert.ok(sections[key].includes(id),key+' deve incluir '+id);
+ for(const category of ['Vagas efetivas de desenvolvimento júnior','Estágios em desenvolvimento',
+  'QA e automação de testes','Integração de sistemas e áreas correlatas',
+  'Oportunidades anteriormente encontradas','Vagas encerradas'])
+  assert.ok(result.reportText.includes(category),category);
+ const item=result.report.records.juniorDevelopment[0];
+ for(const field of ['cargo','empresa','modalidade','localidade','salario','tecnologias',
+  'formacaoExigida','experiencia','prazoInscricao','compatibilidade',
+  'motivoClassificacao','motivoCompatibilidade','ultimaValidacao','urlOficial'])
+  assert.ok(Object.prototype.hasOwnProperty.call(item,field),'campo ausente: '+field);
+ assert.equal(item.salario,'Não informado');
+ assert.equal(item.formacaoExigida,'Não informada');
+ assert.equal(item.experiencia,'Não informada');
+ assert.equal(item.urlOficial,null);
+ assert.equal(item.urlFonte,'https://github.com/backend-br/vagas/issues/1');
+ assert.ok(result.reportHtml.includes('Link oficial para candidatura'));
+ assert.ok(result.reportHtml.includes('Link do anúncio na fonte'));
+ assert.equal(result.report.counts.new,5);
+});
+test('F: informação explícita é renderizada; URL do anúncio não vira oficial',()=>{
+ const now=new Date(),monday=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()));
+ monday.setUTCDate(monday.getUTCDate()-(monday.getUTCDay()+6)%7);
+ const recent=new Date(monday.getTime()-3*86400000).toISOString();
+ const data={vagas:[{
+  id:'verified',cargo:'Estágio em Desenvolvimento Frontend',empresa:'ABC',nivel:'Estágio',
+  modalidade:'Híbrido',local:'Porto Alegre',fonte:'Himalayas',tecnologias:['JavaScript'],
+  formacaoExigida:'Cursando Sistemas de Informação',experienciaDesejavelAnos:1,
+  salary_min:1500,salary_max:2000,salary_currency:'BRL',
+  expiraEm:'2027-01-31',compatibility_score:90,
+  compatibility_notes:'Foco em tecnologias declaradas',primeiraIdentificacao:recent,
+  statusCandidatura:'ACTIVE',ultimaVerificacaoCandidatura:new Date().toISOString(),
+  application_url:'https://aggregator.example.com/redirect',
+  official_application_url:'https://careers.example.com/apply'
+ }],eventosHistorico:[{id:'verified',tipo:'nova',em:recent}]};
+ const out=execute(js('F','Montar relatório consolidado'),{data,reportsArchive:{reports:[]}});
+ const item=out.report.records.internships[0];
+ assert.match(item.salario,/1.500/);
+ assert.match(item.salario,/2.000/);
+ assert.equal(item.formacaoExigida,'Cursando Sistemas de Informação');
+ assert.equal(item.experiencia,'Desejável: 1 ano(s)');
+ assert.equal(item.urlOficial,'https://careers.example.com/apply');
+ assert.equal(item.compatibilidade,'90/100');
+ assert.ok(item.ultimaValidacao!=='Não informado');
+});
