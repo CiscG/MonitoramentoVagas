@@ -1,0 +1,22 @@
+services:
+  tecops-jooble-gateway:
+    build: .
+    container_name: tecops-jooble-gateway
+    restart: unless-stopped
+    env_file: .env
+    expose:
+      - "8787"
+    networks:
+      - tecops-internal
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    cap_drop:
+      - ALL
+
+networks:
+  tecops-internal:
+    name: tecops-internal
+    external: true
