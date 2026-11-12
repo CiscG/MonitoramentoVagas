@@ -52,7 +52,12 @@ test('A: Adzuna autentica por credencial e Jooble não exporta token no path',()
   assert.equal(n.retryOnFail,true);
  }
  for(const n of jooble){
-  assert.equal(n.type,'n8n-nodes-base.code');
+  assert.equal(n.type,'n8n-nodes-base.httpRequest');
+  assert.equal(n.parameters.url,'http://tecops-jooble-gateway:8787/search');
+  assert.equal(n.parameters.authentication,'genericCredentialType');
+  assert.equal(n.parameters.genericAuthType,'httpHeaderAuth');
+  assert.equal(n.parameters.method,'POST');
+  assert.ok(n.parameters.sendBody);
   assert.doesNotMatch(JSON.stringify(n),/JOOBLE_API_KEY|\/api\/[a-zA-Z0-9]{16,}/);
  }
  assert.ok(A.nodes.some(n=>n.type==='n8n-nodes-base.wait'));
