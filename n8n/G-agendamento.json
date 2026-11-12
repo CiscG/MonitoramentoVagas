@@ -49,7 +49,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const incoming=$input.first().json||{};\nif(!['daily','weekly'].includes(incoming.run?.kind)) throw new Error('Execução sem tipo de agendamento explícito.');\nreturn [{json:{...incoming,profile:{\n locations:['Santa Rosa','Rio Grande do Sul','RS','Remoto'],\n workModes:[],includeRemote:true,allowUnknownLocation:true,\n roleKeywords:[],technologies:[],jobLevels:['Estágio','Júnior','Trainee','Não informada'],\n maxExperienceYears:2,excludeMandatoryExperience:false,\n priorityAreas:['Backend','Full Stack','QA','Desenvolvimento de Jogos','Unity','Game Dev','IoT']\n}}}];"
+        "jsCode": "const incoming=$input.first().json||{};\nif(!['daily','weekly'].includes(incoming.run?.kind)) throw new Error('Execução sem tipo de agendamento explícito.');\nreturn [{json:{...incoming,profile:{\n // Todo o Brasil em modalidade remota; híbrido/presencial somente com local confirmado no RS.\n locations:['Santa Rosa','Rio Grande do Sul','RS'],\n workModes:[],includeRemote:true,allowUnknownLocation:false,rsOnlyForNonRemote:true,\n roleKeywords:[],technologies:[],jobLevels:['Estágio','Júnior','Trainee','Não informada'],\n maxExperienceYears:2,excludeMandatoryExperience:false,\n priorityAreas:['Backend','Full Stack','QA','Desenvolvimento de Jogos','Unity','Game Dev','IoT']\n}}}];"
       }
     },
     {
