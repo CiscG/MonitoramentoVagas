@@ -6,12 +6,13 @@
 |---|---|---|---|
 | PostgreSQL (Host, Database, User, Password, Port) | Credencial **Postgres** do n8n | Sim | G e H; banco `tecops` |
 | GitHub API / PAT com Contents read/write | Credencial **GitHub API** do n8n | Sim para espelho | G, fallback de E; permissão restrita ao repositório |
-| Adzuna `app_id`/`app_key` | Credencial **HTTP Custom Auth** (`qs`) | Apenas se Adzuna habilitada | A (3 consultas) |
+| Adzuna `app_id`/`app_key` | Credencial **HTTP Custom Auth** (`qs`) | Apenas se Adzuna habilitada | A (7 consultas) |
 | SMTP (host, porta, TLS, usuário, senha de app) | Credencial **SMTP** do n8n | Para envio de relatório | G |
 | `TECOPS_REPORT_EMAIL_FROM` | Variável do processo n8n, ou valor fixo no nó | Para o e-mail | Remetente |
 | `TECOPS_REPORT_EMAIL_TO` | Variável do processo n8n, ou valor fixo no nó | Para o e-mail | Destinatário |
 | `DATABASE_URL` | Somente terminal para bootstrap | Apenas durante importação | Scripts Node.js, não exportar no JSON |
-| `JOOBLE_API_KEY` | Não utilizada na versão atual | Não | Jooble deliberadamente desativada |
+| `JOOBLE_BR_API_KEY` | `.env` privado do contêiner gateway | Obrigatório para Jooble | Chave API regional do portal brasileiro |
+| `GATEWAY_SHARED_TOKEN` | `.env` do gateway e credencial Header Auth do n8n | Obrigatório para Jooble | Protege a comunicação interna com o gateway |
 
 Nunca incluir senhas em arquivos JSON de workflow, Git ou logs. Credenciais exportadas não são resolvidas automaticamente em outra instância.
 
@@ -71,3 +72,7 @@ SELECT * FROM tecops_source_overview;
 - Mesmo sem novas vagas confirmadas, F gera relatório semanal com o aviso correspondente; o SMTP só deve ser considerado funcional após teste real de recebimento.
 
 Não há atualização automática da instância n8n do usuário por alterações no repositório. O merge no GitHub requer reimportar/revisar workflows na interface.
+
+## Credenciais Jooble e diagnóstico Adzuna
+
+O procedimento atualizado está em [docs/INTEGRACOES_ADZUNA_JOOBLE.md](INTEGRACOES_ADZUNA_JOOBLE.md). Não coloque as chaves Jooble nem o token compartilhado no workflow exportado; mantenha `.env` fora do versionamento. Adzuna HTTP 401 exige revisão de `app_id`/`app_key` e permissão da conta, sem fallback para dados inventados.
