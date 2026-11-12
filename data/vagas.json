@@ -1213,7 +1213,7 @@
       "name": "Frontend BR",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T01:22:08.171Z",
+      "checkedAt": "2026-11-12T02:25:01.923Z",
       "quantity": 8,
       "error": null
     },
@@ -1221,7 +1221,7 @@
       "name": "Backend BR",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T01:22:10.945Z",
+      "checkedAt": "2026-11-12T02:25:04.795Z",
       "quantity": 41,
       "error": null
     },
@@ -1229,7 +1229,7 @@
       "name": "Himalayas",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T01:22:13.282Z",
+      "checkedAt": "2026-11-12T02:25:07.202Z",
       "quantity": 20,
       "error": null
     },
@@ -1237,7 +1237,7 @@
       "name": "Adzuna",
       "ok": false,
       "statusCode": 401,
-      "checkedAt": "2026-11-12T01:22:16.455Z",
+      "checkedAt": "2026-11-12T02:25:10.083Z",
       "quantity": 0,
       "error": "HTTP 401: Falha HTTP"
     },
@@ -1245,7 +1245,7 @@
       "name": "Jooble",
       "ok": false,
       "statusCode": 503,
-      "checkedAt": "2026-11-12T01:22:18.529Z",
+      "checkedAt": "2026-11-12T02:25:12.158Z",
       "quantity": 0,
       "error": "HTTP 503: Jooble desativado: configurar gateway autenticado (chave no path não pode ser armazenada em credencial HTTP padrão)."
     },
@@ -1253,7 +1253,7 @@
       "name": "Himalayas Game Dev",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T01:22:20.777Z",
+      "checkedAt": "2026-11-12T02:25:14.329Z",
       "quantity": 5,
       "error": null
     },
@@ -1261,7 +1261,7 @@
       "name": "Himalayas Estagio",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T01:22:22.977Z",
+      "checkedAt": "2026-11-12T02:25:16.492Z",
       "quantity": 10,
       "error": null
     },
@@ -1269,7 +1269,7 @@
       "name": "Adzuna Game Dev",
       "ok": false,
       "statusCode": 401,
-      "checkedAt": "2026-11-12T01:22:25.785Z",
+      "checkedAt": "2026-11-12T02:25:19.578Z",
       "quantity": 0,
       "error": "HTTP 401: Falha HTTP"
     },
@@ -1277,7 +1277,7 @@
       "name": "Adzuna Estagio",
       "ok": false,
       "statusCode": 401,
-      "checkedAt": "2026-11-12T01:22:28.880Z",
+      "checkedAt": "2026-11-12T02:25:22.373Z",
       "quantity": 0,
       "error": "HTTP 401: Falha HTTP"
     },
@@ -1285,7 +1285,7 @@
       "name": "Jooble BR Game Dev",
       "ok": false,
       "statusCode": 503,
-      "checkedAt": "2026-11-12T01:22:30.928Z",
+      "checkedAt": "2026-11-12T02:25:24.420Z",
       "quantity": 0,
       "error": "HTTP 503: Jooble desativado: configurar gateway autenticado (chave no path não pode ser armazenada em credencial HTTP padrão)."
     },
@@ -1293,14 +1293,14 @@
       "name": "Jooble BR Estagio",
       "ok": false,
       "statusCode": 503,
-      "checkedAt": "2026-11-12T01:22:32.977Z",
+      "checkedAt": "2026-11-12T02:25:26.470Z",
       "quantity": 0,
       "error": "HTTP 503: Jooble desativado: configurar gateway autenticado (chave no path não pode ser armazenada em credencial HTTP padrão)."
     }
   ],
   "historicoPreservado": true,
   "repetidasNaExecucao": 0,
-  "ultimaSincronizacao": "2026-11-12T01:22:36.309Z",
+  "ultimaSincronizacao": "2026-11-12T02:26:15.617Z",
   "atualizadasNaExecucao": 0,
   "ultimaConsultaBemSucedida": {
     "Himalayas": "2026-11-11T21:25:23.303Z",
