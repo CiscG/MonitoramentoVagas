@@ -1,5 +1,11 @@
 # MonitoramentoVagas (TecOps) — n8n + GitHub Pages
 
+## Auditoria, confiabilidade e testes reais
+
+A documentação da auditoria técnica, correções e limitações desta versão está em [docs/AUDITORIA_PLANO.md](docs/AUDITORIA_PLANO.md). Consulte também [APIs e fontes](docs/APIS_E_FONTES.md), [credenciais e instalação](docs/CREDENCIAIS_E_INSTALACAO.md), [exemplos de execução](docs/EXEMPLOS_EXECUCAO.md), [testes de oportunidades reais](docs/TESTES_OPORTUNIDADES_REAIS.md) e [como adicionar fontes](docs/ADICIONAR_NOVAS_FONTES.md).
+
+**Importante:** a publicação no GitHub não instala automaticamente os workflows na instância n8n. O PostgreSQL continua sendo a fonte de verdade; um anúncio GitHub aberto não equivale à confirmação de candidaturas, enquanto a validação de vagas Himalayas utiliza o endpoint oficial de status (200/410).
+
 ## Persistência PostgreSQL e workflows n8n atualizados
 
 A nova versão do workflow **G** utiliza **PostgreSQL como fonte de verdade** para vagas, histórico, execução e relatórios. O arquivo `data/vagas.json` é atualizado como **espelho do site GitHub Pages**, e não deve ser usado como origem para restaurar o banco sem revisão. A migração requer SQL, bootstrap e credenciais locais antes da ativação. Leia primeiro [Migração e operação PostgreSQL](database/OPERACAO_POSTGRES_N8N.md) e [guia n8n](n8n/README.md). Os workflows monolíticos antigos permanecem no repositório apenas para referência e não devem rodar em paralelo com G.
@@ -8,7 +14,7 @@ A nova versão do workflow **G** utiliza **PostgreSQL como fonte de verdade** pa
 
 A execução foi dividida em **sete workflows independentes**: coleta, filtragem, validação, classificação, deduplicação, relatório e agendamento. Veja o guia completo de importação e configuração em [n8n/README.md](n8n/README.md). O agendador G roda diariamente e consolida os relatórios toda segunda-feira, incluindo semanas sem novas vagas confirmadas.
 
-O novo pipeline usa **`data/vagas.json`** e o arquivo público de relatórios **`data/relatorios-semanais.json`**. A migração PostgreSQL permanece opcional; o n8n ainda não usa a tabela `jobs` como fonte operacional.
+O PostgreSQL é a fonte operacional de vagas e histórico. `data/vagas.json` serve como espelho de leitura do site; atualizações dependem do G e de credenciais válidas.
 
 **Não ative simultaneamente os workflows monolíticos antigos e o agendador G.** Depois de configurar credenciais, IDs dos subworkflows e SMTP, teste o G e desative os dois legados antes de ativar o agendamento. A importação dos arquivos no n8n não é automática.
 
