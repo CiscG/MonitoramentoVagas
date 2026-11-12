@@ -1,5 +1,9 @@
 # MonitoramentoVagas (TecOps) — n8n + GitHub Pages
 
+## Ampliação geográfica — Rio Grande do Sul
+
+A coleta agora busca **vagas remotas** e também **híbridas/presenciais no Rio Grande do Sul**. Foram adicionadas quatro consultas regionais Adzuna para desenvolvimento, estágio, QA e integração. As vagas com localidade fora do RS ou desconhecida não são aceitas como oportunidades locais; resultados remotos continuam elegíveis. Para importar, configurar credenciais e testar: [docs/AMPLIACAO_BUSCAS_RS.md](docs/AMPLIACAO_BUSCAS_RS.md).
+
 ## Auditoria, confiabilidade e testes reais
 
 A documentação da auditoria técnica, correções e limitações desta versão está em [docs/AUDITORIA_PLANO.md](docs/AUDITORIA_PLANO.md). Consulte também [APIs e fontes](docs/APIS_E_FONTES.md), [credenciais e instalação](docs/CREDENCIAIS_E_INSTALACAO.md), [exemplos de execução](docs/EXEMPLOS_EXECUCAO.md), [testes de oportunidades reais](docs/TESTES_OPORTUNIDADES_REAIS.md) e [como adicionar fontes](docs/ADICIONAR_NOVAS_FONTES.md).
