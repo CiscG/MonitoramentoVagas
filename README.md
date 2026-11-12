@@ -1,5 +1,9 @@
 # MonitoramentoVagas (TecOps) — n8n + GitHub Pages
 
+## Interface TecOps renovada
+
+O site recebeu um redesign visual responsivo: cards mais claros, indicadores, painel de filtros com opções avançadas, estados de candidatura e compatibilidade explicados sem sobrecarregar a tela. O frontend continua estático no GitHub Pages, lendo `data/vagas.json` sem alterar os workflows n8n. Consulte [documentação do redesign](docs/REDESIGN_FRONTEND.md).
+
 ## Ampliação geográfica — Rio Grande do Sul
 
 A coleta agora busca **vagas remotas** e também **híbridas/presenciais no Rio Grande do Sul**. Foram adicionadas quatro consultas regionais Adzuna para desenvolvimento, estágio, QA e integração. As vagas com localidade fora do RS ou desconhecida não são aceitas como oportunidades locais; resultados remotos continuam elegíveis. Para importar, configurar credenciais e testar: [docs/AMPLIACAO_BUSCAS_RS.md](docs/AMPLIACAO_BUSCAS_RS.md).
