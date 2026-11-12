@@ -49,7 +49,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const previous=$prevNode?.name||'';\nreturn [{json:{run:{kind:previous==='Agendamento semanal'?'weekly':'daily',\n requestedAt:new Date().toISOString(),id:String($execution.id||new Date().toISOString())},profile:{\n locations:['Santa Rosa','Rio Grande do Sul','RS','Remoto'],\n workModes:[],includeRemote:true,allowUnknownLocation:true,\n roleKeywords:[],technologies:[],jobLevels:['Estágio','Júnior','Trainee','Não informada'],\n maxExperienceYears:2,excludeMandatoryExperience:false,\n priorityAreas:['Backend','Full Stack','QA','Desenvolvimento de Jogos','Unity','Game Dev','IoT']\n}}}];"
+        "jsCode": "const incoming=$input.first().json||{};\nif(!['daily','weekly'].includes(incoming.run?.kind)) throw new Error('Execução sem tipo de agendamento explícito.');\nreturn [{json:{...incoming,profile:{\n locations:['Santa Rosa','Rio Grande do Sul','RS','Remoto'],\n workModes:[],includeRemote:true,allowUnknownLocation:true,\n roleKeywords:[],technologies:[],jobLevels:['Estágio','Júnior','Trainee','Não informada'],\n maxExperienceYears:2,excludeMandatoryExperience:false,\n priorityAreas:['Backend','Full Stack','QA','Desenvolvimento de Jogos','Unity','Game Dev','IoT']\n}}}];"
       }
     },
     {
@@ -462,6 +462,32 @@
         "mode": "runOnceForAllItems",
         "jsCode": "const result=$input.first().json.archive_result;\nif(result?.archived!==true)throw new Error('Relatório não arquivado no PostgreSQL.');\nreturn [{json:$('Executar F — relatório').first().json}];"
       }
+    },
+    {
+      "name": "Definir execução diária",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        150
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{json:{run:{kind:'daily',requestedAt:new Date().toISOString(),id:String($execution.id)}}}];"
+      }
+    },
+    {
+      "name": "Definir execução semanal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        390
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{json:{run:{kind:'weekly',requestedAt:new Date().toISOString(),id:String($execution.id)}}}];"
+      }
     }
   ],
   "connections": {
@@ -469,7 +495,7 @@
       "main": [
         [
           {
-            "node": "Contexto da execução",
+            "node": "Definir execução diária",
             "type": "main",
             "index": 0
           }
@@ -480,7 +506,7 @@
       "main": [
         [
           {
-            "node": "Contexto da execução",
+            "node": "Definir execução semanal",
             "type": "main",
             "index": 0
           }
@@ -742,6 +768,28 @@
         [
           {
             "node": "Ler versão pública GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Definir execução diária": {
+      "main": [
+        [
+          {
+            "node": "Contexto da execução",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Definir execução semanal": {
+      "main": [
+        [
+          {
+            "node": "Contexto da execução",
             "type": "main",
             "index": 0
           }
