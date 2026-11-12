@@ -1213,7 +1213,7 @@
       "name": "Frontend BR",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T02:26:55.118Z",
+      "checkedAt": "2026-11-12T02:48:56.472Z",
       "quantity": 8,
       "error": null
     },
@@ -1221,7 +1221,7 @@
       "name": "Backend BR",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T02:26:57.817Z",
+      "checkedAt": "2026-11-12T02:48:59.201Z",
       "quantity": 41,
       "error": null
     },
@@ -1229,7 +1229,7 @@
       "name": "Himalayas",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T02:27:00.090Z",
+      "checkedAt": "2026-11-12T02:49:01.461Z",
       "quantity": 20,
       "error": null
     },
@@ -1237,7 +1237,7 @@
       "name": "Adzuna",
       "ok": false,
       "statusCode": 401,
-      "checkedAt": "2026-11-12T02:27:03.023Z",
+      "checkedAt": "2026-11-12T02:49:04.352Z",
       "quantity": 0,
       "error": "HTTP 401: Falha HTTP"
     },
@@ -1245,7 +1245,7 @@
       "name": "Jooble",
       "ok": false,
       "statusCode": 503,
-      "checkedAt": "2026-11-12T02:27:05.097Z",
+      "checkedAt": "2026-11-12T02:49:06.427Z",
       "quantity": 0,
       "error": "HTTP 503: Jooble desativado: configurar gateway autenticado (chave no path não pode ser armazenada em credencial HTTP padrão)."
     },
@@ -1253,7 +1253,7 @@
       "name": "Himalayas Game Dev",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T02:27:07.273Z",
+      "checkedAt": "2026-11-12T02:49:08.620Z",
       "quantity": 5,
       "error": null
     },
@@ -1261,7 +1261,7 @@
       "name": "Himalayas Estagio",
       "ok": true,
       "statusCode": 200,
-      "checkedAt": "2026-11-12T02:27:09.429Z",
+      "checkedAt": "2026-11-12T02:49:10.777Z",
       "quantity": 10,
       "error": null
     },
@@ -1269,7 +1269,7 @@
       "name": "Adzuna Game Dev",
       "ok": false,
       "statusCode": 401,
-      "checkedAt": "2026-11-12T02:27:12.521Z",
+      "checkedAt": "2026-11-12T02:49:13.577Z",
       "quantity": 0,
       "error": "HTTP 401: Falha HTTP"
     },
@@ -1277,7 +1277,7 @@
       "name": "Adzuna Estagio",
       "ok": false,
       "statusCode": 401,
-      "checkedAt": "2026-11-12T02:27:15.329Z",
+      "checkedAt": "2026-11-12T02:49:16.360Z",
       "quantity": 0,
       "error": "HTTP 401: Falha HTTP"
     },
@@ -1285,7 +1285,7 @@
       "name": "Jooble BR Game Dev",
       "ok": false,
       "statusCode": 503,
-      "checkedAt": "2026-11-12T02:27:17.381Z",
+      "checkedAt": "2026-11-12T02:49:18.422Z",
       "quantity": 0,
       "error": "HTTP 503: Jooble desativado: configurar gateway autenticado (chave no path não pode ser armazenada em credencial HTTP padrão)."
     },
@@ -1293,14 +1293,46 @@
       "name": "Jooble BR Estagio",
       "ok": false,
       "statusCode": 503,
-      "checkedAt": "2026-11-12T02:27:19.439Z",
+      "checkedAt": "2026-11-12T02:49:20.473Z",
       "quantity": 0,
       "error": "HTTP 503: Jooble desativado: configurar gateway autenticado (chave no path não pode ser armazenada em credencial HTTP padrão)."
+    },
+    {
+      "name": "Adzuna RS Desenvolvimento",
+      "ok": false,
+      "statusCode": 401,
+      "checkedAt": "2026-11-12T02:49:23.281Z",
+      "quantity": 0,
+      "error": "HTTP 401: Falha HTTP"
+    },
+    {
+      "name": "Adzuna RS Estágio",
+      "ok": false,
+      "statusCode": 401,
+      "checkedAt": "2026-11-12T02:49:26.103Z",
+      "quantity": 0,
+      "error": "HTTP 401: Falha HTTP"
+    },
+    {
+      "name": "Adzuna RS QA",
+      "ok": false,
+      "statusCode": 401,
+      "checkedAt": "2026-11-12T02:49:28.918Z",
+      "quantity": 0,
+      "error": "HTTP 401: Falha HTTP"
+    },
+    {
+      "name": "Adzuna RS Integração",
+      "ok": false,
+      "statusCode": 401,
+      "checkedAt": "2026-11-12T02:49:31.715Z",
+      "quantity": 0,
+      "error": "HTTP 401: Falha HTTP"
     }
   ],
   "historicoPreservado": true,
   "repetidasNaExecucao": 0,
-  "ultimaSincronizacao": "2026-11-12T02:27:22.818Z",
+  "ultimaSincronizacao": "2026-11-12T02:50:09.681Z",
   "atualizadasNaExecucao": 0,
   "ultimaConsultaBemSucedida": {
     "Himalayas": "2026-11-11T21:25:23.303Z",
