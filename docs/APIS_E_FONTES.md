@@ -37,3 +37,7 @@
 - Coletores disponíveis: `collectors/README.md`
 
 A confirmação de retorno de uma API em um momento não garante disponibilidade futura, nem valida todos os anúncios de terceiros.
+
+## Consultas regionais Rio Grande do Sul
+
+Além das buscas Adzuna anteriores, quatro consultas Adzuna utilizam `where=Rio Grande do Sul` com termos de desenvolvimento, estágio, QA e integração. As consultas usam a mesma credencial HTTP Custom Auth, mantêm limite de 20 resultados por página e exigem as quotas reais da conta. Normalização, filtro e deduplicação posterior evitam afirmar que uma vaga é do RS sem localidade declarada. Ver [ampliação das buscas RS](AMPLIACAO_BUSCAS_RS.md).
