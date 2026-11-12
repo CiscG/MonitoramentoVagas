@@ -57,8 +57,6 @@ const SCORE_RANGES = Object.freeze({
 });
 
 document.title = 'TecOps — oportunidades em tecnologia';
-const pageHeading = document.querySelector('header h1');
-if (pageHeading) pageHeading.textContent = 'TecOps';
 
 function el(tag, cls, content) {
   const element = document.createElement(tag);
@@ -90,10 +88,13 @@ function modalityKey(value) {
   return mode;
 }
 function jobModalityKey(job) {
-  const details = normalize([job.modalidade, job.cargo, job.local, job.descricao].map(text).join(' '));
-  if (/\b(hibrid[oa]s?|hybrid)\b/.test(details)) return 'hibrido';
-  if (/\b(presencial|on[ -]?site|in[ -]?office|office based)\b/.test(details)) return 'presencial';
-  return modalityKey(job.modalidade);
+  const explicit = modalityKey(job.modalidade || job.work_mode || '');
+  if (explicit) return explicit;
+  const title = normalize(job.cargo || job.title);
+  if (/\b(hibrid[oa]s?|hybrid)\b/.test(title)) return 'hibrido';
+  if (/\b(presencial|on[ -]?site|onsite)\b/.test(title)) return 'presencial';
+  if (/\b(remot[oa]s?|remote|home[ -]?office)\b/.test(title)) return 'remoto';
+  return 'nao informada';
 }
 function dateValue(value) {
   if (!value) return null;
@@ -219,50 +220,96 @@ function scoreTier(score) {
   if (score >= 30) return 'low';
   return 'minimal';
 }
-function addPreferenceFilters() {
-  const filters = document.querySelector('.filters');
-  if (!filters) return;
-  if (!$('priority-location')) {
-    const select = el('select'); select.id = 'priority-location'; select.setAttribute('aria-label', 'Prioridade de localização');
-    select.replaceChildren(new Option('Todas as prioridades de local', ''), ...jobPreferences.locations.map(item => new Option(item.label, item.key)));
-    filters.append(select); select.addEventListener('change', render);
-  }
-  if (!$('experience-filter')) {
-    const select = el('select'); select.id = 'experience-filter'; select.setAttribute('aria-label', 'Filtrar classificação de experiência');
-    select.replaceChildren(new Option('Todas as classificações de experiência', ''), ...Object.entries(EXPERIENCE).map(([key, item]) => new Option(item.label, key)));
-    filters.append(select); select.addEventListener('change', render);
-  }
-  if (!$('score-range')) {
-    const select = el('select');
-    select.id = 'score-range';
-    select.setAttribute('aria-label', 'Filtrar por faixa de pontuação de compatibilidade');
-    select.replaceChildren(
-      new Option('Todas as faixas de pontuação', ''),
-      new Option('85–100 · Excelente', '85-100'),
-      new Option('70–84 · Alta', '70-84'),
-      new Option('50–69 · Intermediária', '50-69'),
-      new Option('30–49 · Baixa', '30-49'),
-      new Option('0–29 · Pouco compatível', '0-29')
-    );
-    filters.append(select);
-    select.addEventListener('change', render);
-  }
-  if (!$('category')) { const select = el('select'); select.id = 'category'; select.setAttribute('aria-label', 'Filtrar categoria'); filters.append(select); select.addEventListener('change', render); }
-  if (!$('profile-match')) {
-    const label = el('label', 'profile-filter'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.id = 'profile-match'; checkbox.addEventListener('change', render);
-    label.append(checkbox, document.createTextNode(' Priorizar vagas compatíveis com meu perfil (localidade, cargo e tecnologias)')); label.style.gridColumn = '1 / -1'; filters.append(label);
-  }
-}
 function addQuickSearchTags() {
-  const filters = document.querySelector('.filters'); if (!filters || filters.querySelector('[data-quick-search-tags]')) return;
-  const group = el('div'); group.dataset.quickSearchTags = ''; group.setAttribute('role', 'group'); group.setAttribute('aria-label', 'Tags rápidas de pesquisa');
-  Object.assign(group.style, { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', gridColumn: '1 / -1', marginTop: '4px' }); group.append(el('span', '', 'Tags rápidas:'));
-  [['remoto', 'Remoto'], ['hibrido', 'Híbrido'], ['presencial', 'Presencial']].forEach(([key, title]) => {
-    const button = el('button', '', title); button.type = 'button'; button.dataset.quickSearchTag = key; button.setAttribute('aria-pressed', 'false');
-    Object.assign(button.style, { border: '1px solid #cbd5e1', borderRadius: '999px', padding: '6px 12px', background: '#fff', cursor: 'pointer' });
-    button.addEventListener('click', () => { if (quickSearchTags.has(key)) quickSearchTags.delete(key); else quickSearchTags.add(key); button.setAttribute('aria-pressed', String(quickSearchTags.has(key))); render(); }); group.append(button);
+  const group = $('quick-tags'); if (!group) return;
+  [['remoto','Remoto'],['hibrido','Híbrido'],['presencial','Presencial']].forEach(([key,label])=>{
+    const button=el('button','quick-tag',label);
+    button.type='button';button.dataset.quickSearchTag=key;
+    button.setAttribute('aria-pressed','false');
+    button.addEventListener('click',()=>{
+      if (quickSearchTags.has(key)) quickSearchTags.delete(key);
+      else quickSearchTags.add(key);
+      button.setAttribute('aria-pressed',String(quickSearchTags.has(key)));
+      render();
+    });
+    group.append(button);
   });
-  filters.append(group);
+}
+function iconSvg(kind){
+  const parts={
+    location:'<path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+    external:'<path d="M13 5h6v6M19 5l-9 9"/><path d="M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/>'
+  };
+  const wrapper=document.createElement('span');wrapper.className='meta-icon';
+  // Os caminhos são constantes locais, nunca dados provenientes das vagas.
+  wrapper.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(parts[kind]||'')+'</svg>';
+  return wrapper.firstChild;
+}
+function jobCard(job) {
+  const status=applicationStatus(job),match=compatibility(job),modality=jobModalityKey(job);
+  const card=el('article','job');
+  const topline=el('div','job-topline'),mark=el('div','company-mark');
+  const company=text(job.empresa)||'Empresa não informada';
+  mark.textContent=(company.match(/[\p{L}\p{N}]/u)||['?'])[0].toUpperCase();
+  mark.setAttribute('aria-hidden','true');
+  const companyText=el('div','company-details');
+  companyText.append(el('span','company-name',company),el('span','job-source',text(job.fonte)||'Fonte não informada'));
+  const score=el('div','score-chip score-tier-'+scoreTier(match.score));
+  score.title='Pontuação estimada: não garante elegibilidade';
+  score.append(el('b','',String(match.score)),el('small','','/100'));
+  topline.append(mark,companyText,score);card.append(topline);
+  const heading=el('h3'),title=text(job.cargo)||'Cargo não informado';
+  const safeUrl=/^https:\/\//i.test(text(job.link))?text(job.link):'';
+  if (safeUrl) {
+    const titleLink=el('a','',title);titleLink.href=safeUrl;
+    titleLink.target='_blank';titleLink.rel='noopener noreferrer';heading.append(titleLink);
+  } else heading.textContent=title;
+  card.append(heading);
+  const metadata=el('div','job-meta');
+  for(const [icon,value] of [['location',text(job.local)||'Local não informado'],['clock',formatDate(job.publicadoEm)]]){
+    const field=el('span','meta-item');field.append(iconSvg(icon),document.createTextNode(value));metadata.append(field);
+  }
+  card.append(metadata);
+  const tags=el('div','tags');
+  const modeLabel=modality==='hibrido'?'Híbrido':modality==='presencial'?'Presencial':modality==='remoto'?'Remoto':'Não informada';
+  tags.append(el('span','tag tag-level',text(job.nivel)||'Nível não informado'),el('span','tag tag-mode',modeLabel));
+  const technologies=Array.isArray(job.tecnologias)?job.tecnologias.slice(0,2):[];
+  technologies.forEach(t=>tags.append(el('span','tag tag-tech',text(t))));
+  card.append(tags);
+  card.append(el('p','job-description',text(job.descricao)||'Confira as informações completas na publicação original.'));
+  const footer=el('div','job-footer');
+  const statusShort={
+    ACTIVE:'Anúncio ativo',CLOSED:'Encerrada',EXPIRED:'Prazo expirado',
+    PENDING_VALIDATION:'Aguardando confirmação',SOURCE_UNAVAILABLE:'Fonte indisponível'
+  };
+  const statusBadge=el('span','status-pill status-'+status.toLowerCase(),statusShort[status]||'Não verificada');
+  statusBadge.title=APPLICATION_STATUS[status]||'Status não informado';
+  footer.append(statusBadge);
+  if(safeUrl){
+    const button=el('a','job-link');button.href=safeUrl;
+    button.target='_blank';button.rel='noopener noreferrer';
+    button.append(document.createTextNode('Ver vaga'),iconSvg('external'));footer.append(button);
+  }
+  card.append(footer);
+  const details=el('details','job-details');details.append(el('summary','','Mais detalhes da oportunidade'));
+  const detailBody=el('div','job-detail-grid');
+  const meter=el('div','match-meter');meter.setAttribute('role','meter');
+  meter.setAttribute('aria-label','Compatibilidade estimada');
+  meter.setAttribute('aria-valuenow',String(match.score));
+  meter.setAttribute('aria-valuemin','0');meter.setAttribute('aria-valuemax','100');
+  const fill=el('span','match-meter-fill');fill.style.width=match.score+'%';meter.append(fill);
+  detailBody.append(el('p','',match.label+' · '+match.score+' de 100 pontos'),meter);
+  const statusInfo=el('p');
+  statusInfo.append(el('strong','', 'Verificação: '),document.createTextNode(APPLICATION_STATUS[status]+'. '+(text(job.motivoVerificacaoCandidatura)||'Situação da candidatura ainda não confirmada.')));
+  detailBody.append(statusInfo);
+  const stamp=el('p');stamp.append(el('strong','', 'Última verificação: '),document.createTextNode(formatTimestamp(job.ultimaVerificacaoCandidatura)));detailBody.append(stamp);
+  const xp=EXPERIENCE[experienceInfo(job)];
+  const xpRow=el('p');xpRow.append(el('strong','','Experiência: '),document.createTextNode(xp.label));detailBody.append(xpRow);
+  if(match.explicitRequired)detailBody.append(el('div','job-detail-alert','Atenção: a publicação indica exigência de experiência formal. Confira os requisitos antes de se candidatar.'));
+  const groups=technologyMatches(job);
+  if(groups.length){const tech=el('p');tech.append(el('strong','','Tecnologias relacionadas: '),document.createTextNode(groups.map(g=>g.group).join(' · ')));detailBody.append(tech)}
+  details.append(detailBody);card.append(details);return card;
 }
 function render() {
   const search = normalize($('search')?.value), level = $('level')?.value || '', mode = modalityKey($('mode')?.value || '');
@@ -313,46 +360,16 @@ function render() {
     return (dateValue(b.publicadoEm) || 0) - (dateValue(a.publicadoEm) || 0);
   });
   const count = $('count'); if (count) count.textContent = `${filtered.length} de ${vagas.length} ${vagas.length === 1 ? 'vaga' : 'vagas'}`;
-  const box = $('jobs'); if (!box) return; box.replaceChildren();
-  if (!filtered.length) { box.append(el('p', 'empty', 'Nenhuma vaga encontrada com os filtros atuais.')); return; }
-  filtered.forEach(job => {
-    const card = el('article', 'job'), tags = el('div', 'tags'), expClass = experienceInfo(job), exp = EXPERIENCE[expClass], status = applicationStatus(job), statusLabel = APPLICATION_STATUS[status];
-    [job.nivel || 'Não informado', jobModalityKey(job) === 'hibrido' ? 'Híbrido' : jobModalityKey(job) === 'presencial' ? 'Presencial' : job.modalidade || 'Não informado', job.fonte || 'Não informado'].forEach(tag => tags.append(el('span', 'tag', text(tag))));
-    card.append(tags, el('h3', '', text(job.cargo) || 'Cargo não informado'));
-    const statusBadge = el('p', `application-status status-${status.toLowerCase()}`, `Status da candidatura: ${statusLabel}`);
-    statusBadge.style.cssText = `font-size:.84rem;font-weight:700;margin:.25rem 0;color:${status === 'ACTIVE' ? '#167044' : status === 'CLOSED' || status === 'EXPIRED' ? '#a33b2f' : '#8a6517'}`;
-    card.append(statusBadge);
-    card.append(el('p', 'verification-time', `Última verificação: ${formatTimestamp(job.ultimaVerificacaoCandidatura)}`));
-    if (job.motivoVerificacaoCandidatura) card.append(el('p', 'verification-reason', text(job.motivoVerificacaoCandidatura)));
-    const expBadge = el('p', `experience-class ${expClass.toLowerCase()}`, `Experiência: ${exp.label}`);
-    expBadge.style.cssText = 'font-size:.84rem;font-weight:650;margin:.25rem 0;color:#315b45';
-    if (expClass === 'EXPERIENCIA_OBRIGATORIA') { expBadge.textContent = 'Aviso: esta vaga exige experiência profissional formal; mantida na lista, mas com prioridade menor.'; expBadge.style.color = '#a33b2f'; }
-    card.append(expBadge);
-    const match = compatibility(job);
-    const scoreSummary = el('div', 'score-summary');
-    const scoreBadge = el('div', `match-score score-tier-${scoreTier(match.score)}`);
-    scoreBadge.title = 'Pontuação estimada de compatibilidade; verifique os requisitos no anúncio original.';
-    scoreBadge.append(
-      el('strong', 'score-value', `${match.score}/100`),
-      el('span', 'score-label', match.label)
-    );
-    const scoreMeter = el('div', 'score-meter');
-    scoreMeter.setAttribute('role', 'meter');
-    scoreMeter.setAttribute('aria-label', 'Pontuação estimada de compatibilidade');
-    scoreMeter.setAttribute('aria-valuemin', '0');
-    scoreMeter.setAttribute('aria-valuemax', '100');
-    scoreMeter.setAttribute('aria-valuenow', String(match.score));
-    const scoreFill = el('span', `score-fill score-tier-${scoreTier(match.score)}`);
-    scoreFill.style.width = `${match.score}%`;
-    scoreMeter.append(scoreFill);
-    scoreSummary.append(scoreBadge, scoreMeter);
-    card.append(scoreSummary);
-    if (match.explicitRequired) card.append(el('p', 'eligibility-warning', 'Requisito eliminatório possível: a vaga exige experiência profissional formal. Confira o anúncio original antes de se candidatar.'));
-    const techMatches = technologyMatches(job); if (techMatches.length) card.append(el('p', 'match-tech', `Tecnologias: ${techMatches.map(group => group.group).join(' · ')}`));
-    card.append(el('div', 'meta', `${text(job.empresa) || 'Empresa não informada'} · ${text(job.local) || 'Local não informado'} · ${formatDate(job.publicadoEm)}`), el('p', 'description', text(job.descricao) || 'Consulte os requisitos no anúncio original.'));
-    if (/^https:\/\//i.test(text(job.link))) { const link = el('a', 'apply', 'Ver oportunidade'); link.href = text(job.link); link.target = '_blank'; link.rel = 'noopener noreferrer'; card.append(link); }
-    box.append(card);
-  });
+  const summary=$('filter-summary');
+  if(summary)summary.textContent=filtered.length===vagas.length?'Mostrando todas as oportunidades':'Busca refinada pelos filtros selecionados';
+  const box = $('jobs'); if (!box) return; box.setAttribute('aria-busy','false'); box.replaceChildren();
+  if (!filtered.length) {
+    const empty=el('div','empty');
+    empty.append(el('span','empty-icon','⌕'),el('strong','','Nenhuma oportunidade encontrada'),el('p','','Tente alterar os filtros ou pesquisar por outra tecnologia.'));
+    const reset=el('button','','Limpar filtros');reset.type='button';reset.addEventListener('click',clearFilters);
+    empty.append(reset);box.append(empty);return;
+  }
+  filtered.forEach(job => box.append(jobCard(job)));
 }
 function clearFilters() {
   ['search', 'level', 'mode', 'source', 'location', 'priority-location', 'category', 'experience-filter', 'score-range', 'period'].forEach(id => { if ($(id)) $(id).value = ''; });
@@ -367,13 +384,14 @@ async function load() {
     if ($('total')) $('total').textContent = String(vagas.length);
     if ($('remote')) $('remote').textContent = String(vagas.filter(job => jobModalityKey(job) === 'remoto').length);
     if ($('intern')) $('intern').textContent = String(vagas.filter(job => levelKey(job.nivel) === 'estagio').length);
+    if ($('local')) $('local').textContent=String(vagas.filter(job => ['hibrido','presencial'].includes(jobModalityKey(job))).length);
     populateSelect('source', vagas.map(job => job.fonte), 'Todas as fontes'); populateSelect('location', vagas.map(job => job.local), 'Todas as localizações'); populateSelect('category', vagas.flatMap(jobCategories), 'Todas as categorias'); render();
   } catch (error) {
     if ($('updated')) $('updated').textContent = 'Falha ao atualizar os dados'; const box = $('jobs');
     if (box && !vagas.length) box.replaceChildren(el('p', 'empty error', 'Não foi possível carregar as vagas. Tente atualizar a página.')); else render(); console.error(error);
   }
 }
-addPreferenceFilters(); addQuickSearchTags();
-['search', 'level', 'mode', 'source', 'location', 'priority-location', 'category', 'experience-filter', 'period', 'sort'].forEach(id => { const control = $(id); if (control) control.addEventListener(id === 'search' ? 'input' : 'change', render); });
+addQuickSearchTags();
+['search', 'level', 'mode', 'source', 'location', 'priority-location', 'category', 'experience-filter', 'score-range', 'period', 'sort', 'profile-match'].forEach(id => { const control = $(id); if (control) control.addEventListener(id === 'search' ? 'input' : 'change', render); });
 if ($('clear-filters')) $('clear-filters').addEventListener('click', clearFilters);
 load(); setInterval(load, 5 * 60 * 1000);
