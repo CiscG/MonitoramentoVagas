@@ -45,6 +45,12 @@ test('issue fechada: apenas encerramento da publicação, conforme API',()=>{
  assert.equal(item.application_status,'CLOSED');
  assert.match(item.motivoVerificacaoCandidatura,/issue fechada/i);
 });
+test('HTML genérico com texto de encerramento não confirma a situação da vaga',()=>{
+ const item=interpret(realGithubIssue,'html',200,
+  '<html><body><h1>Exemplo de vagas</h1><p>Applications are closed para anúncios antigos.</p></body></html>');
+ assert.equal(item.application_status,'PENDING_VALIDATION');
+ assert.match(item.motivoVerificacaoCandidatura,/revisão manual necessária/i);
+});
 test('Himalayas: só 200 com job confirma anúncio ativo; 410 significa fechado',()=>{
  const himalaya={id:'himalayas-abc',fonte:'Himalayas',link:'https://himalayas.app/companies/example/jobs/example'};
  assert.equal(interpret(himalaya,'himalayas_job',200,{job:{guid:himalaya.link}}).application_status,'ACTIVE');
