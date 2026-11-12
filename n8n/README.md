@@ -103,3 +103,7 @@ Para aplicar a alteração, atualize o **workflow F já importado** no n8n, mant
 ## Requisições, retries, logs e credenciais
 
 O C usa **Loop Over Items** com uma vaga por lote, **Merge** e **IF** para controlar novas tentativas; aguarda 2 segundos entre verificações e usa backoff progressivo de 2, 4 e 8 segundos ou `Retry-After` numérico. O A intercala pausas de 2 segundos entre fontes e usa as tentativas nativas do HTTP Request. Limites de provedores são configuráveis e devem respeitar as respectivas cotas reais. Logs e falhas são gravados em PostgreSQL pelo G e H; nunca inclua tokens no texto de erro. Para instruções e limitações operacionais: [database/OPERACAO_POSTGRES_N8N.md](../database/OPERACAO_POSTGRES_N8N.md).
+
+## Buscas locais no Rio Grande do Sul
+
+A coleta também consulta **Adzuna RS Desenvolvimento/Estágio/QA/Integração**, além das buscas remotas existentes. Configure os quatro HTTP Request novos com a mesma credencial Custom Auth da Adzuna e atualize A, B, D e G. O G ativa `rsOnlyForNonRemote`: híbridas/presenciais somente quando a localidade informada for do RS. Consulte o [guia de ampliação regional](../docs/AMPLIACAO_BUSCAS_RS.md) antes de publicar.
