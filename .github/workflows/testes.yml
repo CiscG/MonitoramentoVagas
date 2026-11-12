@@ -44,7 +44,7 @@ jobs:
             const db=new Client({connectionString:process.env.DATABASE_URL});
             await db.connect();
             try {
-              for(const sql of ['database/001_jobs.sql','database/002_pipeline_runtime.sql']){
+              for(const sql of ['database/001_jobs.sql','database/002_pipeline_runtime.sql','database/003_audit_views.sql']){
                 await db.query(fs.readFileSync(sql,'utf8'));
               }
             } finally { await db.end(); }
