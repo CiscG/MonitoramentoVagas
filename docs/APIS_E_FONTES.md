@@ -9,7 +9,7 @@
 | Himalayas | `GET https://himalayas.app/jobs/api/search` | Sem chave em acesso público; chave opcional | Três consultas: entrada, Game Dev e estágios |
 | Himalayas (validação) | `GET https://himalayas.app/jobs/api/companies/:company/jobs/:slug` | Sem chave para limites públicos | 200 com `job` confirma anúncio ativo; 410 anuncia encerramento; 404 é inconclusivo |
 | Adzuna | `GET https://api.adzuna.com/v1/api/jobs/br/search/1` | `app_id` e `app_key` via credencial Custom Auth | Três consultas; indisponível se credencial ausente |
-| Jooble | Nenhum HTTP Request ativo | Chave exigida pela API, não configurada | Desativada: retorna diagnóstico explícito de indisponibilidade, sem criar resultados |
+| Jooble BR | `POST https://br.jooble.org/api/{CHAVE_REGIONAL}` executado apenas por gateway privado | Chave regional armazenada no `.env` do gateway; Header Auth interno no n8n | Três consultas reais preparadas; somente funcionam após obter chave válida, subir o gateway e vincular credencial |
 
 ### Sem integração ativa ao agendamento
 
@@ -41,3 +41,7 @@ A confirmação de retorno de uma API em um momento não garante disponibilidade
 ## Consultas regionais Rio Grande do Sul
 
 Além das buscas Adzuna anteriores, quatro consultas Adzuna utilizam `where=Rio Grande do Sul` com termos de desenvolvimento, estágio, QA e integração. As consultas usam a mesma credencial HTTP Custom Auth, mantêm limite de 20 resultados por página e exigem as quotas reais da conta. Normalização, filtro e deduplicação posterior evitam afirmar que uma vaga é do RS sem localidade declarada. Ver [ampliação das buscas RS](AMPLIACAO_BUSCAS_RS.md).
+
+## Gateway regional Jooble
+
+O n8n não contém a chave regional no caminho da URL. Os três nós chamam o serviço privado `tecops-jooble-gateway:8787/search` com credencial de cabeçalho; ele consulta a API oficial brasileira por POST usando a chave disponível apenas no ambiente do contêiner. Sem chave autorizada a integração permanece indisponível, sem dados simulados. Mais detalhes em [configuração segura](INTEGRACOES_ADZUNA_JOOBLE.md).

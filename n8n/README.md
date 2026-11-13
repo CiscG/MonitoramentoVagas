@@ -42,7 +42,7 @@ Confira o roteiro de instalação completo: [Migração PostgreSQL e operação 
 1. Faça backup da instância do n8n, workflows e dos dados do GitHub.
 2. Prepare o PostgreSQL e execute o bootstrap; nunca sobrescreva o histórico com JSON vazio.
 3. Atualize A, C e G (mantenha os IDs dos subworkflows), vincule as credenciais **Postgres**, **GitHub** e **SMTP**. B, D, E e F seguem utilizáveis.
-4. Em A, configure o **Custom Auth** da Adzuna (qs.app_id + qs.app_key); Jooble está desativado até existir uma integração segura, já que usa chave no caminho da URL.
+4. Em A, configure o **Custom Auth** da Adzuna (qs.app_id + qs.app_key); os três nós Jooble usam gateway interno Docker com credencial Header Auth; configure e teste o serviço antes de ativar G. Consulte [instalação Adzuna e Jooble](../docs/INTEGRACOES_ADZUNA_JOOBLE.md).
 5. Importe H, configure sua credencial Postgres e selecione H como **Error workflow** de G e, quando necessário, dos subworkflows.
 6. Teste em ambiente separado, confira `tecops_execution_logs`, `jobs`, `tecops_pipeline_state`, a página publicada e o e-mail semanal.
 7. Desative os fluxos legados e só então ative G na produção.
@@ -107,3 +107,7 @@ O C usa **Loop Over Items** com uma vaga por lote, **Merge** e **IF** para contr
 ## Buscas locais no Rio Grande do Sul
 
 A coleta também consulta **Adzuna RS Desenvolvimento/Estágio/QA/Integração**, além das buscas remotas existentes. Configure os quatro HTTP Request novos com a mesma credencial Custom Auth da Adzuna e atualize A, B, D e G. O G ativa `rsOnlyForNonRemote`: híbridas/presenciais somente quando a localidade informada for do RS. Consulte o [guia de ampliação regional](../docs/AMPLIACAO_BUSCAS_RS.md) antes de publicar.
+
+## Ativação da Jooble via gateway interno
+
+O workflow A chama `http://tecops-jooble-gateway:8787/search` em três consultas, autenticadas por **HTTP Header Auth** `X-TecOps-Token`. O gateway exige chave regional `JOOBLE_BR_API_KEY` e token `GATEWAY_SHARED_TOKEN` armazenados no `.env` local, ignorado pelo Git. Não há resposta artificial de desativação. Sem gateway/credenciais, o nó retorna falha explícita; não confundir isso com ausência de vagas. Consulte [o guia detalhado](../docs/INTEGRACOES_ADZUNA_JOOBLE.md).

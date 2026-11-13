@@ -1,0 +1,9 @@
+# Credenciais locais, nunca publicar no GitHub
+.env
+.env.*
+!.env.example
+services/jooble-gateway/.env
+services/jooble-gateway/.env.*
+!services/jooble-gateway/.env.example
+node_modules/
+*.log

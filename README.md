@@ -1,5 +1,9 @@
 # MonitoramentoVagas (TecOps) — n8n + GitHub Pages
 
+## Correção das integrações Adzuna e Jooble
+
+As sete consultas Adzuna continuam exigindo `app_id`/`app_key` válidos (HTTP 401 não pode ser corrigido sem autorizar a conta). As três consultas Jooble foram preparadas para uso real por meio de um gateway privado Docker, que mantém a chave regional fora do JSON do n8n e requer autenticação por Header Auth. **As duas integrações dependem de configuração no servidor antes de funcionarem.** Consulte [instalação e diagnóstico](docs/INTEGRACOES_ADZUNA_JOOBLE.md).
+
 ## Interface TecOps renovada
 
 O site recebeu um redesign visual responsivo: cards mais claros, indicadores, painel de filtros com opções avançadas, estados de candidatura e compatibilidade explicados sem sobrecarregar a tela. O frontend continua estático no GitHub Pages, lendo `data/vagas.json` sem alterar os workflows n8n. Consulte [documentação do redesign](docs/REDESIGN_FRONTEND.md).
