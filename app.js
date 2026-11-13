@@ -397,7 +397,7 @@ function monitoringStatus(data, now=Date.now()){
  const fail=diagnostics.filter(d=>d?.ok===false).length;
  let state='unknown',label='Sem diagnóstico confirmado';
  if(!stale&&diagnostics.length){state=fail?'partial':'ok';label=fail?'Sincronização parcial':'Fontes consultadas sem erro informado';}
- else if(valid){state='stale';label='Sincronização desatualizada';}
+ else if(valid&&stale){state='stale';label='Sincronização desatualizada';}
  return {state,label,successful:ok,failed:fail,diagnostics,lastSync:valid?last:null};
 }
 function displayMonitoring(data){
