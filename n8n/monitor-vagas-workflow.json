@@ -391,7 +391,8 @@
       "position": [
         5390,
         180
-      ]
+      ],
+      "notes": "LEGADO — DESCONECTADO para proteger o PostgreSQL. G-agendamento é o único publicador; não religar este nó."
     },
     {
       "parameters": {
@@ -806,13 +807,7 @@
     },
     "Mudou alguma vaga?": {
       "main": [
-        [
-          {
-            "node": "Publicar vagas.json",
-            "type": "main",
-            "index": 0
-          }
-        ],
+        [],
         []
       ]
     },

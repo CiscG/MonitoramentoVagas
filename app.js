@@ -198,6 +198,17 @@ function areaScore(job) {
   return /backend|back-end|java|python|c#|\.net|full.?stack|programador|programadora|qa|testes|integracao|unity|jogos|embarcados|iot/.test(title) ? 5 : 0;
 }
 function compatibility(job) {
+  const stored = Number(job?.compatibility_score);
+  // A nota principal é a calculada pelo pipeline D; mantém cálculo antigo
+  // somente para registros anteriores que não possuem score persistido.
+  if (job?.compatibility_score !== undefined && job.compatibility_score !== null &&
+      job.compatibility_score !== '' && Number.isFinite(stored) && stored >= 0 && stored <= 100) {
+    const label=stored>=85?'Excelente compatibilidade':stored>=70?'Alta compatibilidade':
+      stored>=50?'Compatibilidade intermediária':stored>=30?'Baixa compatibilidade':'Pouco compatível';
+    return {score:stored,rawScore:stored,label,components:null,
+      explicitRequired:experienceInfo(job)==='EXPERIENCIA_OBRIGATORIA',
+      experienceClass:experienceInfo(job),origin:'pipeline'};
+  }
   const components = {
     technology: technologyScore(job),
     education: educationScore(job),
@@ -211,7 +222,7 @@ function compatibility(job) {
   const explicitRequired = experienceClass === 'EXPERIENCIA_OBRIGATORIA';
   const score = Math.max(0, Math.min(100, rawScore - (explicitRequired ? 20 : 0)));
   const label = score >= 85 ? 'Excelente compatibilidade' : score >= 70 ? 'Alta compatibilidade' : score >= 50 ? 'Compatibilidade intermediária' : score >= 30 ? 'Baixa compatibilidade' : 'Pouco compatível';
-  return { score, rawScore, label, components, explicitRequired, experienceClass };
+  return { score, rawScore, label, components, explicitRequired, experienceClass, origin:'provisional' };
 }
 function scoreTier(score) {
   if (score >= 85) return 'excellent';
@@ -256,7 +267,7 @@ function jobCard(job) {
   const companyText=el('div','company-details');
   companyText.append(el('span','company-name',company),el('span','job-source',text(job.fonte)||'Fonte não informada'));
   const score=el('div','score-chip score-tier-'+scoreTier(match.score));
-  score.title='Pontuação estimada: não garante elegibilidade';
+  score.title=match.origin==='pipeline'?'Pontuação estimada pelo pipeline; não garante elegibilidade':'Estimativa provisória: pontuação ainda não armazenada pelo pipeline';
   score.append(el('b','',String(match.score)),el('small','','/100'));
   topline.append(mark,companyText,score);card.append(topline);
   const heading=el('h3'),title=text(job.cargo)||'Cargo não informado';
@@ -299,7 +310,8 @@ function jobCard(job) {
   meter.setAttribute('aria-valuenow',String(match.score));
   meter.setAttribute('aria-valuemin','0');meter.setAttribute('aria-valuemax','100');
   const fill=el('span','match-meter-fill');fill.style.width=match.score+'%';meter.append(fill);
-  detailBody.append(el('p','',match.label+' · '+match.score+' de 100 pontos'),meter);
+  detailBody.append(el('p','',match.label+' · '+match.score+' de 100 pontos'+(match.origin==='provisional'?' (estimativa provisória)':'')),meter);
+  if(match.origin==='pipeline'&&text(job.compatibility_notes))detailBody.append(el('p','',text(job.compatibility_notes)));
   const statusInfo=el('p');
   statusInfo.append(el('strong','', 'Verificação: '),document.createTextNode(APPLICATION_STATUS[status]+'. '+(text(job.motivoVerificacaoCandidatura)||'Situação da candidatura ainda não confirmada.')));
   detailBody.append(statusInfo);
@@ -376,11 +388,63 @@ function clearFilters() {
   quickSearchTags.clear(); document.querySelectorAll('[data-quick-search-tag]').forEach(button => button.setAttribute('aria-pressed', 'false'));
   if ($('profile-match')) $('profile-match').checked = false; if ($('sort')) $('sort').value = 'compatibility'; render();
 }
+function monitoringStatus(data, now=Date.now()){
+ const diagnostics=Array.isArray(data?.diagnosticosFontes)?data.diagnosticosFontes:[];
+ const last=Date.parse(data?.ultimaSincronizacao||'');
+ const valid=Number.isFinite(last)&&last<=now+300000;
+ const stale=!valid||now-last>36*60*60*1000;
+ const ok=diagnostics.filter(d=>d?.ok===true).length;
+ const fail=diagnostics.filter(d=>d?.ok===false).length;
+ let state='unknown',label='Sem diagnóstico confirmado';
+ if(!stale&&diagnostics.length){state=fail?'partial':'ok';label=fail?'Sincronização parcial':'Fontes consultadas sem erro informado';}
+ else if(valid&&stale){state='stale';label='Sincronização desatualizada';}
+ return {state,label,successful:ok,failed:fail,diagnostics,lastSync:valid?last:null};
+}
+function displayMonitoring(data){
+ const status=monitoringStatus(data);
+ const badge=$('monitor-status');
+ if(badge){badge.className='monitor-state monitor-'+status.state;badge.textContent=status.label;}
+ const sync=$('monitor-sync'),change=$('monitor-change');
+ const fmt=value=>{const d=Date.parse(value||'');return Number.isFinite(d)?new Date(d).toLocaleString('pt-BR'):'Não informada';};
+ if(sync)sync.textContent=fmt(data.ultimaSincronizacao);
+ if(change)change.textContent=fmt(data.atualizadoEm);
+ const sources=$('monitor-sources');
+ if(sources)sources.textContent=status.diagnostics.length?
+   status.successful+' OK · '+status.failed+' com falha':'Sem diagnóstico disponível';
+ const counts=$('monitor-counts');
+ if(counts)counts.textContent=[data.novasNaExecucao,data.atualizadasNaExecucao,data.repetidasNaExecucao].map(x=>
+  Number.isFinite(Number(x))?String(Number(x)):'—').join(' / ');
+ const desc=$('monitor-description');
+ if(desc)desc.textContent=status.state==='stale'?
+   'A última sincronização publicada ultrapassou 36 horas; isso não confirma que o n8n parou. Confira o PostgreSQL e o workflow G.':
+   status.state==='unknown'?'Não há evidência suficiente de uma coleta recente no JSON público.':
+   status.state==='partial'?'Algumas fontes falharam na última coleta publicada; as demais podem ter respondido normalmente.':
+   'Os diagnósticos do último JSON publicado não registraram falhas de fonte. Isso não garante candidaturas abertas.';
+ const container=$('monitor-source-list');
+ if(container){
+  container.replaceChildren();
+  if(!status.diagnostics.length){container.append(el('p','','Sem diagnósticos de fonte publicados.'));return;}
+  for(const source of status.diagnostics){
+   const item=el('div','monitor-source');
+   const title=el('strong','',text(source.name)||'Fonte sem nome');
+   const state=source.ok===true?'Consulta OK':source.ok===false?'Falha informada':'Estado desconhecido';
+   const statusText=el('span',source.ok===true?'source-ok':'source-error',state);
+   const count=Number.isFinite(Number(source.quantity))?Number(source.quantity):null;
+   item.append(title,statusText,el('span','',count===null?'Quantidade não informada':count+' registros informados'));
+   // Não renderizar mensagens brutas de erro para evitar possíveis segredos.
+   if(source.ok===false&&Number.isInteger(Number(source.statusCode))&&Number(source.statusCode)>0)
+     item.append(el('span','','HTTP '+Number(source.statusCode)));
+   container.append(item);
+  }
+ }
+}
+
 async function load() {
   try {
     const response = await fetch(`./data/vagas.json?t=${Date.now()}`, { cache: 'no-store' }); if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json(); vagas = Array.isArray(data.vagas) ? data.vagas.filter(job => job && typeof job === 'object') : [];
-    if ($('updated')) { const timestamp = dateValue(data.atualizadoEm); $('updated').textContent = timestamp === null ? 'Aguardando a primeira sincronização' : `Atualizado em ${new Date(timestamp).toLocaleString('pt-BR')}`; }
+    if ($('updated')) { const timestamp = dateValue(data.ultimaSincronizacao); $('updated').textContent = timestamp === null ? 'Sincronização não informada' : `Última sincronização publicada: ${new Date(timestamp).toLocaleString('pt-BR')}`; }
+    displayMonitoring(data);
     if ($('total')) $('total').textContent = String(vagas.length);
     if ($('remote')) $('remote').textContent = String(vagas.filter(job => jobModalityKey(job) === 'remoto').length);
     if ($('intern')) $('intern').textContent = String(vagas.filter(job => levelKey(job.nivel) === 'estagio').length);

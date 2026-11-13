@@ -2,12 +2,24 @@
   "name": "TecOps — Validação de candidaturas (6h)",
   "nodes": [
     {
-      "parameters": { "rule": { "interval": [{ "field": "hours", "hoursInterval": 6 }] } },
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
       "id": "status-schedule",
       "name": "A cada 6 horas",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [0, 300]
+      "position": [
+        0,
+        300
+      ]
     },
     {
       "parameters": {
@@ -15,13 +27,18 @@
         "url": "https://api.github.com/repos/CiscG/MonitoramentoVagas/contents/data/vagas.json",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "githubApi",
-        "options": { "timeout": 30000 }
+        "options": {
+          "timeout": 30000
+        }
       },
       "id": "read-jobs",
       "name": "Ler vagas do GitHub",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 300],
+      "position": [
+        220,
+        300
+      ],
       "onError": "stopWorkflow"
     },
     {
@@ -33,22 +50,39 @@
       "name": "Preparar URLs originais",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 300]
+      "position": [
+        460,
+        300
+      ]
     },
     {
       "parameters": {
         "url": "={{ $json.checkedUrl || 'https://invalid.invalid/' }}",
         "options": {
           "timeout": 20000,
-          "redirect": { "redirect": { "followRedirects": true, "maxRedirects": 5 } },
-          "response": { "response": { "fullResponse": true, "neverError": true, "responseFormat": "text" } }
+          "redirect": {
+            "redirect": {
+              "followRedirects": true,
+              "maxRedirects": 5
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          }
         }
       },
       "id": "check-original-page",
       "name": "Consultar página original",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [700, 300],
+      "position": [
+        700,
+        300
+      ],
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 2,
@@ -63,7 +97,10 @@
       "name": "Classificar e preparar resultados",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [960, 300]
+      "position": [
+        960,
+        300
+      ]
     },
     {
       "parameters": {
@@ -74,24 +111,83 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ { message: 'Valida status de candidatura das oportunidades', content: $json.content, sha: $json.sha, branch: 'main' } }}",
-        "options": { "timeout": 30000, "response": { "response": { "fullResponse": true, "neverError": true } } }
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
       },
       "id": "save-status",
       "name": "Salvar status no GitHub",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1200, 300],
-      "onError": "stopWorkflow"
+      "position": [
+        1200,
+        300
+      ],
+      "onError": "stopWorkflow",
+      "notes": "LEGADO — DESCONECTADO para impedir publicação GitHub fora da transação PostgreSQL do G."
     }
   ],
   "connections": {
-    "A cada 6 horas": { "main": [[{ "node": "Ler vagas do GitHub", "type": "main", "index": 0 }]] },
-    "Ler vagas do GitHub": { "main": [[{ "node": "Preparar URLs originais", "type": "main", "index": 0 }]] },
-    "Preparar URLs originais": { "main": [[{ "node": "Consultar página original", "type": "main", "index": 0 }]] },
-    "Consultar página original": { "main": [[{ "node": "Classificar e preparar resultados", "type": "main", "index": 0 }]] },
-    "Classificar e preparar resultados": { "main": [[{ "node": "Salvar status no GitHub", "type": "main", "index": 0 }]] }
+    "A cada 6 horas": {
+      "main": [
+        [
+          {
+            "node": "Ler vagas do GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler vagas do GitHub": {
+      "main": [
+        [
+          {
+            "node": "Preparar URLs originais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar URLs originais": {
+      "main": [
+        [
+          {
+            "node": "Consultar página original",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar página original": {
+      "main": [
+        [
+          {
+            "node": "Classificar e preparar resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classificar e preparar resultados": {
+      "main": [
+        []
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1", "timezone": "America/Sao_Paulo" },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
   "active": false,
   "pinData": {},
   "tags": []

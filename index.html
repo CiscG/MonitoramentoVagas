@@ -67,6 +67,28 @@
       </article>
     </section>
 
+    <section id="monitoramento" class="monitor-panel" aria-labelledby="monitor-title">
+      <div class="monitor-header">
+        <div>
+          <span class="section-kicker">TRANSPARÊNCIA DA COLETA</span>
+          <h2 id="monitor-title">Estado do monitoramento</h2>
+          <p>Dados da última execução publicada; não são telemetria ao vivo do servidor.</p>
+        </div>
+        <span id="monitor-status" class="monitor-state monitor-unknown" role="status" aria-live="polite">Aguardando dados</span>
+      </div>
+      <div class="monitor-metrics">
+        <div><span>Última sincronização registrada</span><strong id="monitor-sync">Não informada</strong></div>
+        <div><span>Última alteração das vagas</span><strong id="monitor-change">Não informada</strong></div>
+        <div><span>Fontes consultadas</span><strong id="monitor-sources">Não informado</strong></div>
+        <div><span>Novas / atualizadas / repetidas</span><strong id="monitor-counts">—</strong></div>
+      </div>
+      <p id="monitor-description" class="monitor-description">O painel será atualizado quando os dados públicos forem carregados.</p>
+      <details class="monitor-details">
+        <summary>Detalhamento por fonte <span aria-hidden="true">+</span></summary>
+        <div id="monitor-source-list" class="monitor-source-list"><p>Sem diagnósticos publicados.</p></div>
+      </details>
+    </section>
+
     <div class="workspace">
       <aside id="filtros" class="filters-panel" aria-labelledby="filters-title">
         <div class="filter-heading">
