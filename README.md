@@ -1,5 +1,9 @@
 # MonitoramentoVagas (TecOps) — n8n + GitHub Pages
 
+## Saúde da coleta e publicação única
+
+O frontend distingue **última sincronização registrada** de **última alteração das vagas**, mostra diagnóstico por fonte e sinaliza dados desatualizados (mais de 36 horas). A pontuação do pipeline é usada quando o registro inclui `compatibility_score`; caso contrário, o site identifica a estimativa provisória. Os dois workflows legados foram preservados, mas os nós de **publicação direta no GitHub** foram desconectados nos JSONs do repositório. **Desative suas instâncias antigas manualmente no n8n**: alterar o GitHub não desativa workflows publicados. O workflow G deve ser o único publicador, após a transação PostgreSQL. Consulte o [guia de implantação e diagnóstico SQL somente leitura](docs/FLUXO_UNICO_SAUDE.md).
+
 ## Correção das integrações Adzuna e Jooble
 
 As sete consultas Adzuna continuam exigindo `app_id`/`app_key` válidos (HTTP 401 não pode ser corrigido sem autorizar a conta). As três consultas Jooble foram preparadas para uso real por meio de um gateway privado Docker, que mantém a chave regional fora do JSON do n8n e requer autenticação por Header Auth. **As duas integrações dependem de configuração no servidor antes de funcionarem.** Consulte [instalação e diagnóstico](docs/INTEGRACOES_ADZUNA_JOOBLE.md).
