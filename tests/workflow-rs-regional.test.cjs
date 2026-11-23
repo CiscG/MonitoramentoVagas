@@ -46,7 +46,8 @@ test('A tem quatro consultas Adzuna regionais com credencial e Wait entre elas',
    assert.ok(!/app_key|app_id/i.test(http.parameters.url));
    assert.ok(node(A,'Validar Adzuna '+suffix));
  }
- assert.equal(A.connections['Aguardar limite — RS 4'].main[0][0].node,'Normalizar coleta');
+ assert.equal(A.connections['Aguardar limite — RS 4'].main[0][0].node,'Vagas Himalayas QA');
+ assert.equal(A.connections['Aguardar limite — busca extra 6'].main[0][0].node,'Normalizar coleta');
 });
 test('A normaliza localização estruturada e deduplica consultas regionais',()=>{
  const raw=(id,title,mode,location)=>({id,title,
