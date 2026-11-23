@@ -25,7 +25,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -77,7 +78,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -129,7 +131,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -183,7 +186,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -240,7 +244,8 @@
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 2000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -292,7 +297,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -331,7 +337,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -372,7 +379,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -413,7 +421,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -457,7 +466,8 @@
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 2000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -501,7 +511,8 @@
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 2000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -721,7 +732,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -776,7 +788,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -831,7 +844,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -886,7 +900,8 @@
       "onError": "continueRegularOutput",
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -940,7 +955,8 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
-      "id": "tecops-search-1"
+      "id": "tecops-search-1",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -996,7 +1012,8 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
-      "id": "tecops-search-2"
+      "id": "tecops-search-2",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -1054,7 +1071,8 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
-      "id": "tecops-search-3"
+      "id": "tecops-search-3",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -1112,7 +1130,8 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
-      "id": "tecops-search-4"
+      "id": "tecops-search-4",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -1170,7 +1189,8 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
-      "id": "tecops-search-5"
+      "id": "tecops-search-5",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -1231,7 +1251,8 @@
       "maxTries": 2,
       "waitBetweenTries": 2000,
       "onError": "continueRegularOutput",
-      "id": "tecops-search-6"
+      "id": "tecops-search-6",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
