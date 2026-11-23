@@ -1,5 +1,9 @@
 # MonitoramentoVagas (TecOps) — n8n + GitHub Pages
 
+## Buscas ampliadas e execução verificável (novembro/2026)
+
+O fluxo A inclui **21 consultas** (GitHub BR, Himalayas, Adzuna e Jooble), com novas buscas de QA, Full Stack, jogos e oportunidades no Rio Grande do Sul. As estatísticas `collectionStats` permitem diferenciar vagas brutas, normalizadas, descartadas e duplicadas. O G agora verifica o contrato de dados retornados por cada subworkflow A–E e sinaliza explicitamente perda de contexto, em vez de registrar execução verde sem chegar ao PostgreSQL. Consulte [atualização, testes e implantação](docs/BUSCAS_E_CONTRATOS_20261123.md). **A importação dos JSONs atualizados no n8n é manual e requer religar credenciais dos nós novos.**
+
 ## Saúde da coleta e publicação única
 
 O frontend distingue **última sincronização registrada** de **última alteração das vagas**, mostra diagnóstico por fonte e sinaliza dados desatualizados (mais de 36 horas). A pontuação do pipeline é usada quando o registro inclui `compatibility_score`; caso contrário, o site identifica a estimativa provisória. Os dois workflows legados foram preservados, mas os nós de **publicação direta no GitHub** foram desconectados nos JSONs do repositório. **Desative suas instâncias antigas manualmente no n8n**: alterar o GitHub não desativa workflows publicados. O workflow G deve ser o único publicador, após a transação PostgreSQL. Consulte o [guia de implantação e diagnóstico SQL somente leitura](docs/FLUXO_UNICO_SAUDE.md).
