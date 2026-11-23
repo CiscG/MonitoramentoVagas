@@ -70,7 +70,8 @@
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "name": "Executar B — filtragem",
@@ -90,7 +91,8 @@
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "name": "Executar C — validação",
@@ -110,7 +112,8 @@
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "name": "Executar D — classificação",
@@ -130,7 +133,8 @@
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "name": "Executar E — deduplicação",
@@ -150,7 +154,8 @@
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "name": "É execução semanal?",
@@ -488,6 +493,76 @@
         "mode": "runOnceForAllItems",
         "jsCode": "return [{json:{run:{kind:'weekly',requestedAt:new Date().toISOString(),id:String($execution.id)}}}];"
       }
+    },
+    {
+      "id": "tecops-contract-1",
+      "name": "Verificar contrato — A — coleta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        400
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Impede falsa execução Succeeded quando subworkflow deixa de entregar o envelope do pipeline.\nconst items=$input.all();\nif(items.length!==1)throw new Error(\"A — coleta: saída inválida: esperado 1 item com contexto; recebido \"+items.length);\nconst p=items[0]?.json||{};\nif(!Array.isArray(p.jobs))throw new Error(\"A — coleta: jobs ausente ou inválido; verifique o subworkflow instalado e sua versão publicada.\");\nif(!['daily','weekly'].includes(p.run?.kind)||!p.run?.id)\n throw new Error(\"A — coleta: campo run ausente; subworkflow perdeu contexto do G ou foi executado isoladamente.\");\nif(!p.pg||!Number.isSafeInteger(Number(p.pg.revision)))\n throw new Error(\"A — coleta: contexto pg.revision ausente; abortando para preservar histórico PostgreSQL.\");\nif(!p.profile||typeof p.profile!=='object')\n throw new Error(\"A — coleta: profile ausente; verifique parâmetros de Entrada/Code.\");\nif(!Array.isArray(p.diagnostics)||typeof p.rawCount!=='number')\n throw new Error('A — coleta: diagnóstico ou rawCount ausente; o normalizador não retornou o formato previsto.');\n\n\n\n\nreturn items;"
+      }
+    },
+    {
+      "id": "tecops-contract-2",
+      "name": "Verificar contrato — B — filtragem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        400
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Impede falsa execução Succeeded quando subworkflow deixa de entregar o envelope do pipeline.\nconst items=$input.all();\nif(items.length!==1)throw new Error(\"B — filtragem: saída inválida: esperado 1 item com contexto; recebido \"+items.length);\nconst p=items[0]?.json||{};\nif(!Array.isArray(p.jobs))throw new Error(\"B — filtragem: jobs ausente ou inválido; verifique o subworkflow instalado e sua versão publicada.\");\nif(!['daily','weekly'].includes(p.run?.kind)||!p.run?.id)\n throw new Error(\"B — filtragem: campo run ausente; subworkflow perdeu contexto do G ou foi executado isoladamente.\");\nif(!p.pg||!Number.isSafeInteger(Number(p.pg.revision)))\n throw new Error(\"B — filtragem: contexto pg.revision ausente; abortando para preservar histórico PostgreSQL.\");\nif(!p.profile||typeof p.profile!=='object')\n throw new Error(\"B — filtragem: profile ausente; verifique parâmetros de Entrada/Code.\");\n\nif(!p.filterStats||typeof p.filterStats.received!=='number')\n throw new Error('B — filtragem: filterStats ausente; verifique o nó Filtrar vagas.');\n\n\n\nreturn items;"
+      }
+    },
+    {
+      "id": "tecops-contract-3",
+      "name": "Verificar contrato — C — validação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1380,
+        400
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Impede falsa execução Succeeded quando subworkflow deixa de entregar o envelope do pipeline.\nconst items=$input.all();\nif(items.length!==1)throw new Error(\"C — validação: saída inválida: esperado 1 item com contexto; recebido \"+items.length);\nconst p=items[0]?.json||{};\nif(!Array.isArray(p.jobs))throw new Error(\"C — validação: jobs ausente ou inválido; verifique o subworkflow instalado e sua versão publicada.\");\nif(!['daily','weekly'].includes(p.run?.kind)||!p.run?.id)\n throw new Error(\"C — validação: campo run ausente; subworkflow perdeu contexto do G ou foi executado isoladamente.\");\nif(!p.pg||!Number.isSafeInteger(Number(p.pg.revision)))\n throw new Error(\"C — validação: contexto pg.revision ausente; abortando para preservar histórico PostgreSQL.\");\nif(!p.profile||typeof p.profile!=='object')\n throw new Error(\"C — validação: profile ausente; verifique parâmetros de Entrada/Code.\");\n\n\nif(!p.validationStats||typeof p.validationStats.checked!=='number')\n throw new Error('C — validação: validationStats ausente; verifique Consolidar verificações.');\n\n\nreturn items;"
+      }
+    },
+    {
+      "id": "tecops-contract-4",
+      "name": "Verificar contrato — D — classificação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        400
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Impede falsa execução Succeeded quando subworkflow deixa de entregar o envelope do pipeline.\nconst items=$input.all();\nif(items.length!==1)throw new Error(\"D — classificação: saída inválida: esperado 1 item com contexto; recebido \"+items.length);\nconst p=items[0]?.json||{};\nif(!Array.isArray(p.jobs))throw new Error(\"D — classificação: jobs ausente ou inválido; verifique o subworkflow instalado e sua versão publicada.\");\nif(!['daily','weekly'].includes(p.run?.kind)||!p.run?.id)\n throw new Error(\"D — classificação: campo run ausente; subworkflow perdeu contexto do G ou foi executado isoladamente.\");\nif(!p.pg||!Number.isSafeInteger(Number(p.pg.revision)))\n throw new Error(\"D — classificação: contexto pg.revision ausente; abortando para preservar histórico PostgreSQL.\");\nif(!p.profile||typeof p.profile!=='object')\n throw new Error(\"D — classificação: profile ausente; verifique parâmetros de Entrada/Code.\");\n\n\n\nif(!p.classifiedAt)\n throw new Error('D — classificação: classifiedAt ausente; verifique Calcular compatibilidade.');\n\nreturn items;"
+      }
+    },
+    {
+      "id": "tecops-contract-5",
+      "name": "Verificar contrato — E — deduplicação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        400
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Impede falsa execução Succeeded quando subworkflow deixa de entregar o envelope do pipeline.\nconst items=$input.all();\nif(items.length!==1)throw new Error(\"E — deduplicação: saída inválida: esperado 1 item com contexto; recebido \"+items.length);\nconst p=items[0]?.json||{};\nif(!Array.isArray(p.jobs))throw new Error(\"E — deduplicação: jobs ausente ou inválido; verifique o subworkflow instalado e sua versão publicada.\");\nif(!['daily','weekly'].includes(p.run?.kind)||!p.run?.id)\n throw new Error(\"E — deduplicação: campo run ausente; subworkflow perdeu contexto do G ou foi executado isoladamente.\");\nif(!p.pg||!Number.isSafeInteger(Number(p.pg.revision)))\n throw new Error(\"E — deduplicação: contexto pg.revision ausente; abortando para preservar histórico PostgreSQL.\");\nif(!p.profile||typeof p.profile!=='object')\n throw new Error(\"E — deduplicação: profile ausente; verifique parâmetros de Entrada/Code.\");\n\n\n\n\nif(!p.data||!Array.isArray(p.data.vagas)||!Array.isArray(p.data.historicoVagas)||!Array.isArray(p.data.eventosHistorico))\n throw new Error('E — deduplicação: estado final incompleto; não gravar no PostgreSQL.');\nreturn items;"
+      }
     }
   ],
   "connections": {
@@ -566,7 +641,7 @@
       "main": [
         [
           {
-            "node": "Executar B — filtragem",
+            "node": "Verificar contrato — A — coleta",
             "type": "main",
             "index": 0
           }
@@ -577,7 +652,7 @@
       "main": [
         [
           {
-            "node": "Executar C — validação",
+            "node": "Verificar contrato — B — filtragem",
             "type": "main",
             "index": 0
           }
@@ -588,7 +663,7 @@
       "main": [
         [
           {
-            "node": "Executar D — classificação",
+            "node": "Verificar contrato — C — validação",
             "type": "main",
             "index": 0
           }
@@ -599,7 +674,7 @@
       "main": [
         [
           {
-            "node": "Executar E — deduplicação",
+            "node": "Verificar contrato — D — classificação",
             "type": "main",
             "index": 0
           }
@@ -610,7 +685,7 @@
       "main": [
         [
           {
-            "node": "Preparar transação PostgreSQL",
+            "node": "Verificar contrato — E — deduplicação",
             "type": "main",
             "index": 0
           }
@@ -790,6 +865,61 @@
         [
           {
             "node": "Contexto da execução",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar contrato — A — coleta": {
+      "main": [
+        [
+          {
+            "node": "Executar B — filtragem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar contrato — B — filtragem": {
+      "main": [
+        [
+          {
+            "node": "Executar C — validação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar contrato — C — validação": {
+      "main": [
+        [
+          {
+            "node": "Executar D — classificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar contrato — D — classificação": {
+      "main": [
+        [
+          {
+            "node": "Executar E — deduplicação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar contrato — E — deduplicação": {
+      "main": [
+        [
+          {
+            "node": "Preparar transação PostgreSQL",
             "type": "main",
             "index": 0
           }

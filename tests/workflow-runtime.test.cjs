@@ -43,8 +43,8 @@ test('C: processamento item a item e retentativa progressiva HTTP',()=>{
 test('A: Adzuna autentica por credencial e Jooble não exporta token no path',()=>{
  const adzuna=A.nodes.filter(n=>n.name.startsWith('Vagas Adzuna'));
  const jooble=A.nodes.filter(n=>n.name.startsWith('Vagas Jooble'));
- assert.equal(adzuna.length,7); // 3 buscas nacionais + 4 novas consultas Rio Grande do Sul.
- assert.equal(jooble.length,3);
+ assert.equal(adzuna.length,10); // 7 buscas anteriores + 3 novas consultas de QA, Full Stack e Game Dev.
+ assert.equal(jooble.length,4); // inclui a consulta RS de QA
  for(const n of adzuna){
   assert.equal(n.parameters.genericAuthType,'httpCustomAuth');
   assert.equal(n.parameters.authentication,'genericCredentialType');
