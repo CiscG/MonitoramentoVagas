@@ -1,5 +1,9 @@
 # TecOps — pipeline modular do n8n (A–G)
 
+## Atualização de cobertura e contratos A–G (23/11/2026)
+
+O A executa 21 buscas (15 anteriores, 6 novas para QA, Full Stack, Game Dev e RS), sem gravar no PostgreSQL. Os HTTP Request têm Always Output Data para que uma resposta vazia seja registrada como diagnóstico pela validação, não silenciosamente ignorada. O G agora possui cinco nós `Verificar contrato — A/B/C/D/E` para impedir sucesso falso caso um subworkflow não entregue `jobs` e os campos de contexto. Antes de publicar, confira IDs dos subworkflows e credenciais dos 3 novos nós Adzuna e do novo Jooble. Consulte [instruções de implantação](../docs/BUSCAS_E_CONTRATOS_20261123.md).
+
 > **Estado:** arquivos preparados para importação. O repositório não permite acessar sua instância n8n, cadastrar credenciais ou ativar workflows remotamente. Todos são importados **inativos** por segurança.
 
 ## Arquitetura
